@@ -3,6 +3,10 @@
 # Load files in config/ folder
 source config/*.sh
 
+##############################################################################
+# !! Important - Only Single and Mirror/RAID1 Setups are currently supported #
+##############################################################################
+
 # Other Configuration
 # Define disks
 disk1="ata-CT500MX500SSD1_1835E14E9C46"
