@@ -9,9 +9,14 @@ source config.sh
 # Umount previosuly mounted pools & filesystems
 umount $destination/{dev,sys,proc}
 zfs umount -a
-zfs umount $rootpool
-zfs umount $rootpool/ROOT/$distribution
-zpool export -f $rootpool
+
+if [ "$rootfs" == "zfs" ]
+then
+    zfs umount $rootpool
+    zfs umount $rootpool/ROOT/$distribution
+    zpool export -f $rootpool
+fi
+
 echo "\nWARNING: In case of errors it might be easier to just REBOOT the system\n"
 sleep 5
 

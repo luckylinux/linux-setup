@@ -4,14 +4,17 @@
 source ../config.sh
 
 # Import ZFS pool if not already mounted
-zpool import $rootpool -R "${destination}"
-zfs mount rootpool/ROOT/$distribution
+if [ "$rootfs" == "zfs" ]
+then
+	zpool import $rootpool -R "${destination}"
+	zfs mount $rootpool/ROOT/$distribution
+	zfs set devices=off $rootpool
+fi
 
 sleep 5
 
 # Install minimal system
 debootstrap --exclude=$excludepackages "${release}" "${destination}" "${source}"
-zfs set devices=off $rootpool
 
 # Add swap to fstab
 mkdir -p "${destination}/etc/"
