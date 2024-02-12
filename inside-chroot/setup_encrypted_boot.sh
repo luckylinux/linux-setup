@@ -95,7 +95,10 @@ grub-install $device2
 update-grub
 
 # Setup automatic disk unlock
-source ./setup_clevis_nbde.sh
+if [ "$clevisautounlock" == "yes" ]
+then
+    source ./setup_clevis_nbde.sh
+fi
 
 # Update initramfs
 update-initramfs -c -k all

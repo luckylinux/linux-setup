@@ -130,6 +130,12 @@ else
     #--bootloader-id=ubuntu --recheck --no-floppy
 fi
 
+# Setup automatic disk unlock
+if [ "$clevisautounlock" == "yes" ]
+then
+    source ../modules/setup_clevis_nbde.sh
+fi
+
 # Update initramfs
 update-initramfs -u -k all
 

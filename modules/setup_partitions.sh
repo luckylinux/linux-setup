@@ -116,7 +116,7 @@ do
         elif [ "$bootfs" == "zfs" ]
         then
            # Set partition type
-           sgdisk -t BF01 "${device1}"
+           sgdisk -t BF01 "${device}"
         else    
         then
            # Filesystem for /boot not supported
@@ -131,22 +131,32 @@ do
         # Need to get the short disk name / device name
         disk="${disks[$counter]}"
 
-        # Ask for password
-        # Initial values need to be intentionally different in order for the while loop to work correctly
-        password="true"
-        verify="false"
-        while [ "$password" != "$verify" ]
-	do
-	   read -s -p "Enter encryption password: " password
-           echo ""
-           read -s -p "Verify encryption password: " verify
+        if [ "$encryptrootfs" == "no"]
+        then
+                echo "Skip Encryption Process"
+        else if [ "$encryptrootfs" == "luks"]
+        then
+                # Ask for password
+                # Initial values need to be intentionally different in order for the while loop to work correctly
+                password="true"
+                verify="false"
+                while [ "$password" != "$verify" ]
+                do
+                read -s -p "Enter encryption password: " password
+                echo ""
+                read -s -p "Verify encryption password: " verify
 
-           if [ "$password" != "$verify" ]; then
-              echo "Password Verification failed - Password do NOT match"
-           else
-              echo "Password Verification successful"
-           fi
-	done
+                if [ "$password" != "$verify" ]; then
+                echo "Password Verification failed - Password do NOT match"
+                else
+                echo "Password Verification successful"
+                fi
+                done
+        else
+        then
+                echo "Encryption mode <${encryptrootfs}> for / is NOT supported. Aborting !"
+                exit 1
+        fi
 
         echo $password | cryptsetup -q -v --type luks2 --cipher aes-xts-plain64 --hash sha512 --key-size 512 --use-random --iter-time 5000 luksFormat "${device}-part4"
         echo -n $password | cryptsetup open --type luks2 "${device}-part4" "${disk}_crypt"
@@ -164,13 +174,39 @@ echo "==========================================================================
 
 sleep 5
 
+# EFI Software Raid
+if [ $numdisks -eq 1 ]
+then
+   # Use FAT32 directly
+else if [ $numdisks -eq 2 ]
+   # Use MDADM
+   mdadm --create --verbose --metadata=0.90 /dev/md2 --level=1 --raid-devices=$numdisks "${device1}-part2" "${device2}-part2"
+fi
+
+
 if [ "$bootfs" == "zfs" ]
 then
-    # Set partition type
-    sgdisk -t BF01 "${device1}"
-    sleep 1
-    sgdisk -t BF01 "${device2}"
-    sleep 1
+        # Set partition type for the first disk
+        # Redundant - Was already done above
+        #sgdisk -t BF01 "${device1}"
+        #sleep 1
+
+        # Check if it's a single disk or a mirror RAID
+        if [ "$numdisks" -eq 1 ]
+        then
+                devicelist="${device1}-part3"
+        else if [ "$numdisks" -eq 2 ]
+                # Set partition type also for the second disk
+                # Redundant - Was already done above
+                #sgdisk -t BF01 "${device2}"
+                #sleep 1
+
+                devicelist="mirror ${device1}-part3 ${device2}-part3"
+        else
+        then
+                echo "Only single disks and mirror / RAID-1 setups are currently supported. Aborting !"
+                exit 1
+        fi
 
     # Create boot pool
     zpool create -f \
@@ -195,33 +231,127 @@ then
        -O acltype=posixacl -O canmount=off -O compression=lz4 \
        -O devices=off -O normalization=formD -O relatime=on -O xattr=sa \
        -O mountpoint=/boot -R "$destination" \
-       $bootpool mirror "${device1}-part3" "${device2}-part3"
+       $bootpool $devicelist
 
     # Create datasets
-    zfs create -o canmount=off -o mountpoint=none bpool/BOOT
-    zfs create -o mountpoint=/boot bpool/BOOT/debian
+    zfs create -o canmount=off -o mountpoint=none $bootpool/BOOT
+    zfs create -o mountpoint=/boot $bootpool/BOOT/$distribution
+else
+then
+
+        if [ $numdisks -eq 2 ]
+        then
+                # Dual Disk
+                # Setup MDADM RAID1 / mirror EXT4 Software Raid
+
+                # Set partition type
+                # Redundant - Was already done above
+                #sgdisk -t 8300 "${device1}-part3"
+                sleep 1
+
+                # Create filesystem
+                mkfs.ext4  "${device1}-part3"
+
+                # Set partition type
+                # Redundant - Was already done above
+                #sgdisk -t 8300 "${device2}-part3"
+                sleep 1
+
+                # Create filesystem
+                mkfs.ext4  "${device2}-part3"
+
+                # Assemble MDADM Array
+                mdadm --create --verbose --metadata=0.90 /dev/md2 --level=1 --raid-devices=$numdisks "${device1}-part3" "${device2}-part3"
+        else if [ $numdisks -eq 1 ]
+                # Single Disk
+                # Use EXT4 Directly
+                
+                # Set partition type
+                # Redundant - Was already done above
+                #sgdisk -t 8300 "${device1}-part3"
+                #sleep 1
+
+                # Create filesystem
+                mkfs.ext4  "${device1}-part3"
+        fi
 fi
 
 # Wait a few seconds
 sleep 5
 
+# Determine Root device(s)
+# Path / Device changes whether encryption is used or not
+if [ "$encryptrootfs" == "no"]
+then
+        firstdevice="/dev/disk/by-id/${disk1}-part4"
+        seconddevice="/dev/disk/by-id/${disk2}-part4"
+else if [ "$encryptrootfs" == "luks"]
+        firstdevice="/dev/mapper/${disk1}_crypt"
+        seconddevice="/dev/mapper/${disk2}_crypt"
+else
+then
+        echo "Encryption mode <${encryptrootfs}> for / is NOT supported. Aborting !"
+        exit 1
+fi
+
 if [ "$rootfs" == "zfs" ]
 then
+        # Check if it's a single disk or a mirror RAID
+        if [ "$numdisks" -eq 1 ]
+        then
+                devicelist="$firstdevice"
+        else if [ "$numdisks" -eq 2 ]
+                devicelist="mirror $firstdevice $seconddevice"
+        else
+        then
+                echo "Only single disks and mirror / RAID-1 setups are currently supported. Aborting !"
+                exit 1
+        fi
+
         # Create root pool
         zpool create -f -o ashift=$ashift \
         -O acltype=posixacl -O canmount=off -O compression=lz4 \
         -O dnodesize=auto -O normalization=formD -O relatime=on \
         -O xattr=sa \
         -O mountpoint=/ -R "$destination" \
-        $rootpool mirror "/dev/mapper/${disk1}_crypt" "/dev/mapper/${disk2}_crypt"
+        $rootpool $devicelist
+        
+else
+then
+        if [ $numdisks -eq 2 ]
+        then
+                # Dual Disk
+                # Setup MDADM RAID1 / mirror EXT4 Software Raid
+
+                # Create filesystem
+                mkfs.ext4  "${firstdevice}"
+
+                # Create filesystem
+                mkfs.ext4  "${seconddevice}"
+
+                # Assemble MDADM Array
+                mdadm --create --verbose /dev/md3 --level=1 --raid-devices=$numdisks "${firstdevice}" "${seconddevice}"
+        else if [ $numdisks -eq 1 ]
+                # Single Disk
+                # Use EXT4 Directly
+
+                # Create filesystem
+                mkfs.ext4  "${firstdevice}"
+        fi
 fi
 
 # Wait a few seconds
 sleep 5
 
-# Enable Disk in Crypttab for initramfs
-echo "${disk1}_crypt" UUID=$(blkid -s UUID -o value ${device1}-part4) none \
-    luks,discard,initramfs > "${destination}/etc/crypttab"
+if [ "$encryptrootfs" == "luks"]
+then
+        # Enable Disk in Crypttab for initramfs
+        echo "${disk1}_crypt" UUID=$(blkid -s UUID -o value ${firstdevice}) none \
+        luks,discard,initramfs > "${destination}/etc/crypttab"
 
-echo "${disk2}_crypt" UUID=$(blkid -s UUID -o value ${device2}-part4) none \
-    luks,discard,initramfs >> "${destination}/etc/crypttab"
+        if [ $numdisks -eq 2 ]
+        then
+                echo "${disk2}_crypt" UUID=$(blkid -s UUID -o value ${seconddevice}) none \
+                 luks,discard,initramfs >> "${destination}/etc/crypttab"
+        fi                 
+fi
