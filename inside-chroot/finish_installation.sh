@@ -3,6 +3,21 @@
 # Load configuration
 source ../config.sh
 
+# Mount /boot
+chattr +i /boot
+mount /boot
+mkdir -p /boot/efi
+mkdir -p /boot/grub
+chattr +i /boot/efi
+mount /boot/efi
+
+# Fix /etc/resolv.conf
+rm -f /etc/resolv.conf
+echo "nameserver $ns1" >> /etc/resolv.conf
+echo "nameserver $ns2" >> /etc/resolv.conf
+chattr +i /etc/resolv.conf
+
+# ...
 ln -s /proc/self/mounts /etc/mtab
 
 # Update APT

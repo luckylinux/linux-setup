@@ -61,6 +61,10 @@ ipaddress="myipadddress"   # Only relevant for "static"
 subnetmask="255.255.240.0" # Only relevant for "static"
 defgateway="192.168.1.1"   # Only relevant for "static"
 
+# Nameservers
+ns1="192.168.1.3"
+ns2="192.168.1.4"
+
 # Declare disk labels
 labels=("DISK1" "DISK2")
 
