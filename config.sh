@@ -46,6 +46,9 @@ release="bookworm" # "bullseye", "bookworm", "testing"
 # Define Debian archive
 source="http://ftp.dk.debian.org/debian/"
 
+# Exclude packages when running debootstrap
+excludepackages="netplan.io,snapd"
+
 # Define mountpoint
 destination="/mnt/$distribution"
 
