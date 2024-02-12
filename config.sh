@@ -30,7 +30,7 @@ numdevices=${#devices[@]}
 n="/dev/null"
 
 # Backup Server
-backupserver=""
+backupserver="myipadddress"
 backupdataset="zdata/BACKUP/$name"
 
 # Backup Snapshot Name
@@ -57,7 +57,7 @@ domainname="mydomain.tld"
 
 # Define ip address
 ipconfiguration="static"   # "static" or "dhcp"
-ipaddress="192.168.2.19"   # Only relevant for "static"
+ipaddress="myipadddress"   # Only relevant for "static"
 subnetmask="255.255.240.0" # Only relevant for "static"
 defgateway="192.168.1.1"   # Only relevant for "static"
 
