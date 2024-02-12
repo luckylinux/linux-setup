@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load config
-source config.sh
+source ../config.sh
 
 # Disable swap
 swapoff -a
@@ -16,10 +16,10 @@ umount -R "${destination}"
 # Export pool
 if [ "$rootfs" == "zfs" ]
 then
-    zpool export -f rpool
+    zpool export -f $rootpool
 fi
 
 if [ "$bootfs" == "zfs" ]
 then
-    zpool export -f bpool
+    zpool export -f $bootpool
 fi
