@@ -3,7 +3,9 @@
 I am releasing on GitHub my Install Script set of Tools which I used to install several Operating Systems, such as:
 - Debian GNU/Linux
 - Proxmox VE
-- Ubuntu
+- Ubuntu GNU/Linux
+- Linux Mint GNU/Linux
+- ...
 
 I am doing a heavy refactoring of the code, so there will be a lot of breakages and things not working (yet).
 
