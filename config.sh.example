@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load files in config/ folder
-source config/*.sh
+#source config/*.sh
 
 ##############################################################################
 # !! Important - Only Single and Mirror/RAID1 Setups are currently supported #
@@ -117,7 +117,7 @@ margin_size=512                                                 # MiB
 root_size=$((disk_size-bios_size-efi_size-boot_size-swap_size-margin_size))      # MiB
 
 # Pool settings
-# Ashift=13 can lead to some overhead
+# Ashift=13 can lead to some overhead - Only applicable when using ZFS
 ashift=12
 rootpool="rpool"
 bootpool="bpool"

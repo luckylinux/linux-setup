@@ -225,7 +225,7 @@ then
         -O xattr=sa \
         -O mountpoint=/ -R "$destination" \
         $rootpool $devicelist
-        
+
 else
 then
         if [ $numdisks -eq 2 ]
@@ -263,5 +263,5 @@ then
         then
                 echo "${disk2}_crypt" UUID=$(blkid -s UUID -o value ${seconddevice}) none \
                  luks,discard,initramfs >> "${destination}/etc/crypttab"
-        fi                 
+        fi
 fi

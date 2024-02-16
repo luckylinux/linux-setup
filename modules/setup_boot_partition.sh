@@ -6,9 +6,9 @@ source ../config.sh
 if [ "$bootfs" == "zfs" ]
 then
         # Set partition type for the first disk
-        # Redundant - Was already done above
-        #sgdisk -t BF01 "${device1}"
-        #sleep 1
+        # Might already have been done during setup, but still calling it here in case of e.g. /boot partition conversion
+        sgdisk -t BF01 "${device1}"
+        sleep 1
 
         # Check if it's a single disk or a mirror RAID
         if [ "$numdisks" -eq 1 ]
@@ -16,9 +16,9 @@ then
                 devicelist="${device1}-part3"
         else if [ "$numdisks" -eq 2 ]
                 # Set partition type also for the second disk
-                # Redundant - Was already done above
-                #sgdisk -t BF01 "${device2}"
-                #sleep 1
+                # Might already have been done during setup, but still calling it here in case of e.g. /boot partition conversion
+                sgdisk -t BF01 "${device2}"
+                sleep 1
 
                 devicelist="mirror ${device1}-part3 ${device2}-part3"
         else
@@ -64,16 +64,16 @@ then
                 # Setup MDADM RAID1 / mirror EXT4 Software Raid
 
                 # Set partition type
-                # Redundant - Was already done above
-                #sgdisk -t 8300 "${device1}-part3"
+                # Might already have been done during setup, but still calling it here in case of e.g. /boot partition conversion
+                sgdisk -t 8300 "${device1}-part3"
                 sleep 1
 
                 # Create filesystem
                 mkfs.ext4  "${device1}-part3"
 
                 # Set partition type
-                # Redundant - Was already done above
-                #sgdisk -t 8300 "${device2}-part3"
+                # Might already have been done during setup, but still calling it here in case of e.g. /boot partition conversion
+                sgdisk -t 8300 "${device2}-part3"
                 sleep 1
 
                 # Create filesystem
@@ -81,14 +81,16 @@ then
 
                 # Assemble MDADM Array
                 mdadm --create --verbose --metadata=0.90 /dev/md2 --level=1 --raid-devices=$numdisks "${device1}-part3" "${device2}-part3"
+
+
         else if [ $numdisks -eq 1 ]
                 # Single Disk
                 # Use EXT4 Directly
-                
+
                 # Set partition type
-                # Redundant - Was already done above
-                #sgdisk -t 8300 "${device1}-part3"
-                #sleep 1
+                # Might already have been done during setup, but still calling it here in case of e.g. /boot partition conversion
+                sgdisk -t 8300 "${device1}-part3"
+                sleep 1
 
                 # Create filesystem
                 mkfs.ext4  "${device1}-part3"
