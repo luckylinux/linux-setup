@@ -21,13 +21,13 @@ echo "\nWARNING: In case of errors it might be easier to just REBOOT the system\
 sleep 5
 
 # Init partitioning
-source modules/init_partitioning.sh
+source $toolpath/modules/init_partitioning.sh
 
 # Setup disks
-source modules/setup_partitions.sh
+source $toolpath/modules/setup_partitions.sh
 
 # Setup datasets
-source modules/setup_datasets.sh
+source $toolpath/modules/setup_datasets.sh
 
 # Setup minimal system
-source modules/setup_minimal.sh
+source $toolpath/modules/setup_minimal.sh

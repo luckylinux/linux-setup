@@ -80,11 +80,11 @@ do
         # Wait a few seconds
         sleep 2
 
-	echo "Creating FAT32 filesystem on ${device}-part2"
-	mkfs.vfat -F 32 "${device}-part2"
+	#echo "Creating FAT32 filesystem on ${device}-part2"
+	#mkfs.vfat -F 32 "${device}-part2"
 
 	# Wait a few seconds
-	sleep 1
+	#sleep 1
 
 	# Setup /boot partition
 	start_boot=$((end_efi))		 # MiB
@@ -112,7 +112,7 @@ do
             sleep 1
 
             # Create filesystem
-            mkfs.ext4  "${device}-part3"
+            #mkfs.ext4  "${device}-part3"
         elif [ "$bootfs" == "zfs" ]
         then
            # Set partition type
@@ -178,9 +178,26 @@ sleep 5
 if [ $numdisks -eq 1 ]
 then
    # Use FAT32 directly
+   # Create Filesystem
+   echo "Creating FAT32 filesystem on $device1-part2"
+   mkfs.vfat -F 32 "$device1-part2"
+   sleep 1
+
+   # Create Filesystem
+   echo "Creating FAT32 filesystem on $device2-part2"
+   mkfs.vfat -F 32 "$device2-part2"
+   sleep 1
+   
+
 else if [ $numdisks -eq 2 ]
    # Use MDADM
-   mdadm --create --verbose --metadata=0.90 /dev/md2 --level=1 --raid-devices=$numdisks "${device1}-part2" "${device2}-part2"
+   mdadm --create --verbose --metadata=0.90 /dev/${mdadm_efi_device} --level=1 --raid-devices=$numdisks "${device1}-part2" "${device2}-part2"
+   sleep
+
+   # Create Filesystem
+   echo "Creating FAT32 filesystem on /dev/${mdadm_efi_device}"
+   mkfs.vfat -F 32 "/dev/${mdadm_efi_device}"
+   sleep 1
 fi
 
 # Setup boot Partition & RAID

@@ -1,7 +1,11 @@
 #!/bin/bash
 
-# Load files in config/ folder
-#source config/*.sh
+# Tool path
+#toolpath=$(dirname "$0")
+toolpath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
+
+# Load files in config-pre/ folder
+source $toolpath/config-pre/*.sh
 
 ##############################################################################
 # !! Important - Only Single and Mirror/RAID1 Setups are currently supported #
@@ -129,3 +133,6 @@ keyservers=("192.168.1.15" "192.168.1.16" "192.168.1.17" "192.168.1.18")
 # Only relevant for grub installation
 # (both partition schemes are created in order to facilitate change - if needed)
 bootloadermode="UEFI"
+
+# Load files in config-post/ folder
+source $toolpath/config-post/*.sh

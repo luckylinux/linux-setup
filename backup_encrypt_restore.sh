@@ -7,10 +7,10 @@ toolpath=$(pwd)
 source config.sh
 
 # Setup required tools
-source modules/setup_requirements.sh
+source $toolpath/modules/setup_requirements.sh
 
 # Backup existing pool
-source modules/backup_system.sh
+source $toolpath/modules/backup_system.sh
 
 # Umount previosuly mounted pools & filesystems
 umount "$destination/{dev,sys,proc}"
@@ -32,13 +32,13 @@ then
 fi
 
 # Init partitioning
-source modules/init_partitioning.sh
+source $toolpath/modules/init_partitioning.sh
 
 # Setup disks
-source modules/setup_partitions.sh
+source $toolpath/modules/setup_partitions.sh
 
 # Setup datasets
-source modules/setup_datasets.sh
+source $toolpath/modules/setup_datasets.sh
 
 # Restore system
-source modules/restore_system.sh
+source $toolpath/modules/restore_system.sh

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load Configuration
-source ../config.sh
+source $toolpath/config.sh
 
 if [ "$bootfs" == "zfs" ]
 then
@@ -14,7 +14,8 @@ then
         if [ "$numdisks" -eq 1 ]
         then
                 devicelist="${device1}-part3"
-        else if [ "$numdisks" -eq 2 ]
+        elif [ "$numdisks" -eq 2 ]
+        then
                 # Set partition type also for the second disk
                 # Might already have been done during setup, but still calling it here in case of e.g. /boot partition conversion
                 sgdisk -t BF01 "${device2}"
@@ -22,7 +23,6 @@ then
 
                 devicelist="mirror ${device1}-part3 ${device2}-part3"
         else
-        then
                 echo "Only single disks and mirror / RAID-1 setups are currently supported. Aborting !"
                 exit 1
         fi
@@ -55,11 +55,17 @@ then
     # Create datasets
     zfs create -o canmount=off -o mountpoint=none $bootpool/BOOT
     zfs create -o mountpoint=/boot $bootpool/BOOT/$distribution
-else
-then
 
-        if [ $numdisks -eq 2 ]
+elif [ "$bootfs" == "ext4" ]
+then
+        if [ "$numdisks" -eq 2 ]
         then
+                # If running in CHROOT then make sure to setup required packages
+                if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]
+                then
+			apt-get install --yes mdadm
+	        fi
+
                 # Dual Disk
                 # Setup MDADM RAID1 / mirror EXT4 Software Raid
 
@@ -69,7 +75,7 @@ then
                 sleep 1
 
                 # Create filesystem
-                mkfs.ext4  "${device1}-part3"
+                #mkfs.ext4  "${device1}-part3"
 
                 # Set partition type
                 # Might already have been done during setup, but still calling it here in case of e.g. /boot partition conversion
@@ -77,13 +83,18 @@ then
                 sleep 1
 
                 # Create filesystem
-                mkfs.ext4  "${device2}-part3"
+                #mkfs.ext4  "${device2}-part3"
 
                 # Assemble MDADM Array
-                mdadm --create --verbose --metadata=0.90 /dev/md2 --level=1 --raid-devices=$numdisks "${device1}-part3" "${device2}-part3"
+                echo "Assembling MDADM RAID1 array for boot device"
+                mdadm --create --verbose --metadata=0.90 /dev/${mdadm_boot_device} --level=1 --raid-devices=$numdisks "${device1}-part3" "${device2}-part3"
+                sleep 1
 
+                # Create filesystem
+                mkfs.ext4 "/dev/${mdadm_boot_device}"
 
-        else if [ $numdisks -eq 1 ]
+        elif [ "$numdisks" -eq 1 ]
+        then
                 # Single Disk
                 # Use EXT4 Directly
 
@@ -94,5 +105,12 @@ then
 
                 # Create filesystem
                 mkfs.ext4  "${device1}-part3"
+        else
+                echo "Only 1-Disk and 2-Disks Setups are currently supported. Aborting !"
+                exit 1
         fi
+
+else
+        echo "Only ZFS and EXT4 are currently supported. Aborting !"
+        exit 1
 fi
