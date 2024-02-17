@@ -31,3 +31,6 @@ if [ "$clevisautounlock" == "yes" ]
 then
     source $toolpath/modules/setup_clevis_nbde.sh
 fi
+
+# (Re)install Bootloader
+source $toolpath/inside-chroot/install_bootloader.sh
