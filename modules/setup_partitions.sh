@@ -136,10 +136,10 @@ do
         # Need to get the short disk name / device name
         disk="${disks[$counter]}"
 
-        if [ "$encryptrootfs" == "no"]
+        if [ "$encryptrootfs" == "no" ]
         then
                 echo "Skip Encryption Process"
-        elif [ "$encryptrootfs" == "luks"]
+        elif [ "$encryptrootfs" == "luks" ]
         then
                 # Ask for password
                 # Initial values need to be intentionally different in order for the while loop to work correctly
@@ -147,15 +147,16 @@ do
                 verify="false"
                 while [ "$password" != "$verify" ]
                 do
-                read -s -p "Enter encryption password: " password
-                echo ""
-                read -s -p "Verify encryption password: " verify
+                      read -s -p "Enter encryption password: " password
+                      echo ""
+                      read -s -p "Verify encryption password: " verify
 
-                if [ "$password" != "$verify" ]; then
-                    echo "Password Verification failed - Password do NOT match"
-                else
-                    echo "Password Verification successful"
-                fi
+                      if [ "$password" != "$verify" ]
+                      then
+                             echo "Password Verification failed - Password do NOT match"
+                      else
+                             echo "Password Verification successful"
+                      fi
                 done
         else
                 echo "Encryption mode <${encryptrootfs}> for / is NOT supported. Aborting !"
@@ -177,6 +178,9 @@ echo "====================================== SETUP RAID ========================
 echo "=================================================================================================="
 
 sleep 5
+
+# Setup EFI Partition & RAID
+source $toolpath/setup_efi_partition.sh
 
 # EFI Software Raid
 if [ $numdisks -eq 1 ]
@@ -206,7 +210,7 @@ then
 fi
 
 # Setup boot Partition & RAID
-source ./setup_boot_partition.sh
+source $toolpath/setup_boot_partition.sh
 
 # Wait a few seconds
 sleep 5
