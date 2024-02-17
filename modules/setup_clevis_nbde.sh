@@ -76,8 +76,8 @@ do
      curl -sfg http://$keyserver/adv -o /tmp/keyserver-$counter.jws
 
      # Check which keys are currently used via CLEVIS
-     list_device1=$(clevis luks list -d $device1-part4)
-     list_device2=$(clevis luks list -d $device2-part4)
+     list_device1=$(clevis luks list -d $device1-part${root_num})
+     list_device2=$(clevis luks list -d $device2-part${root_num})
 
      # Bind device to the TANG server via CLEVIS
      # Device 1
@@ -86,7 +86,7 @@ do
          echo "Keyserver <$keyserver> is already installed"
      else
          echo "Install Keyserver <$keyserver> onto $device1 LUKS Header"
-         echo $password | clevis luks bind -d $device1-part4 tang "{\"url\": \"http://$keyserver\" , \"adv\": \"/tmp/keyserver-$counter.jws\" }"
+         echo $password | clevis luks bind -d $device1-part${root_num} tang "{\"url\": \"http://$keyserver\" , \"adv\": \"/tmp/keyserver-$counter.jws\" }"
      fi
 
      # Device 2
@@ -95,7 +95,7 @@ do
          echo "Keyserver <$keyserver> is already installed"
      else
           echo "Install Keyserver <$keyserver> onto $device2 LUKS Header"
-          echo $password | clevis luks bind -d $device2-part4 tang "{\"url\": \"http://$keyserver\" , \"adv\": \"/tmp/keyserver-$counter.jws\" }"
+          echo $password | clevis luks bind -d $device2-part${root_num} tang "{\"url\": \"http://$keyserver\" , \"adv\": \"/tmp/keyserver-$counter.jws\" }"
      fi
 
      # Increment counter
@@ -109,7 +109,7 @@ unset $password
 update-initramfs -c -k all
 
 # Get information
-cryptsetup luksDump $device1-part4
-cryptsetup luksDump $device2-part4
-clevis luks list -d $device1-part4
-clevis luks list -d $device2-part4
+cryptsetup luksDump $device1-part${root_num}
+cryptsetup luksDump $device2-part${root_num}
+clevis luks list -d $device1-part${root_num}
+clevis luks list -d $device2-part${root_num}

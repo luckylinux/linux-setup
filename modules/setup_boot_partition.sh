@@ -19,7 +19,7 @@ then
         # Check if it's a single disk or a mirror RAID
         if [ "$numdisks" -eq 1 ]
         then
-                devicelist="${device1}-part3"
+                devicelist="${device1}-part${boot_num}"
         elif [ "$numdisks" -eq 2 ]
         then
                 # Set partition type also for the second disk
@@ -27,7 +27,7 @@ then
                 sgdisk -t BF01 "${device2}"
                 sleep 1
 
-                devicelist="mirror ${device1}-part3 ${device2}-part3"
+                devicelist="mirror ${device1}-part${boot_num} ${device2}-part${boot_num}"
         else
                 echo "Only single disks and mirror / RAID-1 setups are currently supported. Aborting !"
                 exit 1
@@ -77,23 +77,23 @@ then
 
                 # Set partition type
                 # Might already have been done during setup, but still calling it here in case of e.g. /boot partition conversion
-                sgdisk -t 8300 "${device1}-part3"
+                sgdisk -t 8300 "${device1}-part${boot_num}"
                 sleep 1
 
                 # Create filesystem
-                #mkfs.ext4  "${device1}-part3"
+                #mkfs.ext4  "${device1}-part${boot_num}"
 
                 # Set partition type
                 # Might already have been done during setup, but still calling it here in case of e.g. /boot partition conversion
-                sgdisk -t 8300 "${device2}-part3"
+                sgdisk -t 8300 "${device2}-part${boot_num}"
                 sleep 1
 
                 # Create filesystem
-                #mkfs.ext4  "${device2}-part3"
+                #mkfs.ext4  "${device2}-part${boot_num}"
 
                 # Assemble MDADM Array
                 echo "Assembling MDADM RAID1 array for boot device"
-                mdadm --create --verbose --metadata=0.90 /dev/${mdadm_boot_device} --level=1 --raid-devices=$numdisks "${device1}-part3" "${device2}-part3"
+                mdadm --create --verbose --metadata=0.90 /dev/${mdadm_boot_device} --level=1 --raid-devices=$numdisks "${device1}-part${boot_num}" "${device2}-part${boot_num}"
                 sleep 1
 
                 # Create filesystem
@@ -106,11 +106,11 @@ then
 
                 # Set partition type
                 # Might already have been done during setup, but still calling it here in case of e.g. /boot partition conversion
-                sgdisk -t 8300 "${device1}-part3"
+                sgdisk -t 8300 "${device1}-part${boot_num}"
                 sleep 1
 
                 # Create filesystem
-                mkfs.ext4  "${device1}-part3"
+                mkfs.ext4  "${device1}-part${boot_num}"
         else
                 echo "Only 1-Disk and 2-Disks Setups are currently supported. Aborting !"
                 exit 1

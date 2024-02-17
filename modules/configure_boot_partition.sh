@@ -25,7 +25,7 @@ then
         elif [ "$numdisks" -eq 1 ]
         then
                 # Configure Partition in /etc/fstab
-                UUID=$(blkid -s UUID -o value $device1-part3)
+                UUID=$(blkid -s UUID -o value $device1-part${boot_num})
 		echo "# /boot on ext4" >> /etc/fstab
                 echo "UUID=$UUID        /boot   ext4            auto            0      1" >> /etc/fstab
         else

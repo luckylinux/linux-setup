@@ -87,10 +87,10 @@ then
 fi
 
 # Enable Disk in Crypttab for initramfs
-echo "${disk1}_crypt" UUID=$(blkid -s UUID -o value ${device1}-part4) none \
+echo "${disk1}_crypt" UUID=$(blkid -s UUID -o value ${device1}-part${root_num}) none \
     luks,discard,initramfs > "/etc/crypttab"
 
-echo "${disk2}_crypt" UUID=$(blkid -s UUID -o value ${device2}-part4) none \
+echo "${disk2}_crypt" UUID=$(blkid -s UUID -o value ${device2}-part${root_num}) none \
     luks,discard,initramfs >> "/etc/crypttab"
 
 # (Re)Install Bootloader

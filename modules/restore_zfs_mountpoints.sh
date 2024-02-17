@@ -67,7 +67,5 @@ then
         zfs set mountpoint=/ $bootpool/BOOT/$distribution
         zfs set canmount=noauto $bootpool/BOOT/$distribution
         zfs set readonly=off $bootpool/BOOT/$distribution
-
-
 fi
 

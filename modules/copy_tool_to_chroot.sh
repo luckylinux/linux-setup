@@ -14,7 +14,7 @@ mkdir -p "${destination}/tools_install"
 mkdir -p "${destination}/tools_install/$timestamp"
 
 # Copy configuration script to chroot environment
-cp -ra $toolpath/* "${destination}/tools_install"
+cp -ra $toolpath/* "${destination}/tools_install/$timestamp"
 
 # Wait
 sleep 1

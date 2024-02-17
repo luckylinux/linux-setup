@@ -16,8 +16,8 @@ sleep 5
 # Path / Device changes whether encryption is used or not
 if [ "$encryptrootfs" == "no" ]
 then
-        firstdevice="/dev/disk/by-id/${disk1}-part4"
-        seconddevice="/dev/disk/by-id/${disk2}-part4"
+        firstdevice="/dev/disk/by-id/${disk1}-part${root_num}"
+        seconddevice="/dev/disk/by-id/${disk2}-part${root_num}"
 elif [ "$encryptrootfs" == "luks" ]
 then
         firstdevice="/dev/mapper/${disk1}_crypt"

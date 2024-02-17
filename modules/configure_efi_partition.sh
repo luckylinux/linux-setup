@@ -44,7 +44,7 @@ chattr +i /boot/efi
         elif [ "$numdisks" -eq 1 ]
         then
                 # Configure Partition in /etc/fstab
-                UUID=$(blkid -s UUID -o value $device1-part3)
+                UUID=$(blkid -s UUID -o value $device1-part${efi_num})
 		echo "# /boot/efi on vfat" >> /etc/fstab
                 echo "UUID=$UUID        /boot/efi       vfat    umask=0022,fmask=0022,dmask=0022        0       1" >> /etc/fstab
         else

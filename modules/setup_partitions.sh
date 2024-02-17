@@ -42,9 +42,9 @@ do
 	label="${labels[$counter]}"
 
 	# Clear superblock if mdadm was used previously
-	mdadm --zero-superblock --force "${device}-part2" >> $n
-	mdadm --zero-superblock --force "${device}-part3" >> $n
-	mdadm --zero-superblock --force "${device}-part4" >> $n
+	mdadm --zero-superblock --force "${device}-part${efi_num}" >> $n
+	mdadm --zero-superblock --force "${device}-part${boot_num}" >> $n
+	mdadm --zero-superblock --force "${device}-part${root_num}" >> $n
 
 	# Pause
 	sleep 1
@@ -66,7 +66,7 @@ do
         start_bios=1 				# MiB
         end_bios=$((start_bios_efi + bios_size))	# MiB
 
-	echo "Creating BIOS partition on ${device}-part1"
+	echo "Creating BIOS partition on ${device}-part${bios_num}"
 
 	parted --align=opt $device mkpart primary "${start_bios}MiB" "${end_bios}MiB" >> $n
 	parted $device name 1 "${label}_BIOS" >> $n
@@ -76,7 +76,7 @@ do
         start_efi=$((end_bios))
 	end_efi=$((start_efi + efi_size)) # MiB
 
-	echo "Creating EFI partition on ${device}-part2"
+	echo "Creating EFI partition on ${device}-part${efi_num}"
 
 	parted --align=opt $device mkpart ESI fat32 "${start_efi}MiB" "${end_efi}MiB" >> $n
 	parted $device name 2 "${label}_EFI" >> $n
@@ -86,8 +86,8 @@ do
         # Wait a few seconds
         sleep 2
 
-	#echo "Creating FAT32 filesystem on ${device}-part2"
-	#mkfs.vfat -F 32 "${device}-part2"
+	#echo "Creating FAT32 filesystem on ${device}-part${efi_num}"
+	#mkfs.vfat -F 32 "${device}-part${efi_num}"
 
 	# Wait a few seconds
 	#sleep 1
@@ -96,7 +96,7 @@ do
 	start_boot=$((end_efi))		 # MiB
 	end_boot=$((start_boot + boot_size)) # MiB
 
-	echo "Creating /boot partition on ${device}-part3"
+	echo "Creating /boot partition on ${device}-part${bios_num}"
 	parted --align=opt $device mkpart primary "${start_boot}MiB" "${end_boot}MiB" >> $n
 	parted $device name 3 "${label}_BOOT" >> $n
 
@@ -104,7 +104,7 @@ do
 	start_root=$((end_boot))		 # MiB
 	end_root=$((disk_size - margin_size)) # MiB
 
-	echo "Creating / partition on ${device}-part4"
+	echo "Creating / partition on ${device}-part${root_num}"
 	parted --align=opt $device mkpart primary "${start_root}MiB" "${end_root}MiB" >> $n
 	parted $device name 4 "${label}_ROOT" >> $n
 	sgdisk -t 8309 "${device}"
@@ -118,7 +118,7 @@ do
             sleep 1
 
             # Create filesystem
-            #mkfs.ext4  "${device}-part3"
+            #mkfs.ext4  "${device}-part${bios_num}"
         elif [ "$bootfs" == "zfs" ]
         then
            # Set partition type
@@ -163,8 +163,8 @@ do
                 exit 1
         fi
 
-        echo $password | cryptsetup -q -v --type luks2 --cipher aes-xts-plain64 --hash sha512 --key-size 512 --use-random --iter-time 5000 luksFormat "${device}-part4"
-        echo -n $password | cryptsetup open --type luks2 "${device}-part4" "${disk}_crypt"
+        echo $password | cryptsetup -q -v --type luks2 --cipher aes-xts-plain64 --hash sha512 --key-size 512 --use-random --iter-time 5000 luksFormat "${device}-part${root_num}"
+        echo -n $password | cryptsetup open --type luks2 "${device}-part${root_num}" "${disk}_crypt"
         unset $password
         unset $verify
 
