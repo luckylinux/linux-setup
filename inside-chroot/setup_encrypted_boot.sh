@@ -85,20 +85,8 @@ echo "${disk1}_crypt" UUID=$(blkid -s UUID -o value ${device1}-part4) none \
 echo "${disk2}_crypt" UUID=$(blkid -s UUID -o value ${device2}-part4) none \
     luks,discard,initramfs >> "/etc/crypttab"
 
-# Update GRUB
-update-grub
-
-# Check that it's ZFS
-grub-probe /boot
-
-# (Re)install GRUB
-grub-install $device1
-grub-install $device1
-grub-install $device2
-grub-install $device2
-
-# Update GRUB once again
-update-grub
+# (Re)Install Bootloader
+source $toolpath/inside-chroot/install_bootloader.sh
 
 # Setup automatic disk unlock
 if [ "$clevisautounlock" == "yes" ]

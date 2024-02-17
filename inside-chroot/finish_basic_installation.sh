@@ -138,33 +138,8 @@ update-initramfs -u -k all
 echo "# Tell Initramfs to use custom keyboard" >> "/etc/initramfs-tools/initramfs.conf"
 echo "KEYMAP=Y" >> "/etc/initramfs-tools/initramfs.conf"
 
-# Install GRUB to MBR
-if [ "$bootloadermode" == "BIOS" ]
-then
-    # Install GRUB
-    apt-get install --yes grub-pc
-
-    # BIOS
-    grub-install "${device1}"
-    grub-install "${device2}"
-elif [ "$bootloadermode" == "UEFI" ]
-then
-    # Install GRUB
-    apt-get install --yes grub-efi-amd64
-
-    # UEFI
-    grub-install --target=x86_64-efi "${device1}"
-    grub-install --target=x86_64-efi "${device2}"
-    #grub-install --target=x86_64-efi --efi-directory=/boot/efi \
-    #--bootloader-id=ubuntu --recheck --no-floppy
-else
-    # Not Supported
-    echo "Error - bootloadermode <${bootloadermode}> is NOT supported. Aborting"
-    exit 1
-fi
-
-# Update GRUB configuration
-update-grub
+# Install Bootloader
+source $toolpath/inside-chroot/install_bootloader.sh
 
 # Setup automatic disk unlock
 if [ "$clevisautounlock" == "yes" ]
