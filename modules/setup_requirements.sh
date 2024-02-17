@@ -27,7 +27,8 @@ sed -i -e 's/\#DEVICE partitions containers/DEVICE \/dev\/null/g' '/etc/mdadm/md
 
 # Enable mdadm service with systemd
 # If this is a link remove it
-if [ -L /lib/systemd/system/mdadm.service ]; then
+if [ -L /lib/systemd/system/mdadm.service ]
+then
 	echo "Removing /lib/systemd/system/mdadm.service in order to unmask mdadm service" 
 	rm /lib/systemd/system/mdadm.service
 

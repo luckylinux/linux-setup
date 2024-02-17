@@ -81,7 +81,8 @@ do
 
      # Bind device to the TANG server via CLEVIS
      # Device 1
-     if [[ "${list_device1}" == *"${keyserver}"* ]]; then
+     if [[ "${list_device1}" == *"${keyserver}"* ]]
+     then
          echo "Keyserver <$keyserver> is already installed"
      else
          echo "Install Keyserver <$keyserver> onto $device1 LUKS Header"
@@ -89,7 +90,8 @@ do
      fi
 
      # Device 2
-     if [[ "${list_device2}" == *"${keyserver}"* ]]; then
+     if [[ "${list_device2}" == *"${keyserver}"* ]]
+     then
          echo "Keyserver <$keyserver> is already installed"
      else
           echo "Install Keyserver <$keyserver> onto $device2 LUKS Header"
@@ -102,7 +104,6 @@ done
 
 # Clear password from memory
 unset $password
-
 
 # Update initramfs
 update-initramfs -c -k all

@@ -41,7 +41,8 @@ systemctl start mdadm
 
 # Stop existing arrays if exists
 # EFI
-if [ -e "/dev/${mdadm_efi_device}" ]; then
+if [ -e "/dev/${mdadm_efi_device}" ]
+then
 	echo "Remove disks from /dev/${mdadm_efi_device}"
 	mdadm /dev/${mdadm_efi_device} --fail "${device1}-part2"
 	mdadm /dev/${mdadm_efi_device} --fail "${device2}-part2"
@@ -55,7 +56,8 @@ if [ -e "/dev/${mdadm_efi_device}" ]; then
 fi
 
 # /boot
-if [ -e "/dev/${mdadm_boot_device}" ]; then
+if [ -e "/dev/${mdadm_boot_device}" ]
+then
 	echo "Remove disks from /dev/${mdadm_boot_device}"
 	mdadm ${mdadm_boot_device} --fail "${device1}-part3"
 	mdadm ${mdadm_boot_device} --fail "${device2}-part3"
@@ -69,7 +71,8 @@ if [ -e "/dev/${mdadm_boot_device}" ]; then
 fi
 
 # /
-if [ -e "/dev/${mdadm_root_device}" ]; then
+if [ -e "/dev/${mdadm_root_device}" ]
+then
 	echo "Remove disks from /dev/${mdadm_root_device}"
 	mdadm ${mdadm_root_device} --fail "${device1}-part4"
 	mdadm ${mdadm_root_device} --fail "${device2}-part4"
