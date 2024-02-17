@@ -76,6 +76,9 @@ defgateway="192.168.1.1"   # Only relevant for "static"
 ns1="192.168.1.3"
 ns2="192.168.1.4"
 
+# NS Configuration
+nsconfig="resolv.conf" # "resolv.conf" or "systemd-resolved"
+
 # Declare disk labels
 labels=("DISK1" "DISK2")
 

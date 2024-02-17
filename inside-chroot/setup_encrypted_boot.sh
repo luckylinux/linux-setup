@@ -1,7 +1,13 @@
 #!/bin/bash
 
-# Load configuration
-source ../config.sh
+# If toolpath not set, set it to current working directory
+if [[ ! -v toolpath ]]
+then
+    toolpath=$(pwd)
+fi
+
+# Load Configuration
+source $toolpath/config.sh
 
 # Update ZFS pool cache
 mkdir -p /etc/zfs/zfs-list.cache

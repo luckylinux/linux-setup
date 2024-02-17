@@ -1,7 +1,13 @@
 #!/bin/bash
 
-# Load configuration
-source ../config.sh
+# If toolpath not set, set it to current working directory
+if [[ ! -v toolpath ]]
+then
+    toolpath=$(pwd)
+fi
+
+# Load Configuration
+source $toolpath/config.sh
 
 # Mount /boot
 chattr +i /boot
@@ -12,10 +18,36 @@ chattr +i /boot/efi
 mount /boot/efi
 
 # Fix /etc/resolv.conf
-rm -f /etc/resolv.conf
-echo "nameserver $ns1" >> /etc/resolv.conf
-echo "nameserver $ns2" >> /etc/resolv.conf
-chattr +i /etc/resolv.conf
+if [ "$nsconfig" == "resolv.conf" ]
+then
+    # Remove existing configuration
+    rm -f /etc/resolv.conf
+
+    # Add specified nameservers
+    echo "nameserver $ns1" >> /etc/resolv.conf
+    echo "nameserver $ns2" >> /etc/resolv.conf
+
+    # Prervent automatic overriding
+    chattr +i /etc/resolv.conf
+elif [ "$nsconfig" == "systemd-resolved" ]
+    # Install systemd-resolved
+    apt-get install --yes systemd-resolved
+    systemctl enable systemd-resolved
+    systemctl restart systemd-resolved
+
+    # Set DNS Servers in systemd-resolved
+    sed -Ei "s/^#DNS=/DNS=$ns1 $ns2/g" /etc/systemd/resolved.conf
+
+    # Remove /etc/resolv.conf and ensure it's a link to systemd-resolved
+    rm -r /etc/resolv.conf
+    currentpath=$(pwd)
+    cd /etc
+    ln -s ../run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+    cd $currentpath
+else
+    echo "Invalid Nameserver Configuration. <nsconfig> must be one of the following options: <resolv.conf> or <systemd-resolved>. Aborting !"
+    exit 1
+fi
 
 # ...
 ln -s /proc/self/mounts /etc/mtab

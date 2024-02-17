@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# If toolpath not set, set it to current working directory
+if [[ ! -v toolpath ]]
+then
+    toolpath=$(pwd)
+fi
+
+# Load Configuration
+source $toolpath/config.sh
+
 # Setup system groups
 addgroup --system lpadmin
 addgroup --system lxd

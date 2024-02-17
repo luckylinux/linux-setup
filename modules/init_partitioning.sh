@@ -19,6 +19,20 @@ then
     zpool export -f $rootpool
 fi
 
+# Close LUKS devices if applicable
+# If root device is encrypted
+if [ "$encryptrootfs" == "luks" ]
+then
+	# Close $device1
+	cryptsetup luksClose ${disk1}_crypt
+
+	if [ $numdisks -eq 2 ]
+        then
+		# Close $device2
+		cryptsetup luksClose ${disk2}_crypt
+	fi
+fi
+
 # Kill all running processes
 killall parted
 
@@ -26,7 +40,6 @@ killall parted
 systemctl start mdadm
 
 # Stop existing arrays if exists
-
 # EFI
 if [ -e "/dev/${mdadm_efi_device}" ]; then
 	echo "Remove disks from /dev/${mdadm_efi_device}"

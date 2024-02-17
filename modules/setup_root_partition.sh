@@ -60,6 +60,7 @@ else
                 # Dual Disk
 		mkfs.ext4 "/dev/${mdadm_root_device}"
         elif [ $numdisks -eq 1 ]
+        then
                 # Single Disk
                 # Use EXT4 Directly
 

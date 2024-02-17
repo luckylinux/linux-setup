@@ -10,7 +10,7 @@ fi
 source $toolpath/config.sh
 
 # If root device is encrypted
-if [ "$encryptrootfs" == "luks"]
+if [ "$encryptrootfs" == "luks" ]
 then
         # Enable Disk in Crypttab for initramfs
         echo "${disk1}_crypt" UUID=$(blkid -s UUID -o value ${firstdevice}) none \
