@@ -52,6 +52,7 @@ if [ -e "/dev/${mdadm_boot_device}" ]; then
 
 	echo "Stopping /dev/${mdadm_boot_device}"
 	mdadm --stop /dev/${mdadm_boot_device}
+        sleep 1
 fi
 
 # /
@@ -65,4 +66,5 @@ if [ -e "/dev/${mdadm_root_device}" ]; then
 
 	echo "Stopping /dev/${mdadm_root_device}"
 	mdadm --stop /dev/${mdadm_root_device}
+        sleep 1
 fi

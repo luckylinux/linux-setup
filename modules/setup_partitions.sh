@@ -182,84 +182,12 @@ sleep 5
 # Setup EFI Partition / RAID1
 source $toolpath/modules/setup_efi_partition.sh
 
-# Setup boot Partition / RAID1
+# Setup /boot Partition / RAID1
 source $toolpath/modules/setup_boot_partition.sh
 
-# Wait a few seconds
-sleep 5
+# Setup / Partition / RAID1
+source $toolpath/modules/setup_root_partition.sh
 
-# Determine Root device(s)
-# Path / Device changes whether encryption is used or not
-if [ "$encryptrootfs" == "no" ]
-then
-        firstdevice="/dev/disk/by-id/${disk1}-part4"
-        seconddevice="/dev/disk/by-id/${disk2}-part4"
-elif [ "$encryptrootfs" == "luks" ]
-then
-        firstdevice="/dev/mapper/${disk1}_crypt"
-        seconddevice="/dev/mapper/${disk2}_crypt"
-else
-        echo "Encryption mode <${encryptrootfs}> for / is NOT supported. Aborting !"
-        exit 1
-fi
-
-if [ "$rootfs" == "zfs" ]
-then
-        # Check if it's a single disk or a mirror RAID
-        if [ "$numdisks" -eq 1 ]
-        then
-                devicelist="$firstdevice"
-        elif [ "$numdisks" -eq 2 ]
-        then
-                devicelist="mirror $firstdevice $seconddevice"
-        else
-                echo "Only single disks and mirror / RAID-1 setups are currently supported. Aborting !"
-                exit 1
-        fi
-
-        # Create root pool
-        zpool create -f -o ashift=$ashift \
-        -O acltype=posixacl -O canmount=off -O compression=lz4 \
-        -O dnodesize=auto -O normalization=formD -O relatime=on \
-        -O xattr=sa \
-        -O mountpoint=/ -R "$destination" \
-        $rootpool $devicelist
-
-else
-        if [ $numdisks -eq 2 ]
-        then
-                # Dual Disk
-                # Setup MDADM RAID1 / mirror EXT4 Software Raid
-
-                # Create filesystem
-                mkfs.ext4  "${firstdevice}"
-
-                # Create filesystem
-                mkfs.ext4  "${seconddevice}"
-
-                # Assemble MDADM Array
-                mdadm --create --verbose /dev/md3 --level=1 --raid-devices=$numdisks "${firstdevice}" "${seconddevice}"
-        elif [ $numdisks -eq 1 ]
-                # Single Disk
-                # Use EXT4 Directly
-
-                # Create filesystem
-                mkfs.ext4  "${firstdevice}"
-        fi
-fi
-
-# Wait a few seconds
-sleep 5
-
-if [ "$encryptrootfs" == "luks"]
-then
-        # Enable Disk in Crypttab for initramfs
-        echo "${disk1}_crypt" UUID=$(blkid -s UUID -o value ${firstdevice}) none \
-        luks,discard,initramfs > "${destination}/etc/crypttab"
-
-        if [ $numdisks -eq 2 ]
-        then
-                echo "${disk2}_crypt" UUID=$(blkid -s UUID -o value ${seconddevice}) none \
-                 luks,discard,initramfs >> "${destination}/etc/crypttab"
-        fi
-fi
+# Configure root partition
+# PROBABLY NOT CORRECT, SINCE IT WILL AFFECT THE HOST, NOT THE CHROOT ENVIRONMENT !
+source $toolpath/modules/configure_root_partition.sh
