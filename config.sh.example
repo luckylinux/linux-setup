@@ -5,7 +5,10 @@
 toolpath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 
 # Load files in config-pre/ folder
-source $toolpath/config-pre/*.sh
+for f in $toolpath/config-pre/*.sh
+do
+  source $toolpath/config-pre/$f
+done
 
 ##############################################################################
 # !! Important - Only Single and Mirror/RAID1 Setups are currently supported #
@@ -138,4 +141,7 @@ keyservers=("192.168.1.15" "192.168.1.16" "192.168.1.17" "192.168.1.18")
 bootloadermode="UEFI"
 
 # Load files in config-post/ folder
-source $toolpath/config-post/*.sh
+for f in $toolpath/config-post/*.sh
+do
+  source $toolpath/config-post/$f
+done

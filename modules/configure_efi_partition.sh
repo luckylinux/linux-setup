@@ -37,7 +37,7 @@ chattr +i /boot/efi
         if [ "$numdisks" -eq 2 ]
         then
                 # Configure MDADM Array in /etc/fstab
-                UUID=$(blkid -s UUID -o value /dev/${mdadm_boot_device})
+                UUID=$(blkid -s UUID -o value /dev/${mdadm_efi_device})
                 echo "# /boot/efi on vfat with MDADM Software Raid-1" >> /etc/fstab
                 echo "UUID=$UUID	/boot/efi	vfat	umask=0022,fmask=0022,dmask=0022	0       1" >> /etc/fstab
 

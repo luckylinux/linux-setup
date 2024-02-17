@@ -17,11 +17,11 @@ fi
 # Load Configuration
 source $toolpath/config.sh
 
-# Configure EFI Partition & /etc/fstab
-source $toolpath/modules/configure_efi_partition.sh
-
 # Configure /boot Partition & /etc/fstab
 source $toolpath/modules/configure_boot_partition.sh
+
+# Configure EFI Partition & /etc/fstab
+source $toolpath/modules/configure_efi_partition.sh
 
 # Configure / Partition & /etc/fstab
 source $toolpath/modules/configure_root_partition.sh
