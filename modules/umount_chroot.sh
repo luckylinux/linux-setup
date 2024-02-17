@@ -1,17 +1,30 @@
 #!/bin/bash
 
+# If toolpath not set, set it to current working directory
+if [[ ! -v toolpath ]]
+then
+    toolpath=$(pwd)
+fi
+
 # Load config
-source ../config.sh
+source $toolpath/config.sh
 
 # Disable swap
 swapoff -a
 
 # Umount proc, sys, dev
-bash umount_bind.sh
+source $toolpath/umount_bind.sh
 
 # Umount root/boot
-umount -R "${destination}/boot"
-umount -R "${destination}"
+if mountpoint -q "${destination}/boot"
+then
+	umount -R "${destination}/boot"
+fi
+
+if mountpoint -q "${destination}"
+then
+	umount -R "${destination}"
+fi
 
 # Export pool
 if [ "$rootfs" == "zfs" ]

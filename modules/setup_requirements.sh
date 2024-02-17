@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# If toolpath not set, set it to current working directory
+if [[ ! -v toolpath ]]
+then
+    toolpath=$(pwd)
+fi
+
 # Install system tools
 apt-get install --yes aptitude nload htop lm-sensors net-tools debootstrap
 

@@ -3,8 +3,14 @@
 # Do NOT Abort on errors
 #set -e
 
+# If toolpath not set, set it to current working directory
+if [[ ! -v toolpath ]]
+then
+    toolpath=$(pwd)
+fi
+
 # Load configuration
-source ../config.sh
+source $toolpath/config.sh
 
 # Mount Current /boot partition
 mount /boot

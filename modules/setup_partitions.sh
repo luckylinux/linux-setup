@@ -180,7 +180,7 @@ echo "==========================================================================
 sleep 5
 
 # Setup EFI Partition & RAID
-source $toolpath/setup_efi_partition.sh
+source $toolpath/modules/setup_efi_partition.sh
 
 # EFI Software Raid
 if [ $numdisks -eq 1 ]
@@ -210,7 +210,7 @@ then
 fi
 
 # Setup boot Partition & RAID
-source $toolpath/setup_boot_partition.sh
+source $toolpath/modules/setup_boot_partition.sh
 
 # Wait a few seconds
 sleep 5

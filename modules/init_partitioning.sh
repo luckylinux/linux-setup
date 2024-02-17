@@ -1,7 +1,13 @@
 #!/bin/bash
 
+# If toolpath not set, set it to current working directory
+if [[ ! -v toolpath ]]
+then
+    toolpath=$(pwd)
+fi
+
 # Load config
-source config.sh
+source $toolpath/config.sh
 
 # Load ZFS module
 modprobe spl

@@ -1,7 +1,13 @@
 #/bin/bash
 
+# If toolpath not set, set it to current working directory
+if [[ ! -v toolpath ]]
+then
+    toolpath=$(pwd)
+fi
+
 # (Re)load configuration
-source ../config.sh
+source $toolpath/config.sh
 
 # Import ZFS pool if not already mounted
 if [ "$rootfs" == "zfs" ]
@@ -80,7 +86,7 @@ echo "Network configured for <${interfacename}>"
 
 # Copy configuration script to chroot environment
 mkdir -p "${destination}/tools_install"
-cp -ra ../* "${destination}/tools_install"
+cp -ra $toolpath/* "${destination}/tools_install"
 #cp ./config.sh "${destination}/tools_install/config.sh"
 #cp ./files/inside_chroot.sh "${destination}/tools_install/setup_chroot.sh"
 #cp ./files/finish_installation.sh "${destination}/tools_install/setup_system_after_reboot.sh"

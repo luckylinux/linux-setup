@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# If toolpath not set, set it to current working directory
+if [[ ! -v toolpath ]]
+then
+    toolpath=$(pwd)
+fi
+
 # Load Configuration
 source $toolpath/config.sh
 
@@ -11,12 +17,6 @@ then
    echo "Creating FAT32 filesystem on $device1-part2"
    mkfs.vfat -F 32 "$device1-part2"
    sleep 1
-
-   # Create Filesystem
-   echo "Creating FAT32 filesystem on $device2-part2"
-   mkfs.vfat -F 32 "$device2-part2"
-   sleep 1
-
 
 elif [ $numdisks -eq 2 ]
 then
