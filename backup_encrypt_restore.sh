@@ -1,7 +1,13 @@
 #!/bin/bash
 
+# If toolpath not set, set it to current working directory
+if [[ ! -v toolpath ]]
+then
+    toolpath=$(pwd)
+fi
+
 # Load configuration
-source ./config.sh
+source $toolpath/config.sh
 
 # Setup required tools
 #source $toolpath/modules/setup_requirements.sh
@@ -10,7 +16,7 @@ source ./config.sh
 #source $toolpath/modules/backup_system.sh
 
 # Umount previosuly mounted pools & filesystems
-umount "$destination/{dev,sys,proc}"
+source $toolpath/modules/umount_bind.sh
 zfs umount -a
 
 if [ "$bootfs" == "zfs" ]
