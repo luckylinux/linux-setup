@@ -1,10 +1,7 @@
 #!/bin/bash
 
-# Define toolpath
-toolpath=$(pwd)
-
 # Load configuration
-source config.sh
+source ./config.sh
 
 # Umount previosuly mounted pools & filesystems
 umount $destination/{dev,sys,proc}

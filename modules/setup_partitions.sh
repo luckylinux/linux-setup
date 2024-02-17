@@ -1,7 +1,13 @@
 #!/bin/bash
 
+# If toolpath not set, set it to current working directory
+if [[ ! -v toolpath ]]
+then
+    toolpath=$(pwd)
+fi
+
 # Load config
-source ../config.sh
+source $toolpath/config.sh
 
 # Erase all partitions
 echo "=================================================================================================="
@@ -117,8 +123,7 @@ do
         then
            # Set partition type
            sgdisk -t BF01 "${device}"
-        else    
-        then
+        else
            # Filesystem for /boot not supported
            echo "Filesystem for /boot not supported. Aborting"
            exit 1
@@ -134,7 +139,7 @@ do
         if [ "$encryptrootfs" == "no"]
         then
                 echo "Skip Encryption Process"
-        else if [ "$encryptrootfs" == "luks"]
+        elif [ "$encryptrootfs" == "luks"]
         then
                 # Ask for password
                 # Initial values need to be intentionally different in order for the while loop to work correctly
@@ -147,13 +152,12 @@ do
                 read -s -p "Verify encryption password: " verify
 
                 if [ "$password" != "$verify" ]; then
-                echo "Password Verification failed - Password do NOT match"
+                    echo "Password Verification failed - Password do NOT match"
                 else
-                echo "Password Verification successful"
+                    echo "Password Verification successful"
                 fi
                 done
         else
-        then
                 echo "Encryption mode <${encryptrootfs}> for / is NOT supported. Aborting !"
                 exit 1
         fi
@@ -187,9 +191,10 @@ then
    echo "Creating FAT32 filesystem on $device2-part2"
    mkfs.vfat -F 32 "$device2-part2"
    sleep 1
-   
 
-else if [ $numdisks -eq 2 ]
+
+elif [ $numdisks -eq 2 ]
+then
    # Use MDADM
    mdadm --create --verbose --metadata=0.90 /dev/${mdadm_efi_device} --level=1 --raid-devices=$numdisks "${device1}-part2" "${device2}-part2"
    sleep
@@ -212,11 +217,11 @@ if [ "$encryptrootfs" == "no"]
 then
         firstdevice="/dev/disk/by-id/${disk1}-part4"
         seconddevice="/dev/disk/by-id/${disk2}-part4"
-else if [ "$encryptrootfs" == "luks"]
+elif [ "$encryptrootfs" == "luks"]
+then
         firstdevice="/dev/mapper/${disk1}_crypt"
         seconddevice="/dev/mapper/${disk2}_crypt"
 else
-then
         echo "Encryption mode <${encryptrootfs}> for / is NOT supported. Aborting !"
         exit 1
 fi
@@ -227,10 +232,10 @@ then
         if [ "$numdisks" -eq 1 ]
         then
                 devicelist="$firstdevice"
-        else if [ "$numdisks" -eq 2 ]
+        elif [ "$numdisks" -eq 2 ]
+        then
                 devicelist="mirror $firstdevice $seconddevice"
         else
-        then
                 echo "Only single disks and mirror / RAID-1 setups are currently supported. Aborting !"
                 exit 1
         fi
@@ -244,7 +249,6 @@ then
         $rootpool $devicelist
 
 else
-then
         if [ $numdisks -eq 2 ]
         then
                 # Dual Disk
@@ -258,7 +262,7 @@ then
 
                 # Assemble MDADM Array
                 mdadm --create --verbose /dev/md3 --level=1 --raid-devices=$numdisks "${firstdevice}" "${seconddevice}"
-        else if [ $numdisks -eq 1 ]
+        elif [ $numdisks -eq 1 ]
                 # Single Disk
                 # Use EXT4 Directly
 

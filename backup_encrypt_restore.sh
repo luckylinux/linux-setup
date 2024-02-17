@@ -1,10 +1,7 @@
 #!/bin/bash
 
-# Define toolpath
-toolpath=$(pwd)
-
 # Load configuration
-source config.sh
+source ./config.sh
 
 # Setup required tools
 source $toolpath/modules/setup_requirements.sh
