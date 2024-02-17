@@ -55,13 +55,6 @@ echo "	netmask ${subnetmask}" >> "${destination}/etc/network/interfaces.d/${inte
 echo "	gateway ${defgateway}" >> "${destination}/etc/network/interfaces.d/${interfacename}"
 echo "Network configured for <${interfacename}>"
 
-# Copy configuration script to chroot environment
-mkdir -p "${destination}/tools_install"
-cp -ra $toolpath/* "${destination}/tools_install"
-#cp ./config.sh "${destination}/tools_install/config.sh"
-#cp ./files/inside_chroot.sh "${destination}/tools_install/setup_chroot.sh"
-#cp ./files/finish_installation.sh "${destination}/tools_install/setup_system_after_reboot.sh"
-sleep 2
 
 # Setup tools
 echo "# Tools over NFS" >> "${destination}/etc/fstab"
@@ -69,5 +62,5 @@ echo "192.168.1.223:/export/tools          /tools_nfs           nfs             
 mkdir -p  "${destination}/tools_nfs"
 chattr +i "${destination}/tools_nfs"
 
-# Chroot into the new environment
-chroot "${destination}" /bin/bash --login
+# Setup & perform chroot
+source $toolpath/modules/setup_chroot.sh

@@ -10,10 +10,10 @@ fi
 source $toolpath/config.sh
 
 # Setup required tools
-#source $toolpath/modules/setup_requirements.sh
+source $toolpath/modules/setup_requirements.sh
 
 # Backup existing pool
-#source $toolpath/modules/backup_system.sh
+source $toolpath/modules/backup_system.sh
 
 # Umount previosuly mounted pools & filesystems
 source $toolpath/modules/umount_bind.sh
@@ -42,3 +42,12 @@ source $toolpath/modules/setup_partitions.sh
 
 # Restore system
 source $toolpath/modules/restore_system.sh
+
+# Mount system
+source $toolpath/modules/mount_system.sh
+
+# Mount bind
+source $toolpath/modules/mount_bind.sh
+
+# Setup chroot
+source $toolpath/modules/setup_chroot.sh

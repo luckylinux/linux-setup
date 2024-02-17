@@ -12,5 +12,8 @@ source $toolpath/config.sh
 # Bind required filesystems
 source $toolpath/modules/mount_bind.sh
 
+# Copy tool to chroot folder
+source $toolpath/modules/copy_tool_to_chroot.sh
+
 # Chroot into the environment
 chroot "${destination}" /bin/bash --login
