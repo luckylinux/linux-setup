@@ -17,3 +17,8 @@ source $toolpath/modules/copy_tool_to_chroot.sh
 
 # Chroot into the environment
 chroot "${destination}" /bin/bash --login
+#chroot "${destination}" /bin/bash --login -c "/bin/bash /tools_install/$timestamp/inside-chroot/start.sh"
+#-x  <<'EOF'
+#source /etc/profile
+#cd /tools_install/$timestamp
+#EOF
