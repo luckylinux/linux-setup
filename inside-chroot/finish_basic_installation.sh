@@ -74,38 +74,29 @@ apt-get install --yes zfs-dkms zfs-initramfs
 apt-get install --yes nfs-client wget ssh sudo curl
 systemctl enable ssh
 
-# Install GRUB
-if [ "$bootloadermode" == "BIOS" ]
+# Ensure that NFS tools are mounted if applicable
+if [ -d "/tools_nfs" ]
 then
-    # BIOS
-    apt-get nstall --yes grub-pc
-else if [ "$bootloadermode" == "UEFI" ]
-    # UEFI
-    apt-get install --yes grub-efi-amd64
-else
-    # Not Supported
-    echo "Error - bootloadermode <${bootloadermode}> is NOT supported. Aborting"
-    exit 1
+	mount /tools_nfs
 fi
 
-# Ensure that NFS tools are mounted
-mount /tools_nfs
+if [ "$bootfs" == "zfs" ]
+then
+	# Setup GRUB Testing to ensure that ZFS $bootpool works correctly
+	#currentpath=$(pwd)
+	#cd /tools_nfs/Debian
+	#bash setup_grub_testing.sh
+	#apt-get update
+	#cd $currentpath
 
-# Setup GRUB Testing to ensure that ZFS bpool works correctly
-#currentpath=$(pwd)
-#cd /tools_nfs/Debian
-#bash setup_grub_testing.sh
-#apt-get update
-#cd $currentpath
+	# Setup ZFS Backports to ensure that ZFS installed version is the same as the LiveUSB
+	#currentpath=$(pwd)
+	#cd /tools_nfs/Debian
+	#bash setup_zfs_backports.sh
+	#cd $currentpath
 
-# Setup ZFS Backports to ensure that ZFS installed version is the same as the LiveUSB
-#currentpath=$(pwd)
-#cd /tools_nfs/Debian
-#bash setup_zfs_backports.sh
-#cd $currentpath
-
-# Enable importing bpool
-tee /etc/systemd/system/zfs-import-bpool.service << EOF
+	# Enable importing $bootpool
+	tee /etc/systemd/system/zfs-import-$bootpool.service << EOF
 [Unit]
 DefaultDependencies=no
 Before=zfs-import-scan.service
@@ -114,7 +105,7 @@ Before=zfs-import-cache.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/sbin/zpool import -N -o cachefile=none bpool
+ExecStart=/sbin/zpool import -N -o cachefile=none $bootpool
 # Work-around to preserve zpool cache:
 ExecStartPre=-/bin/mv /etc/zfs/zpool.cache /etc/zfs/preboot_zpool.cache
 ExecStartPost=-/bin/mv /etc/zfs/preboot_zpool.cache /etc/zfs/zpool.cache
@@ -123,7 +114,9 @@ ExecStartPost=-/bin/mv /etc/zfs/preboot_zpool.cache /etc/zfs/zpool.cache
 WantedBy=zfs-import.target
 EOF
 
-systemctl enable zfs-import-bpool.service
+	systemctl enable zfs-import-$bootpool.service
+fi
+
 
 # Install kernel
 apt-get install --yes linux-image-amd64
@@ -145,27 +138,38 @@ update-initramfs -u -k all
 echo "# Tell Initramfs to use custom keyboard" >> "/etc/initramfs-tools/initramfs.conf"
 echo "KEYMAP=Y" >> "/etc/initramfs-tools/initramfs.conf"
 
-# Update GRUB configuration
-update-grub
-
 # Install GRUB to MBR
 if [ "$bootloadermode" == "BIOS" ]
 then
+    # Install GRUB
+    apt-get install --yes grub-pc
+
     # BIOS
     grub-install "${device1}"
     grub-install "${device2}"
-else
+elif [ "$bootloadermode" == "UEFI" ]
+then
+    # Install GRUB
+    apt-get install --yes grub-efi-amd64
+
     # UEFI
     grub-install --target=x86_64-efi "${device1}"
     grub-install --target=x86_64-efi "${device2}"
     #grub-install --target=x86_64-efi --efi-directory=/boot/efi \
     #--bootloader-id=ubuntu --recheck --no-floppy
+else
+    # Not Supported
+    echo "Error - bootloadermode <${bootloadermode}> is NOT supported. Aborting"
+    exit 1
 fi
+
+# Update GRUB configuration
+update-grub
 
 # Setup automatic disk unlock
 if [ "$clevisautounlock" == "yes" ]
 then
-    source ../modules/setup_clevis_nbde.sh
+    source $toolpath/modules/setup_clevis_nbde.sh
 fi
 
 # Update initramfs
@@ -174,9 +178,12 @@ update-initramfs -u -k all
 # Update GRUB configuration
 update-grub
 
-# Disable grub fallback service
-# Typically only needed for  mirror or raidz topology:
-systemctl mask grub-initrd-fallback.service
+if [ "$bootfs" == "zfs" ]
+then
+	# Disable grub fallback service
+	# Typically only needed for  mirror or raidz topology:
+	systemctl mask grub-initrd-fallback.service
+fi
 
 # Verify that the ZFS module is installed
 echo "!!! CHECK THAT THE ZFS MODULE IS INSTALLED !!!"
@@ -185,7 +192,7 @@ ls /boot/grub/*/zfs.mod
 # Snapshot the initial installation
 if [ "$bootfs" == "zfs" ]
 then
-    zfs snapshot -r bpool/BOOT/ubuntu@install
+    zfs snapshot -r $bootpool/BOOT/$distribution@install
 fi
 
 if [ "$rootfs" == "zfs" ]

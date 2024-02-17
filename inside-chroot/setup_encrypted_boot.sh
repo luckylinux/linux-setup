@@ -103,7 +103,7 @@ update-grub
 # Setup automatic disk unlock
 if [ "$clevisautounlock" == "yes" ]
 then
-    source ./setup_clevis_nbde.sh
+    source $toolpath/modules/setup_clevis_nbde.sh
 fi
 
 # Update initramfs
