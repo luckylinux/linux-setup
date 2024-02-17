@@ -179,37 +179,10 @@ echo "==========================================================================
 
 sleep 5
 
-# Setup EFI Partition & RAID
+# Setup EFI Partition / RAID1
 source $toolpath/modules/setup_efi_partition.sh
 
-# EFI Software Raid
-if [ $numdisks -eq 1 ]
-then
-   # Use FAT32 directly
-   # Create Filesystem
-   echo "Creating FAT32 filesystem on $device1-part2"
-   mkfs.vfat -F 32 "$device1-part2"
-   sleep 1
-
-   # Create Filesystem
-   echo "Creating FAT32 filesystem on $device2-part2"
-   mkfs.vfat -F 32 "$device2-part2"
-   sleep 1
-
-
-elif [ $numdisks -eq 2 ]
-then
-   # Use MDADM
-   mdadm --create --verbose --metadata=0.90 /dev/${mdadm_efi_device} --level=1 --raid-devices=$numdisks "${device1}-part2" "${device2}-part2"
-   sleep
-
-   # Create Filesystem
-   echo "Creating FAT32 filesystem on /dev/${mdadm_efi_device}"
-   mkfs.vfat -F 32 "/dev/${mdadm_efi_device}"
-   sleep 1
-fi
-
-# Setup boot Partition & RAID
+# Setup boot Partition / RAID1
 source $toolpath/modules/setup_boot_partition.sh
 
 # Wait a few seconds
@@ -217,11 +190,11 @@ sleep 5
 
 # Determine Root device(s)
 # Path / Device changes whether encryption is used or not
-if [ "$encryptrootfs" == "no"]
+if [ "$encryptrootfs" == "no" ]
 then
         firstdevice="/dev/disk/by-id/${disk1}-part4"
         seconddevice="/dev/disk/by-id/${disk2}-part4"
-elif [ "$encryptrootfs" == "luks"]
+elif [ "$encryptrootfs" == "luks" ]
 then
         firstdevice="/dev/mapper/${disk1}_crypt"
         seconddevice="/dev/mapper/${disk2}_crypt"
