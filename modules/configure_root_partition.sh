@@ -13,7 +13,7 @@ source $toolpath/config.sh
 if [ "$encryptrootfs" == "luks" ]
 then
         # Enable Disk in Crypttab for initramfs
-        echo "${disk1}_crypt" UUID=$(blkid -s UUID -o value ${device1}-part{$root_num}) none \
+        echo "${disk1}_crypt" UUID=$(blkid -s UUID -o value ${device1}-part${root_num}) none \
         luks,discard,initramfs > "${destination}/etc/crypttab"
 
         if [ $numdisks -eq 2 ]

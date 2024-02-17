@@ -13,7 +13,7 @@ source $toolpath/config.sh
 swapoff -a
 
 # Umount proc, sys, dev
-source $toolpath/umount_bind.sh
+source $toolpath/modules/umount_bind.sh
 
 # Umount root/boot
 if mountpoint -q "${destination}/boot"
