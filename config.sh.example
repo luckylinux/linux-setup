@@ -7,7 +7,7 @@ toolpath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 # Load files in config-pre/ folder
 for f in $toolpath/config-pre/*.sh
 do
-  source $toolpath/config-pre/$f
+  source $f
 done
 
 ##############################################################################
@@ -143,5 +143,5 @@ bootloadermode="UEFI"
 # Load files in config-post/ folder
 for f in $toolpath/config-post/*.sh
 do
-  source $toolpath/config-post/$f
+  source $f
 done
