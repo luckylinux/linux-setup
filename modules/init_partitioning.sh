@@ -30,11 +30,11 @@ systemctl start mdadm
 # EFI
 if [ -e "/dev/${mdadm_efi_device}" ]; then
 	echo "Remove disks from /dev/${mdadm_efi_device}"
-	mdadm /dev/md127 --fail "${device1}-part2"
-	mdadm /dev/md127 --fail "${device2}-part2"
+	mdadm /dev/${mdadm_efi_device} --fail "${device1}-part2"
+	mdadm /dev/${mdadm_efi_device} --fail "${device2}-part2"
 	sleep 1
-	mdadm /dev/md127 --remove "${device1}-part2"
-	mdadm /dev/md127 --remove "${device2}-part2"
+	mdadm /dev/${mdadm_efi_device} --remove "${device1}-part2"
+	mdadm /dev/${mdadm_efi_device} --remove "${device2}-part2"
 
 	echo "Stopping /dev/${mdadm_efi_device}"
 	mdadm --stop /dev/${mdadm_efi_device}
@@ -44,11 +44,11 @@ fi
 # /boot
 if [ -e "/dev/${mdadm_boot_device}" ]; then
 	echo "Remove disks from /dev/${mdadm_boot_device}"
-	mdadm /dev/md100 --fail "${device1}-part3"
-	mdadm /dev/md100 --fail "${device2}-part3"
+	mdadm ${mdadm_boot_device} --fail "${device1}-part3"
+	mdadm ${mdadm_boot_device} --fail "${device2}-part3"
 	sleep 1
-	mdadm /dev/md100 --remove "${device1}-part3"
-	mdadm /dev/md100 --remove "${device2}-part3"
+	mdadm ${mdadm_boot_device} --remove "${device1}-part3"
+	mdadm ${mdadm_boot_device} --remove "${device2}-part3"
 
 	echo "Stopping /dev/${mdadm_boot_device}"
 	mdadm --stop /dev/${mdadm_boot_device}
@@ -57,11 +57,11 @@ fi
 # /
 if [ -e "/dev/${mdadm_root_device}" ]; then
 	echo "Remove disks from /dev/${mdadm_root_device}"
-	mdadm /dev/md101 --fail "${device1}-part4"
-	mdadm /dev/md101 --fail "${device2}-part4"
+	mdadm ${mdadm_root_device} --fail "${device1}-part4"
+	mdadm ${mdadm_root_device} --fail "${device2}-part4"
 	sleep 1
-	mdadm /dev/md101 --remove "${device1}-part4"
-	mdadm /dev/md101 --remove "${device2}-part4"
+	mdadm ${mdadm_root_device} --remove "${device1}-part4"
+	mdadm ${mdadm_root_device} --remove "${device2}-part4"
 
 	echo "Stopping /dev/${mdadm_root_device}"
 	mdadm --stop /dev/${mdadm_root_device}
