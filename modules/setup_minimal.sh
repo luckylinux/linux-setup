@@ -9,15 +9,8 @@ fi
 # (Re)load configuration
 source $toolpath/config.sh
 
-# Import ZFS pool if not already mounted
-if [ "$rootfs" == "zfs" ]
-then
-	zpool import $rootpool -R "${destination}"
-	zfs mount $rootpool/ROOT/$distribution
-	zfs set devices=off $rootpool
-fi
-
-sleep 5
+# Mount system if not already mounted
+source $toolpath/modules/mount_system.sh
 
 # Install minimal system
 debootstrap --exclude=$excludepackages "${release}" "${destination}" "${source}"
@@ -27,29 +20,7 @@ mkdir -p "${destination}/etc/"
 echo "/dev/zvol/$rootpool/swap      none    swap    defaults        0       0" >> "${destination}/etc/fstab"
 
 # Bind required filesystems
-if mountpoint -q "${destination}/dev"
-then
-	echo "${destination}/dev is already mounted"
-else
-	mkdir -p "${destination}/dev"
-	mount --rbind /dev  "${destination}/dev"
-fi
-
-if mountpoint -q "${destination}/proc"
-then
-	echo "${destination}/proc is already mounted"
-else
-	mkdir -p "${destination}/proc"
-	mount --rbind /proc "${destination}/proc"
-fi
-
-if mountpoint -q "${destination}/sys"
-then
-	echo "${destination}/sys is already mounted"
-else
-	mkdir -p "${destination}/sys"
-	mount --rbind /sys "${destination}/sys"
-fi
+source $toolpath/modules/mount_bind.sh
 
 # Copy APT sources
 cp "./files/sources_${release}.list" "${destination}/etc/apt/sources.list"
