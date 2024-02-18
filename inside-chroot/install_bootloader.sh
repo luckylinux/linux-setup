@@ -79,12 +79,12 @@ then
 	# Choose file source
 	if [ "$distribution" == "debian" ]
 	then
-		dir="$toolpath/files/grub/debian/2.12-1"
+		dir="$toolpath/files/grub/ubuntu/2.06-2"
 	elif [ "$distribution" == "ubuntu" ]
 	then
 		dir="$toolpath/files/grub/ubuntu/2.12-rc1"
 	else
-		dir="$toolpath/files/grub/debian/2.12-1"
+		dir="$toolpath/files/grub/debian/2.06-2"
 		echo "Distribution <$distribution> not implemented yet. Continuing with GRUB installation using Debian GRUB2 scripts ..."
 	fi
 
