@@ -75,7 +75,20 @@ then
 	# Copy files to /etc/grub.d to be sure that the correct root=ZFS=$rootpool/ROOT/$distribution is generated
 	# (otherwise sometimes root=ZFS=/ROOT/$distribution is used instead which of course fails, returning you to busybox without any error/message)
 	# See issue https://github.com/zfsonlinux/grub/issues/18
-	for f in $toolpath/files/grub/*
+
+	# Choose file source
+	if [ "$distribution" == "debian" ]
+	then
+		dir="$toolpath/files/grub/debian/2.12-1"
+	elif [ "$distribution" == "ubuntu" ]
+	then
+		dir="$toolpath/files/grub/ubuntu/2.12-rc1"
+	else
+		dir="$toolpath/files/grub/debian/2.12-1"
+		echo "Distribution <$distribution> not implemented yet. Continuing with GRUB installation using Debian GRUB2 scripts ..."
+	fi
+
+	for f in $dir/*
 	do
 		# Get only filename without path
 		name=$(basename $f)
