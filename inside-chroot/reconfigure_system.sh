@@ -8,11 +8,9 @@ then
         exit 2
 fi
 
-# If toolpath not set, set it to current working directory
-if [[ ! -v toolpath ]]
-then
-    toolpath=$(pwd)
-fi
+# Determine toolpath if not set already
+relativepath="../" # Define relative path to go from this script to the root level of the tool
+if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load Configuration
 source $toolpath/config.sh
