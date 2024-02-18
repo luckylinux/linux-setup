@@ -87,6 +87,9 @@ then
 		chmod +x /etc/grub.d/$name
 	done
 
+	# Disable some GRUB modules
+	chmod -x /etc/grub.d/30_os-prober
+
 	# Update GRUB configuration
 	update-grub
 

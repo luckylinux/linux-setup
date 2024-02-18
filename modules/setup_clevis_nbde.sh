@@ -32,6 +32,11 @@ if [ ! -x /sbin/dhclient ]; then
         exit 0
 fi
 
+. /usr/share/initramfs-tools/scripts/functions
+. /usr/share/initramfs-tools/hook-functions
+
+# Source: https://github.com/latchset/clevis/issues/148#issuecomment-882103016
+#    and: https://github.com/latchset/clevis/issues/148#issuecomment-882103016
 local_libdir="/lib/x86_64-linux-gnu"
 local_found="" lib="" f=""
 for lib in libnss_files libnss_dns libresolv; do
@@ -44,9 +49,6 @@ for lib in libnss_files libnss_dns libresolv; do
     done
     [ -n "$local_found" ] || echo "WARNING: no $local_libdir/$lib.? file" 1>&2
 done
-
-. /usr/share/initramfs-tools/scripts/functions
-. /usr/share/initramfs-tools/hook-functions
 
 mkdir -p \$DESTDIR/etc/dhcp/dhclient-exit-hooks.d/
 cp -a /etc/dhcp/dhclient-exit-hooks.d/rfc3442-classless-routes \$DESTDIR/etc/dhcp/dhclient-exit-hooks.d/
