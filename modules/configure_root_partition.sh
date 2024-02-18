@@ -36,7 +36,9 @@ then
                 echo "UUID=$UUID        /   ext4            auto            0      1" >> /etc/fstab
 
                 # Also add MDADM Array to /etc/mdadm/mdadm.conf
-                mdadm --detail --scan | grep "/dev/${mdadm_root_device}" >> /etc/mdadm/mdadm.conf
+                # When this is enabled, mdadm does NOT create the devices as expected
+                # The boot process might also be interrupted, dropping you to an emergency shell
+                #mdadm --detail --scan | grep "/dev/${mdadm_root_device}" >> /etc/mdadm/mdadm.conf
         elif [ "$numdisks" -eq 1 ]
         then
                 # Configure Partition in /etc/fstab
