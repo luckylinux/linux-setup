@@ -5,28 +5,33 @@
 # cd to /tools_install/$timestamp
 
 # Determine toolpath
-scriptpath=$(dirname "${BASH_SOURCE[0]}")
-parentpath=$(dirname "$scriptpath")
-toolpath1="$( cd "$( dirname "$scriptpath" )" > /dev/null && pwd )"
+#scriptpath=$(dirname "${BASH_SOURCE[0]}")
+#parentpath=$(dirname "$scriptpath")
+#toolpath1="$( cd "$( dirname "$scriptpath" )" > /dev/null && pwd )"
+scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+toolpath=$(realpath --canonicalize-missing $scriptpath/..)
+
+
+echo "Script path: $scriptpath"
 
 # Relativefolder
-relativefolder=".."
+#relativefolder=".."
 
 # Need to strip first $0 of ./
-arg=$0
-arg=${arg//.\//""}
+#arg=$0
+#arg=${arg//.\//""}
 
 # Determine subfolder based on script invocation call
-subfolder=$(dirname $arg)
+#subfolder=$(dirname $arg)
 
-relativepath=$(dirname $relativefolder/$arg)
-relativepath=$(realpath --canonicalize-missing ${relativepath})
+#relativepath=$(dirname $relativefolder/$arg)
+#relativepath=$(realpath --canonicalize-missing ${relativepath})
 
 # Remove subfolder name if present in name
-toolpath2=$(realpath --canonicalize-missing ${relativepath//${subfolder}/""})
+#toolpath2=$(realpath --canonicalize-missing ${relativepath//${subfolder}/""})
 
 # Return shortest string
-if [ ${#toolpath1} -lt ${#toolpath2} ]; then toolpath=$toolpath1; else toolpath=$toolpath2; fi
+#if [ ${#toolpath1} -lt ${#toolpath2} ]; then toolpath=$toolpath1; else toolpath=$toolpath2; fi
 echo "Tool path: $toolpath"
 
 
