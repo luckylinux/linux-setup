@@ -67,6 +67,10 @@ then
 
 elif [ "$bootloader" == "zbm" ]
 then
+	# Useful notes
+	# LUKS: https://github.com/zbm-dev/zfsbootmenu/blob/master/contrib/luks-unlock.sh
+	# Clevis: https://github.com/zbm-dev/zfsbootmenu/discussions/441
+
 	echo "Bootloader <zbm> not implemented yet. Aborting !"
 	exit 2
 else
