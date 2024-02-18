@@ -22,6 +22,8 @@ then
                 echo "# /boot on ext4 with MDADM Software Raid-1" >> /etc/fstab
                 echo "UUID=$UUID	/boot	ext4            auto            0      1" >> /etc/fstab
 
+		# Also add MDADM Array to /etc/mdadm/mdadm.conf
+                mdadm --detail --scan | grep "/dev/${mdadm_boot_device}" >> /etc/mdadm/mdadm.conf
         elif [ "$numdisks" -eq 1 ]
         then
                 # Configure Partition in /etc/fstab

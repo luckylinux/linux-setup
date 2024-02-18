@@ -41,6 +41,8 @@ chattr +i /boot/efi
                 echo "# /boot/efi on vfat with MDADM Software Raid-1" >> /etc/fstab
                 echo "UUID=$UUID	/boot/efi	vfat	umask=0022,fmask=0022,dmask=0022	0       1" >> /etc/fstab
 
+		# Also add MDADM Array to /etc/mdadm/mdadm.conf
+		mdadm --detail --scan | grep "/dev/${mdadm_efi_device}" >> /etc/mdadm/mdadm.conf
         elif [ "$numdisks" -eq 1 ]
         then
                 # Configure Partition in /etc/fstab

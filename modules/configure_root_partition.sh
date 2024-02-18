@@ -22,3 +22,32 @@ then
                  luks,discard,initramfs >> "${destination}/etc/crypttab"
         fi
 fi
+
+if [ "$rootfs" == "zfs" ]
+then
+    echo "Skipping Configuration of FSTAB due to ZFS automount generator"
+elif [ "$rootfs" == "ext4" ]
+then
+        if [ "$numdisks" -eq 2 ]
+        then
+                # Configure MDADM Array in /etc/fstab
+                UUID=$(blkid -s UUID -o value /dev/${mdadm_root_device})
+                echo "# / on ext4 with MDADM Software Raid-1" >> /etc/fstab
+                echo "UUID=$UUID        /   ext4            auto            0      1" >> /etc/fstab
+
+                # Also add MDADM Array to /etc/mdadm/mdadm.conf
+                mdadm --detail --scan | grep "/dev/${mdadm_root_device}" >> /etc/mdadm/mdadm.conf
+        elif [ "$numdisks" -eq 1 ]
+        then
+                # Configure Partition in /etc/fstab
+                UUID=$(blkid -s UUID -o value $device1-part${root_num})
+                echo "# / on ext4" >> /etc/fstab
+                echo "UUID=$UUID        /   ext4            auto            0      1" >> /etc/fstab
+        else
+                echo "Only 1-Disk and 2-Disks Setups are currently supported. Aborting !"
+                exit 1
+        fi
+else
+        echo "Only ZFS and EXT4 are currently supported. Aborting !"
+        exit 1
+fi
