@@ -17,6 +17,22 @@ fi
 # Load Configuration
 source $toolpath/config.sh
 
+# Mount /boot if not already mounted
+if mountpoint -q "/boot"
+then
+	x=1	# Silent
+else
+	mount /boot
+fi
+
+# Mount /boot/efi if not already mounted
+if mountpoint -q "/boot/efi"
+then
+	x=1	# Silent
+else
+	mount /boot/efi
+fi
+
 # Update initramfs
 update-initramfs -k all -u
 
@@ -55,6 +71,21 @@ then
 	    echo "Error - bootloadermode <${bootloadermode}> is NOT supported. Aborting"
 	    exit 1
 	fi
+
+	# Copy files to /etc/grub.d to be sure that the correct root=ZFS=$rootpool/ROOT/$distribution is generated
+	# (otherwise sometimes root=ZFS=/ROOT/$distribution is used instead which of course fails, returning you to busybox without any error/message)
+	# See issue https://github.com/zfsonlinux/grub/issues/18
+	for f in $toolpath/files/grub/*
+	do
+		# Get only filename without path
+		name=$(basename $f)
+
+		# Copy to /etc/grub.d
+		cp $f /etc/grub.d/
+
+		# Make it executable
+		chmod +x /etc/grub.d/$name
+	done
 
 	# Update GRUB configuration
 	update-grub

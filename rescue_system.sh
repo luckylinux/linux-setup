@@ -15,6 +15,9 @@ mkdir -p $destination
 # Prevent files to being created without any FS mounted
 chattr +i $destination
 
+# Unlock encrypted root (if applicable)
+source $toolpath/modules/unlock_encrypted_root.sh
+
 # Mount system
 source $toolpath/modules/mount_system.sh
 
