@@ -146,20 +146,8 @@ update-initramfs -u -k all
 echo "# Tell Initramfs to use custom keyboard" >> "/etc/initramfs-tools/initramfs.conf"
 echo "KEYMAP=Y" >> "/etc/initramfs-tools/initramfs.conf"
 
-# Install Bootloader
-source $toolpath/inside-chroot/install_bootloader.sh
-
-# Setup automatic disk unlock
-if [ "$clevisautounlock" == "yes" ]
-then
-    source $toolpath/modules/setup_clevis_nbde.sh
-fi
-
-# Update initramfs
-update-initramfs -u -k all
-
-# Update GRUB configuration
-update-grub
+# Reconfigure System (Install Bootloader, configure /etc/fstab, /etc/mdadm/mdadm.conf, ...)
+source $toolpath/inside-chroot/reconfigure_system.sh
 
 if [ "$bootfs" == "zfs" ]
 then

@@ -125,3 +125,8 @@ else
 	exit 1
 fi
 
+# Update initramfs once again
+update-initramfs -k all -u
+
+# Update GRUB once again
+update-grub
