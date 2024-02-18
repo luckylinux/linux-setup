@@ -1,0 +1,15 @@
+[Unit]
+ Description=Autoassemble MDADM Arrays
+ ConditionPathExists=/etc/mdadm/mdadm.conf
+
+[Service]
+ Type=forking
+ ExecStart=/usr/local/bin/mdadm-assemble start
+ TimeoutSec=15
+ StandardOutput=syslog
+ StandardError=syslog
+ RemainAfterExit=yes
+ SysVStartPriority=99
+
+[Install]
+ WantedBy=multi-user.target

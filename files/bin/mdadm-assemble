@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Command
+command="${1:-start}"
+
+# Select action
+if [ "$command" == "start" ]
+then
+    for filepath in /etc/mdadm/*.mdadm
+    do
+         # Get only filename without path
+         filename=$(basename $filepath)
+
+         # Clear previous Properties
+         unset mdadm_device
+         unset member_devices
+
+         # Open file
+         source /etc/mdadm/$filename
+
+         # Concatenate Devices into one String
+         IFS=' '
+         concatenated="${member_devices[*]}"
+
+         # Assemble Array
+         if [ ! -b ${mdadm_device} ]
+         then
+		# Echo
+                echo "Execute: mdadm --assemble ${mdadm_device} $concatenated"
+
+		# Execute
+		mdadm --assemble ${mdadm_device} $concatenated
+	 else
+		# Echo
+		echo "Array ${mdadm_device} already exists. Skipping ..."
+	 fi
+    done
+
+elif [ "$command" == "stop" ]
+then
+   echo "Not implemented yet"
+fi

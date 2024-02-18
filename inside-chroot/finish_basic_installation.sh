@@ -122,6 +122,8 @@ ExecStartPost=-/bin/mv /etc/zfs/preboot_zpool.cache /etc/zfs/zpool.cache
 WantedBy=zfs-import.target
 EOF
 
+
+
 	systemctl enable zfs-import-$bootpool.service
 fi
 

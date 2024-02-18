@@ -39,6 +39,27 @@ then
                 # When this is enabled, mdadm does NOT create the devices as expected
                 # The boot process might also be interrupted, dropping you to an emergency shell
                 #mdadm --detail --scan | grep "/dev/${mdadm_root_device}" >> /etc/mdadm/mdadm.conf
+
+                # Alternative is to use a custom Systemd service together with a custom made automount mdadm-assemble.service
+                # The installation is handle by modules/setup_systemd_mdadm_assemble.sh
+                tee /etc/mdadm/root.mdadm << EOF
+#!/bin/bash
+
+# Load Global Configuration
+#source /etc/mdadm/global.sh
+
+# Define mdadm Device
+mdadm_device="/dev/${mdadm_root_device}"
+
+# List Member Devices
+member_devices=()
+member_devices+=( "${devices[0]}-part${root_num}" )
+member_devices+=( "${devices[1]}-part${root_num}" )
+EOF
+
+                # Install tool
+                source $toolpath/modules/setup_systemd_mdadm_assemble.sh
+
         elif [ "$numdisks" -eq 1 ]
         then
                 # Configure Partition in /etc/fstab
