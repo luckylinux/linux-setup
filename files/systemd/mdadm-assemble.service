@@ -1,5 +1,9 @@
 [Unit]
  Description=Autoassemble MDADM Arrays
+ DefaultDependencies=no
+ Requires=systemd-udev-settle.service
+ After=systemd-udev-settle.service
+ ConditionPathIsDirectory=/etc/mdadm/
  ConditionPathExists=/etc/mdadm/mdadm.conf
 
 [Service]
@@ -12,4 +16,4 @@
  SysVStartPriority=99
 
 [Install]
- WantedBy=multi-user.target
+ WantedBy=sysinit.target
