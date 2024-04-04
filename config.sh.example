@@ -86,7 +86,7 @@ nsconfig="resolv.conf" # "resolv.conf" or "systemd-resolved"
 labels=("DISK1" "DISK2")
 
 # Filesystem Choices
-bootfs="zfs" # "ext4", "zfs" or "none" to skip altogether (leaves partition formatted but NOT mounted / empty)
+bootfs="ext4" # "ext4", "zfs" or "none" to skip altogether (leaves partition formatted but NOT mounted / empty)
 rootfs="zfs" # "ext4" or "zfs"
 
 # RAID Choices

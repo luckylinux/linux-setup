@@ -17,9 +17,9 @@ mount /boot
 timestamp=$(date +"%Y%m%d")
 
 # Backup Current /boot partition content
-#cd /boot
-#tar cvzf /boot_$timestamp.tar.gz ./
-#cd ..
+cd /boot
+tar cvzf /boot_$timestamp.tar.gz ./
+cd ..
 
 # Check if ZFS boot pool exists
 # If so, export it
@@ -34,8 +34,8 @@ fi
 source $toolpath/modules/setup_boot_partition.sh
 
 # Move /boot to /boot_local_$timestamp
-#chattr -i /boot
-#mv /boot /boot_local_$timestamp
+chattr -i /boot
+mv /boot /boot_local_$timestamp
 
 # Create /boot folder and prevent direct writing (i.e. a partition must first be mounted inside to enable writing)
 mkdir -p /boot
