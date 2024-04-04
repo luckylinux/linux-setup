@@ -8,11 +8,11 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 source $toolpath/config.sh
 
 # Copy bin file
-cp $toolpathfiles/bin/mdadm-assemble $destination/usr/local/bin/
+cp $toolpath/files/bin/mdadm-assemble $destination/usr/local/bin/
 chmod +x $destination/usr/local/bin/mdadm-assemble
 
 # Copy Systemd file
-cp $files/systemd/mdadm-assemble.service $destination/etc/systemd/system/mdadm-assemble.service
+cp $toolpath/files/systemd/mdadm-assemble.service $destination/etc/systemd/system/mdadm-assemble.service
 
 # Reload daemon
 systemctl daemon-reload
