@@ -15,6 +15,12 @@ elif [ "$bootfs" == "ext4" ]
 then
         if [ "$numdisks" -eq 2 ]
         then
+                # Install mdadm if not already installed
+                if [[ -n $(command -v madm) ]]
+                then
+                    apt-get install -y mdadm
+                fi
+
                 # Configure MDADM Array in /etc/fstab
                 UUID=$(blkid -s UUID -o value /dev/${mdadm_boot_device})
                 echo "# /boot on ext4 with MDADM Software Raid-1" >> /etc/fstab

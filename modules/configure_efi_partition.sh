@@ -34,6 +34,12 @@ chattr +i /boot/efi
 # Configure FSTAB
         if [ "$numdisks" -eq 2 ]
         then
+                # Install mdadm if not already installed
+                if [[ -n $(command -v madm) ]]
+                then
+                    apt-get install -y mdadm
+                fi
+
                 # Configure MDADM Array in /etc/fstab
                 UUID=$(blkid -s UUID -o value /dev/${mdadm_efi_device})
                 echo "# /boot/efi on vfat with MDADM Software Raid-1" >> /etc/fstab
