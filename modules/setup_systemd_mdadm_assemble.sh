@@ -22,7 +22,7 @@ ln -s /dev/null /etc/udev/rules.d/64-md-raid-assembly.rules
 
 # This SOLVED the issue about udev automatically assembling (with a different name than is desired) mdadm arrays
 mkdir -p /lib/udev/rules.d.disabled
-mv /lib/udev/rules.d/64-md-raid-assembly.rules /lib/udev/rules.disabled/64-md-raid-assembly.rules
+mv /lib/udev/rules.d/64-md-raid-assembly.rules /lib/udev/rules.d.disabled/64-md-raid-assembly.rules
 
 # Reload daemon
 systemctl daemon-reload
