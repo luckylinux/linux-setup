@@ -20,7 +20,7 @@ elif [ $numdisks -eq 2 ]
 then
    # Use MDADM
    mdadm --create --verbose --metadata=0.90 /dev/${mdadm_efi_device} --level=1 --raid-devices=$numdisks "${device1}-part${efi_num}" "${device2}-part${efi_num}"
-   sleep
+   sleep 1
 
    # Create Filesystem
    echo "Creating FAT32 filesystem on /dev/${mdadm_efi_device}"
