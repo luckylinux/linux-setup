@@ -21,11 +21,10 @@ echo "/dev/zvol/$rootpool/swap      none    swap    defaults        0       0" >
 source $toolpath/modules/mount_bind.sh
 
 # Copy APT sources
-cp "./files/sources_${release}.list" "${destination}/etc/apt/sources.list"
-cp "./files/02proxy" "${destination}/etc/apt/apt.conf.d/02proxy"
+cp "${toolpath}/repositories/${distribution}/${release}/sources.list" "${destination}/etc/apt/sources.list"
 
 # Copy GRUB configuration file
-cp ./files/grub "${destination}/etc/default/grub"
+cp "${toolpath}/files/etc/default/grub" "${destination}/etc/default/grub"
 
 # Configure hostname
 echo "${targetname}" > "${destination}/etc/hostname"
@@ -55,10 +54,13 @@ echo "Network configured for <${interfacename}>"
 
 
 # Setup tools
-echo "# Tools over NFS" >> "${destination}/etc/fstab"
-echo "192.168.1.223:/export/tools          /tools_nfs           nfs             rw,user=tools,auto,nfsvers=3          0       0"  >> "${destination}/etc/fstab"
-mkdir -p  "${destination}/tools_nfs"
-chattr +i "${destination}/tools_nfs"
+if [[ "$setupnfstools" == "yes" ]]
+then
+   echo "# Tools over NFS" >> "${destination}/etc/fstab"
+   echo "192.168.1.223:/export/tools          /tools_nfs           nfs             rw,user=tools,auto,nfsvers=3          0       0"  >> "${destination}/etc/fstab"
+   mkdir -p  "${destination}/tools_nfs"
+   chattr +i "${destination}/tools_nfs"
+fi
 
 # Setup & perform chroot
 source $toolpath/modules/setup_chroot.sh

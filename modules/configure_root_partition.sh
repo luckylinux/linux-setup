@@ -10,6 +10,9 @@ source $toolpath/config.sh
 # If root device is encrypted
 if [ "$encryptrootfs" == "luks" ]
 then
+        # Make sure that the mountpoint already exists
+        mkdir -p ${destination}/etc
+
         # Enable Disk in Crypttab for initramfs
         echo "${disk1}_crypt" UUID=$(blkid -s UUID -o value ${device1}-part${root_num}) none \
         luks,discard,initramfs > "${destination}/etc/crypttab"

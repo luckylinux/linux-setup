@@ -118,6 +118,9 @@ clevisautounlock="no" # "yes" or "no"
 # Dropbear SSH Unlock at Boot Time
 dropbearunlock="yes" # "yes" or "no"
 
+# Setup NFS Tools Mountpoint and FSTAB Entry
+setupnfstools="yes" # "yes" or "no"
+
 # Dropbear Options
 dropbearwait="1200" # Disconnect the session if no traffic is transmitted or received for ${dropbearwait} seconds
 dropbearport="2222" # Listen on Port ${dropbearport}
