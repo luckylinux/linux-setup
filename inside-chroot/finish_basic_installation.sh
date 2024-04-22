@@ -24,6 +24,9 @@ then
     # Echo
     echo "Configuring Nameservers using resolvconf: /etc/resolv.conf"
 
+    # Make it modifiable (in case of e.g. executing Script multiple Times)
+    chattr -i /etc/resolv.conf
+
     # Remove existing configuration
     rm -f /etc/resolv.conf
 
