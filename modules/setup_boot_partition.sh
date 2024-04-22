@@ -58,7 +58,7 @@ then
 
     # Create datasets
     zfs create -o canmount=off -o mountpoint=none $bootpool/BOOT
-    zfs create -o mountpoint=/boot $bootpool/BOOT/$distribution
+    zfs create -o mountpoint=/boot $bootpool/BOOT/$DISTRIBUTION
 
 elif [ "$bootfs" == "ext4" ]
 then
