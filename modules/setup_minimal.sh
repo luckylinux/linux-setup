@@ -47,6 +47,11 @@ read -p "Enter network interface name: " interfacename
 
 mkdir -p "${destination}/etc/network/interfaces.d"
 
+# Create Persistent Interface Name using UDEV
+macaddress=$(find /sys/class/net -mindepth 1 -maxdepth 1 ! -name lo -printf "%P: " -execdir cat {}/address \; | grep ${interfacename} | sed -E "s|${interfacename}:\s*?([0-9a-fA-F:]+)$|\1|")
+
+echo "SUBSYSTEM==\"net\", ACTION==\"add\", DRIVERS==\"?*\", ATTR{address}==\"${macaddress}\", ATTR{type}==\"1\", KERNEL==\"*\", NAME=\"${interfacename}\"" >> "${destination}/etc/udev/rules.d/30-net_persistent_names.rules"
+
 if [[ "${ipconfiguration}" == "static" ]]
 then
    echo "auto ${interfacename}" > "${destination}/etc/network/interfaces.d/${interfacename}"

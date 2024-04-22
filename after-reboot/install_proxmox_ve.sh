@@ -38,6 +38,10 @@ apt-get remove os-prober
 # Remove linux-image-amd64
 apt-get remove linux-image-amd64
 
+# Also make sure to remove ZFS-DKMS since that referes to Debian Packages and is NOT part of Proxmox VE
+echo "Remove ZFS-DKMS since that referes to Debian Packages and is NOT part of Proxmox VE"
+apt-get removev zfs-dkms
+
 # Configure PVE storage
 tee /etc/pve/storage.cfg <<EOF
 dir: local
@@ -51,3 +55,6 @@ zfspool: local-zfs
         content images,rootdir
         sparse 1
 EOF
+
+# Remove Proxmox VE enterprise repository
+rm -f /etc/apt/sources.list.d/pve-enterprise.list*
