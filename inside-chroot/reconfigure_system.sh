@@ -30,5 +30,11 @@ then
     source $toolpath/modules/setup_clevis_nbde.sh
 fi
 
+# Setup Dropbear
+if [ "$dropbearunlock" == "yes" ]
+then
+    source $toolpath/modules/setup_dropbear_unlock.sh
+fi
+
 # (Re)install Bootloader
 source $toolpath/inside-chroot/install_bootloader.sh

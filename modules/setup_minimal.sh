@@ -28,11 +28,11 @@ cp "./files/02proxy" "${destination}/etc/apt/apt.conf.d/02proxy"
 cp ./files/grub "${destination}/etc/default/grub"
 
 # Configure hostname
-echo "$name" > "${destination}/etc/hostname"
+echo "${targetname}" > "${destination}/etc/hostname"
 
 # Configure host file
 echo "127.0.0.1		localhost" > "${destination}/etc/hosts"
-echo "${ipaddress}	${name}.${domainname} ${name} localhost" >> "${destination}/etc/hosts"
+echo "${ipaddress}	${targethostname}.${targetdomainname} ${targethostname} localhost" >> "${destination}/etc/hosts"
 
 echo "# The following lines are desirable for IPv6 capable hosts" >> "${destination}/etc/hosts"
 echo "::1     		localhost ip6-localhost ip6-loopback" >> "${destination}/etc/hosts"

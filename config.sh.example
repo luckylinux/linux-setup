@@ -40,14 +40,6 @@ numdevices=${#devices[@]}
 # Suppress output
 n="/dev/null"
 
-# Backup Server
-backupserver="myipadddress"
-backupdataset="zdata/BACKUP/$name"
-
-# Backup Snapshot Name
-timestamp=$(date +%Y%m%d)
-snapshotname="${timestamp}"
-
 # Define target Distribution
 distribution="debian" # "debian" or "ubuntu"
 
@@ -72,10 +64,18 @@ usezfsbackports="yes" # "yes" or "no"
 destination="/mnt/$distribution"
 
 # Define hostname
-hostname="pveX"
+targethostname="pveX"
 
 # Define domainname
-domainname="mydomain.tld"
+targetdomainname="mydomain.tld"
+
+# Backup Server
+backupserver="myipadddress"
+backupdataset="zdata/BACKUP/${name}"
+
+# Backup Snapshot Name
+timestamp=$(date +%Y%m%d)
+snapshotname="${timestamp}"
 
 # Define ip address
 ipconfiguration="static"   # "static" or "dhcp"
@@ -109,7 +109,14 @@ encryptrootfs="luks" # "luks" or "no"
 bootloader="grub" # "grub" or "zbm"
 
 # Clevis Automatic Unlock
-clevisautounlock="yes" # "yes" or "no"
+clevisautounlock="no" # "yes" or "no"
+
+# Dropbear SSH Unlock at Boot Time
+dropbearunlock="yes" # "yes" or "no"
+
+# Dropbear Options
+dropbearwait="1200" # Disconnect the session if no traffic is transmitted or received for ${dropbearwait} seconds
+dropbearport="2222" # Listen on Port ${dropbearport}
 
 # Define partition sizes
 # You can find disk size with the following command

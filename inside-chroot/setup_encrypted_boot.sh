@@ -94,10 +94,16 @@ echo "${disk2}_crypt" UUID=$(blkid -s UUID -o value ${device2}-part${root_num}) 
 # (Re)Install Bootloader
 source $toolpath/inside-chroot/install_bootloader.sh
 
-# Setup automatic disk unlock
+# Setup automatic Disk Unlock
 if [ "$clevisautounlock" == "yes" ]
 then
     source $toolpath/modules/setup_clevis_nbde.sh
+fi
+
+# Setup remote Disk Unlock
+if [ "$dropbearunlock" == "yes" ]
+then
+    source $toolpath/modules/setup_dropbear_unlock.sh
 fi
 
 # Update initramfs
