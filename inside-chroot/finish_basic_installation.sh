@@ -21,6 +21,9 @@ currentpath=$(pwd)
 # Fix /etc/resolv.conf
 if [[ "${nsconfig}" == "resolv.conf" ]]
 then
+    # Echo
+    echo "Configuring Nameservers using resolvconf: /etc/resolv.conf"
+
     # Remove existing configuration
     rm -f /etc/resolv.conf
 
@@ -32,6 +35,9 @@ then
     chattr +i /etc/resolv.conf
 elif [[ "${nsconfig}" == "systemd-resolved" ]]
 then
+    # Echo
+    echo "Configuring Nameservers using systemd-resolved: /etc/systemd/resolved.conf"
+
     # Install systemd-resolved
     apt-get install --yes systemd-resolved
     systemctl enable systemd-resolved
