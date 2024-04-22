@@ -13,14 +13,14 @@ then
       #exit 9
    fi
 
-      # Load default Profile from the Distribution
-      source /etc/skel/.bashrc
+   # Load default Profile from the Distribution
+   source /etc/skel/.bashrc
 
-      # Disable weird Echo
-      shopt -u progcomp
-      shopt -u extdebug
-      shopt -u xpg_echo
+   # Disable weird Echo
+   shopt -u progcomp
+   shopt -u extdebug
+   shopt -u xpg_echo
 
-      # Make sure that PATH does NOT include stuff from /usr/local/bin and /usr/local/sbin
-      export PATH="/usr/sbin:/usr/bin:/sbin:/bin"
+   # Make sure that PATH does NOT include stuff from /usr/local/bin and /usr/local/sbin
+   export PATH="/usr/sbin:/usr/bin:/sbin:/bin"
 fi
