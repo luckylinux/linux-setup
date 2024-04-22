@@ -123,7 +123,8 @@ apt-get install --yes isc-dhcp-client
 apt-get install --yes initramfs-tools
 
 # Install partitioning tool and linux kernel
-apt-get install --yes gdisk linux-headers-$(uname -r) linux-image-amd64
+apt-get install --yes linux-headers-$(uname -r)
+apt-get install --yes gdisk linux-image-amd64
 
 # Install ZFS
 apt-get install --yes zfs-dkms zfs-initramfs
