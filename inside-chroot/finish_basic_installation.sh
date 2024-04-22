@@ -44,6 +44,9 @@ elif [ "$nsconfig" == "systemd-resolved" ]
     # Set DNS Servers in systemd-resolved
     sed -Ei "s/^#DNS=/DNS=$ns1 $ns2/g" /etc/systemd/resolved.conf
 
+    # Store current Path
+    currentpath=$(pwd)
+
     # Remove /etc/resolv.conf and ensure it's a link to systemd-resolved
     rm -r /etc/resolv.conf
     currentpath=$(pwd)
