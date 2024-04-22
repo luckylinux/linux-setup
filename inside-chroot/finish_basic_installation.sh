@@ -119,6 +119,9 @@ apt-get install --yes net-tools
 # Install DHClient so we are sure that Networking gets set up properly and do NOT get locked out of the Server
 apt-get install --yes isc-dhcp-client
 
+# Install initramfs-tools
+apt-get install --yes initramfs-tools
+
 # Install partitioning tool and linux kernel
 apt-get install --yes gdisk linux-headers-$(uname -r) linux-image-amd64
 

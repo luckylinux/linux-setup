@@ -16,7 +16,7 @@ then
         if [ "$numdisks" -eq 2 ]
         then
                 # Install mdadm if not already installed
-                if [[ -n $(command -v madm) ]]
+                if [[ -n $(command -v mdadm) ]]
                 then
                     apt-get install -y mdadm
                 fi
