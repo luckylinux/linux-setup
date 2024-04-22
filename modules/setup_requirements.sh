@@ -16,7 +16,7 @@ then
 fi
 
 # Install system tools
-apt-get install --yes aptitude nload htop lm-sensors net-tools debootstrap
+apt-get install --yes aptitude nload htop lm-sensors net-tools debootstrap dosfstools e2fsprogs
 
 # Install partition management tools
 apt-get install --yes gdisk parted

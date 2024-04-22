@@ -18,6 +18,14 @@ source $toolpath/config.sh
 # Store current Path
 currentpath=$(pwd)
 
+# Update APT
+apt-get update
+
+# Configure locales and timezone
+apt-get install --yes locales
+dpkg-reconfigure locales
+dpkg-reconfigure tzdata
+
 # Fix /etc/resolv.conf
 if [[ "${nsconfig}" == "resolv.conf" ]]
 then
@@ -104,13 +112,6 @@ chattr +i /boot/efi
 # Mount /boot/efi
 mount /boot/efi
 
-# Update APT
-apt-get update
-
-# Configure locales
-apt-get install --yes locales
-dpkg-reconfigure locales
-dpkg-reconfigure tzdata
 
 # Install additionnal tools
 apt-get install --yes aptitude
@@ -183,18 +184,16 @@ passwd
 # Remove os-prober package
 apt-get remove --yes os-prober
 
-# Verify that the ZFS root filesystem is recognised
-grub-probe /
-
-# Update initramfs
-update-initramfs -u -k all
-
 # Tell Initramfs to use custom keyboard
 echo "# Tell Initramfs to use custom keyboard" >> "/etc/initramfs-tools/initramfs.conf"
 echo "KEYMAP=Y" >> "/etc/initramfs-tools/initramfs.conf"
 
 # Reconfigure System (Install Bootloader, configure /etc/fstab, /etc/mdadm/mdadm.conf, ...)
 source $toolpath/inside-chroot/reconfigure_system.sh
+
+# Enable /etc/rc.local
+# This calls dhclient to automatically get an IP Address, which should prevent us from getting locked out of the server
+source $toolpath/modules/enable_rc_local.sh
 
 if [ "$bootfs" == "zfs" ]
 then
@@ -206,6 +205,12 @@ fi
 # Verify that the ZFS module is installed
 echo "!!! CHECK THAT THE ZFS MODULE IS INSTALLED !!!"
 ls /boot/grub/*/zfs.mod
+
+# Verify that the ZFS root filesystem is recognised
+grub-probe /
+
+# Update initramfs
+update-initramfs -u -k all
 
 # Snapshot the initial installation
 if [ "$bootfs" == "zfs" ]
