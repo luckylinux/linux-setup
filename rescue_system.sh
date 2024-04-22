@@ -7,11 +7,15 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Load configuration
 source $toolpath/config.sh
 
-# Create folder if not exist
-mkdir -p $destination
+# Umount everything that was previosly mounted
+source $toolpath/umount_everything.sh
 
-# Prevent files to being created without any FS mounted
-chattr +i $destination
+# Ensure that the mointpoint exists and is empty
+source $toolpath/modules/setup_mountpoint.sh
+
+# Setup Requirements for the Installation (Packages will be installed on the currently running HOST)
+installroot="" # Needed to ensure that we install on the Host
+source $toolpath/modules/setup_requirements.sh
 
 # Unlock encrypted root (if applicable)
 source $toolpath/modules/unlock_encrypted_root.sh
