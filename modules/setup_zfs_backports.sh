@@ -19,8 +19,13 @@ cp ${toolpath}/repositories/${distribution}/${release}/sources.list.d/${distribu
 # By default do NOT use backports
 cp ${toolpath}/repositories/${distribution}/${release}/preferences.d/${distribution}-backports ${installroot}/etc/apt/preferences.d/${distribution}-backports
 
-# Copy Kernel Backports Configuration
-cp ${toolpath}/repositories/${distribution}/${release}/preferences.d/kernel-backports ${installroot}/etc/apt/preferences.d/kernel-backports
+
+# Also use Kernel Backports ?
+if [[ "${usekernelbackports}" == "yes" ]]
+then
+   # Copy Kernel Backports Configuration
+   cp ${toolpath}/repositories/${distribution}/${release}/preferences.d/kernel-backports ${installroot}/etc/apt/preferences.d/kernel-backports
+fi
 
 # Copy ZFS Backports Configuration
 cp ${toolpath}/repositories/${distribution}/${release}/preferences.d/zfs-backports ${installroot}/etc/apt/preferences.d/zfs-backports

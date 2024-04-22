@@ -63,6 +63,9 @@ includepackages="lsb-release,curl,wget"
 # Use ZFS Backports Packages
 usezfsbackports="yes" # "yes" or "no"
 
+# Use Kernel Backports Packages
+usekernelbackports="yes" # "yes" or "no"
+
 # Hetzner ZFS Fix
 # This will remove their /usr/local/sbin/zfs dummy Package since we install directly from Debian Backports
 hetznerzfsfix="yes" # "yes" or "no"
