@@ -20,6 +20,9 @@ then
       #echo "Please Close your SSH Session Now and Login Again"
       #echo "This is required to remove all References to the old /usr/local/sbin/zfs alias"
 
+      #exit 9
+   fi
+
       # Load default Profile from the Distribution
       source /etc/skel/.bashrc
 
@@ -30,9 +33,6 @@ then
 
       # Make sure that PATH does NOT include stuff from /usr/local/bin and /usr/local/sbin
       export PATH="/usr/sbin:/usr/bin:/sbin:/bin"
-
-      #exit 9
-   fi
 fi
 
 # Configure Backports if Required
