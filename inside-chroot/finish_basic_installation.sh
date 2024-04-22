@@ -38,7 +38,7 @@ then
     systemctl restart systemd-resolved
 
     # Set DNS Servers in systemd-resolved
-    sed -Ei "s|^#DNS=|DNS=${ns1} {$ns2}|g" /etc/systemd/resolved.conf
+    sed -Ei "s|^#DNS=|DNS=${ns1} ${ns2}|g" /etc/systemd/resolved.conf
 
     # Remove /etc/resolv.conf and ensure it's a link to systemd-resolved
     rm -r /etc/resolv.conf
