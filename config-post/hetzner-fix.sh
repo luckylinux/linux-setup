@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Hetzner ZFS Fix
 # This will remove their /usr/local/sbin/zfs dummy Package since we install directly from Debian Backports
 if [[ "$hetznerzfsfix" == "yes" ]]
