@@ -7,6 +7,9 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Load configuration
 source $toolpath/config.sh
 
+# Umount everything that was previosly mounted
+source $toolpath/umount_everything.sh
+
 # Ensure that the mointpoint exists and is empty
 source $toolpath/modules/setup_mountpoint.sh
 
@@ -17,24 +20,8 @@ source $toolpath/modules/setup_requirements.sh
 # Backup existing pool
 source $toolpath/modules/backup_system.sh
 
-# Umount previosuly mounted pools & filesystems
-source $toolpath/modules/umount_bind.sh
-zfs umount -a
-
-if [ "$bootfs" == "zfs" ]
-then
-    zfs umount $bootpool
-    zpool export -f $bootpool
-fi
-
-if [ "$rootfs" == "zfs" ]
-then
-    zfs umount $rootpool
-    zfs umount $rootpool/ROOT/$distribution
-    zpool export -f $rootpool
-    echo "\nWARNING: In case of errors it might be easier to just REBOOT the system\n"
-    sleep 5
-fi
+# Umount everything that was previosly mounted
+source $toolpath/umount_everything.sh
 
 # Init partitioning
 source $toolpath/modules/init_partitioning.sh

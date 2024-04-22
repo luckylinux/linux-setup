@@ -16,5 +16,12 @@ source $toolpath/modules/umount_chroot.sh
 # Umount previosuly mounted ZFS Pools
 source $toolpath/modules/umount_zfs.sh
 
+# Umount previosuly assembled MDADM Arrays
+source $toolpath/modules/umount_mdadm.sh
+
 # Umount everything that remains by force
 source $toolpath/modules/umount_force_all.sh
+
+# Echo for difficult cases
+echo -e "\nWARNING: In case of errors it might be easier to just REBOOT the system\n"
+sleep 5
