@@ -15,14 +15,6 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Load Configuration
 source $toolpath/config.sh
 
-# Mount /boot
-chattr +i /boot
-mount /boot
-mkdir -p /boot/efi
-mkdir -p /boot/grub
-chattr +i /boot/efi
-mount /boot/efi
-
 # Fix /etc/resolv.conf
 if [ "$nsconfig" == "resolv.conf" ]
 then
@@ -67,6 +59,23 @@ then
     source ${toolpath}/modules/setup_zfs_backports.sh
 fi
 
+# Configure /boot Partition & /etc/fstab
+source $toolpath/modules/configure_boot_partition.sh
+
+# Configure EFI Partition & /etc/fstab
+source $toolpath/modules/configure_efi_partition.sh
+
+# Configure / Partition & /etc/fstab
+source $toolpath/modules/configure_root_partition.sh
+
+# Mount /boot
+chattr +i /boot
+mount /boot
+mkdir -p /boot/efi
+mkdir -p /boot/grub
+chattr +i /boot/efi
+mount /boot/efi
+
 # Update APT
 apt-get update
 
@@ -93,7 +102,8 @@ apt-get install --yes nfs-client wget ssh sudo curl
 systemctl enable ssh
 
 # Ensure that NFS tools are mounted if applicable
-if [ -d "/tools_nfs" ]
+#if [ -d "/tools_nfs" ]
+if [[ "$setupnfstools" == "yes" ]]
 then
 	mount /tools_nfs
 fi
@@ -106,9 +116,6 @@ then
 	#bash setup_grub_testing.sh
 	#apt-get update
 	#cd $currentpath
-
-	# Setup ZFS Backports to ensure that ZFS installed version is the same as the LiveUSB
-        source ${toolpath}/modules/setup_zfs_backports.sh
 
 	# Enable importing $bootpool
 	tee /etc/systemd/system/zfs-import-$bootpool.service << EOF
@@ -133,7 +140,6 @@ EOF
 
 	systemctl enable zfs-import-$bootpool.service
 fi
-
 
 # Install kernel
 apt-get install --yes linux-image-amd64

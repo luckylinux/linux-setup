@@ -40,7 +40,8 @@ source $toolpath/modules/init_partitioning.sh
 source $toolpath/modules/setup_partitions.sh
 
 # Setup datasets
-source $toolpath/modules/setup_datasets.sh
+# File does NOT currently exist
+#source $toolpath/modules/setup_datasets.sh
 
 # Setup minimal system
 source $toolpath/modules/setup_minimal.sh
