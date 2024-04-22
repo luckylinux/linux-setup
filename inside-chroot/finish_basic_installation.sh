@@ -15,6 +15,9 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Load Configuration
 source $toolpath/config.sh
 
+# Store current Path
+currentpath=$(pwd)
+
 # Fix /etc/resolv.conf
 if [ "$nsconfig" == "resolv.conf" ]
 then
@@ -28,6 +31,7 @@ then
     # Prervent automatic overriding
     chattr +i /etc/resolv.conf
 elif [ "$nsconfig" == "systemd-resolved" ]
+then
     # Install systemd-resolved
     apt-get install --yes systemd-resolved
     systemctl enable systemd-resolved
@@ -36,15 +40,12 @@ elif [ "$nsconfig" == "systemd-resolved" ]
     # Set DNS Servers in systemd-resolved
     sed -Ei "s/^#DNS=/DNS=$ns1 $ns2/g" /etc/systemd/resolved.conf
 
-    # Store current Path
-    currentpath=$(pwd)
-
     # Remove /etc/resolv.conf and ensure it's a link to systemd-resolved
     rm -r /etc/resolv.conf
     currentpath=$(pwd)
     cd /etc
     ln -s ../run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
-    cd $currentpath
+    cd $currentpath || exit
 else
     echo "Invalid Nameserver Configuration. <nsconfig> must be one of the following options: <resolv.conf> or <systemd-resolved>. Aborting !"
     exit 1
