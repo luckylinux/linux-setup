@@ -8,11 +8,12 @@ then
    then
       #chattr -i /usr/local/sbin/zfs
       #rm -f /usr/local/sbin/zfs
-
-      echo "Please Close your SSH Session Now and Login Again"
-      echo "This is required to remove all References to the old /usr/local/sbin/zfs alias"
-
+      #echo "Please Close your SSH Session Now and Login Again"
+      #echo "This is required to remove all References to the old /usr/local/sbin/zfs alias"
       #exit 9
+
+      # Do nothing
+      x=1
    fi
 
    # Load default Profile from the Distribution
