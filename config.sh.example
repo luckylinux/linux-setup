@@ -58,7 +58,7 @@ source="http://ftp.dk.debian.org/debian/"
 excludepackages="netplan.io,snapd"
 
 # Packages to Include when running debootstrap
-includepackages="lsb-release,curl,wget"
+includepackages="lsb-release,curl,wget,locales"
 
 # Use ZFS Backports Packages
 usezfsbackports="yes" # "yes" or "no"
