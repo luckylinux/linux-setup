@@ -7,6 +7,10 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Load configuration
 source $toolpath/config.sh
 
+# Setup Requirements for the Installation (Packages will be installed on the currently running HOST)
+installroot="" # Needed to ensure that we install on the Host
+source $toolpath/modules/setup_requirements.sh
+
 # Umount previosuly mounted pools & filesystems
 source $toolpath/modules/umount_bind.sh
 
@@ -28,10 +32,6 @@ fi
 
 echo -e "\nWARNING: In case of errors it might be easier to just REBOOT the system\n"
 sleep 5
-
-# Setup Requirements for the Installation (Packages will be installed on the currently running HOST)
-installroot="" # Needed to ensure that we install on the Host
-source $toolpath/modules/setup_requirements.sh
 
 # Init partitioning
 source $toolpath/modules/init_partitioning.sh
