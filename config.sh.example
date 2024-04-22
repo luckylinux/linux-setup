@@ -54,8 +54,11 @@ release="bookworm" # "bullseye", "bookworm", "testing"
 # Define Debian Archive
 source="http://ftp.dk.debian.org/debian/"
 
-# Exclude Packages when running debootstrap
+# Packages to Exclude when running debootstrap
 excludepackages="netplan.io,snapd"
+
+# Packages to Include when running debootstrap
+includepackages="lsb-release,curl,wget"
 
 # Use ZFS Backports Packages
 usezfsbackports="yes" # "yes" or "no"

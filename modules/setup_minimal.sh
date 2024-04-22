@@ -11,7 +11,7 @@ source $toolpath/config.sh
 source $toolpath/modules/mount_system.sh
 
 # Install minimal system
-debootstrap --exclude=$excludepackages "${release}" "${destination}" "${source}"
+debootstrap --exclude="${excludepackages}" --include="${includepackages}" "${release}" "${destination}" "${source}"
 
 # Add swap to fstab
 mkdir -p "${destination}/etc/"
