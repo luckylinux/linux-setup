@@ -60,6 +60,10 @@ excludepackages="netplan.io,snapd"
 # Use ZFS Backports Packages
 usezfsbackports="yes" # "yes" or "no"
 
+# Hetzner ZFS Fix
+# This will remove their /usr/local/sbin/zfs dummy Package since we install directly from Debian Backports
+hetznerzfsfix="yes" # "yes" or "no"
+
 # Define mountpoint
 destination="/mnt/$distribution"
 
