@@ -4,6 +4,17 @@
 relativepath="../" # Define relative path to go from this script to the root level of the tool
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
+######################################################
+# Install Requirements on the Currently Running HOST #
+######################################################
+
+# Configure Backports if Required
+# Must be perfomed also on the Host if the Guest uses Backports
+if [[ "${usezfsbackports}" == "yes" ]]
+then
+    source ${toolpath}/modules/setup_zfs_backports.sh
+fi
+
 # Install system tools
 apt-get install --yes aptitude nload htop lm-sensors net-tools debootstrap
 

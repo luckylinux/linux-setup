@@ -7,7 +7,8 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Load configuration
 source $toolpath/config.sh
 
-# Setup required tools
+# Setup Requirements for the Installation (Packages will be installed on the currently running HOST)
+installroot="" # Needed to ensure that we install on the Host
 source $toolpath/modules/setup_requirements.sh
 
 # Backup existing pool

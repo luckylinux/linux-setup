@@ -58,6 +58,12 @@ fi
 # ...
 ln -s /proc/self/mounts /etc/mtab
 
+# Install Backports if so Requested
+if [[ "${usezfsbackports}" == "yes" ]]
+then
+    source ${toolpath}/modules/setup_zfs_backports.sh
+fi
+
 # Update APT
 apt-get update
 
@@ -69,6 +75,9 @@ dpkg-reconfigure tzdata
 # Install additionnal tools
 apt-get install --yes aptitude
 apt-get install --yes net-tools
+
+# Install DHClient so we are sure that Networking gets set up properly and do NOT get locked out of the Server
+apt-get install --yes isc-dhcp-client
 
 # Install partitioning tool and linux kernel
 apt-get install --yes gdisk linux-headers-$(uname -r) linux-image-amd64
@@ -96,10 +105,7 @@ then
 	#cd $currentpath
 
 	# Setup ZFS Backports to ensure that ZFS installed version is the same as the LiveUSB
-	#currentpath=$(pwd)
-	#cd /tools_nfs/Debian
-	#bash setup_zfs_backports.sh
-	#cd $currentpath
+        source ${toolpath}/modules/setup_zfs_backports.sh
 
 	# Enable importing $bootpool
 	tee /etc/systemd/system/zfs-import-$bootpool.service << EOF

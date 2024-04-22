@@ -48,17 +48,25 @@ backupdataset="zdata/BACKUP/$name"
 timestamp=$(date +%Y%m%d)
 snapshotname="${timestamp}"
 
-# Define distribution
+# Define target Distribution
 distribution="debian" # "debian" or "ubuntu"
 
-# Define distribution release
+# Define the current running system Distribution
+# Used if need to setup Backports prior to running Install
+hostdistribution=$(lsb_release -i | sed -E "s|.*?Distributor ID:\s*?([a-ZA-Z]+)|\L\1|")
+hostrelease=$(lsb_release -c | sed -E "s|.*?Codename:\s*?([a-ZA-Z]+)|\L\1|")
+
+# Define Distribution Release
 release="bookworm" # "bullseye", "bookworm", "testing"
 
-# Define Debian archive
+# Define Debian Archive
 source="http://ftp.dk.debian.org/debian/"
 
-# Exclude packages when running debootstrap
+# Exclude Packages when running debootstrap
 excludepackages="netplan.io,snapd"
+
+# Use ZFS Backports Packages
+usezfsbackports="yes" # "yes" or "no"
 
 # Define mountpoint
 destination="/mnt/$distribution"
