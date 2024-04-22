@@ -19,18 +19,18 @@ source $toolpath/config.sh
 currentpath=$(pwd)
 
 # Fix /etc/resolv.conf
-if [ "$nsconfig" == "resolv.conf" ]
+if [[ "${nsconfig}" == "resolv.conf" ]]
 then
     # Remove existing configuration
     rm -f /etc/resolv.conf
 
     # Add specified nameservers
-    echo "nameserver $ns1" >> /etc/resolv.conf
-    echo "nameserver $ns2" >> /etc/resolv.conf
+    echo "nameserver ${ns1}" >> /etc/resolv.conf
+    echo "nameserver ${ns2}" >> /etc/resolv.conf
 
     # Prervent automatic overriding
     chattr +i /etc/resolv.conf
-elif [ "$nsconfig" == "systemd-resolved" ]
+elif [[ "${nsconfig}" == "systemd-resolved" ]]
 then
     # Install systemd-resolved
     apt-get install --yes systemd-resolved
@@ -38,7 +38,7 @@ then
     systemctl restart systemd-resolved
 
     # Set DNS Servers in systemd-resolved
-    sed -Ei "s/^#DNS=/DNS=$ns1 $ns2/g" /etc/systemd/resolved.conf
+    sed -Ei "s|^#DNS=|DNS=${ns1} {$ns2}|g" /etc/systemd/resolved.conf
 
     # Remove /etc/resolv.conf and ensure it's a link to systemd-resolved
     rm -r /etc/resolv.conf
