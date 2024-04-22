@@ -78,12 +78,30 @@ source $toolpath/modules/configure_efi_partition.sh
 # Configure / Partition & /etc/fstab
 source $toolpath/modules/configure_root_partition.sh
 
-# Mount /boot
-chattr +i /boot
-mount /boot
-mkdir -p /boot/efi
-mkdir -p /boot/grub
+# Umount /boot/efi to start "Clean"
+umount /boot/efi
+
+# Mount /boot if not already mounted
+if mountpoint -q "/boot"
+then
+    x=1     # Silent
+else
+    # Not mounted yet
+    # Make sure that a filesystem is mounted at /boot
+    chattr +i /boot
+
+    # Mount it
+    mount /boot
+
+    # Create required Folders
+    mkdir -p /boot/efi
+    mkdir -p /boot/grub
+fi
+
+# Make sure that a filesystem is mounted at /boot/efi
 chattr +i /boot/efi
+
+# Mount /boot/efi
 mount /boot/efi
 
 # Update APT
