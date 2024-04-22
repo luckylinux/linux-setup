@@ -42,43 +42,64 @@ systemctl start mdadm
 if [ -e "/dev/${mdadm_efi_device}" ]
 then
 	echo "Remove disks from /dev/${mdadm_efi_device}"
+	mdadm --stop /dev/${mdadm_efi_device}
+
+	sleep 2
+
 	mdadm /dev/${mdadm_efi_device} --fail "${device1}-part${efi_num}"
 	mdadm /dev/${mdadm_efi_device} --fail "${device2}-part${efi_num}"
-	sleep 1
+
+	sleep 2
+
 	mdadm /dev/${mdadm_efi_device} --remove "${device1}-part${efi_num}"
 	mdadm /dev/${mdadm_efi_device} --remove "${device2}-part${efi_num}"
 
 	echo "Stopping /dev/${mdadm_efi_device}"
 	mdadm --stop /dev/${mdadm_efi_device}
-        sleep 1
+
+        sleep 2
 fi
 
 # /boot
 if [ -e "/dev/${mdadm_boot_device}" ]
 then
 	echo "Remove disks from /dev/${mdadm_boot_device}"
+	mdadm --stop /dev/${mdadm_boot_device}
+
+	sleep 2
+
 	mdadm ${mdadm_boot_device} --fail "${device1}-part${boot_num}"
 	mdadm ${mdadm_boot_device} --fail "${device2}-part${boot_num}"
-	sleep 1
+
+	sleep 2
+
 	mdadm ${mdadm_boot_device} --remove "${device1}-part${boot_num}"
 	mdadm ${mdadm_boot_device} --remove "${device2}-part${boot_num}"
 
 	echo "Stopping /dev/${mdadm_boot_device}"
 	mdadm --stop /dev/${mdadm_boot_device}
-        sleep 1
+
+        sleep 2
 fi
 
 # /
 if [ -e "/dev/${mdadm_root_device}" ]
 then
 	echo "Remove disks from /dev/${mdadm_root_device}"
+	mdadm --stop /dev/${mdadm_root_device}
+
+	sleep 2
+
 	mdadm ${mdadm_root_device} --fail "${device1}-part${root_num}"
 	mdadm ${mdadm_root_device} --fail "${device2}-part${root_num}"
-	sleep 1
+
+	sleep 2
+
 	mdadm ${mdadm_root_device} --remove "${device1}-part${root_num}"
 	mdadm ${mdadm_root_device} --remove "${device2}-part${root_num}"
 
 	echo "Stopping /dev/${mdadm_root_device}"
 	mdadm --stop /dev/${mdadm_root_device}
-        sleep 1
+
+        sleep 2
 fi
