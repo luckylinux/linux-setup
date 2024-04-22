@@ -7,6 +7,12 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Get Debian Version
 echo "Configuring System <${distribution} ${release}> to use Backports Packages for ZFS"
 
+# Create folder if not exist
+mkdir -p ${installroot}/etc
+mkdir -p ${installroot}/etc/apt
+mkdir -p ${installroot}/etc/apt/sources.list.d
+mkdir -p ${installroot}/etc/apt/preferences.d
+
 # Copy Backports Definition
 cp ${toolpath}/repositories/${distribution}/${release}/sources.list.d/${distribution}-backports.list ${installroot}/etc/apt/sources.list.d/${distribution}-backports.list
 
