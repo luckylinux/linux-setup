@@ -10,7 +10,7 @@ source $toolpath/config.sh
 # Ask for Password if Applicable
 if [[ "${clevisautounlock}" == "no" ]]
 then
-    read -p "Enter Password for unlocking Cryptsetup LUKS Encrypted Devices: " password
+    read -s -p "Enter Password for unlocking Cryptsetup LUKS Encrypted Devices: " password
 fi
 
 # If it's LUKS encrypted
