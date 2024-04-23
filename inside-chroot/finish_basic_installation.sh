@@ -26,6 +26,9 @@ apt-get install --yes locales
 dpkg-reconfigure locales
 dpkg-reconfigure tzdata
 
+# Install BASH-completion Package
+apt-get install --yes bash-completion
+
 # Fix /etc/resolv.conf
 if [[ "${nsconfig}" == "resolv.conf" ]]
 then
