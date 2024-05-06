@@ -39,13 +39,13 @@ local_libdir="/lib/x86_64-linux-gnu"
 local_found="" lib="" f=""
 for lib in libnss_files libnss_dns libresolv; do
     local_found=""
-    for f in "$local_libdir/$lib.so".?; do
-        [ -e "$f" ] || continue
-        [ "$verbose" = "y" ] && echo "dns: $lib: $f"
-        copy_file library "$f"
-        local_found="$f"
+    for f in "\${local_libdir}/\${lib}.so".?; do
+        [ -e "\${f}" ] || continue
+        [ "\${verbose}" = "y" ] && echo "dns: \${lib}: \${f}"
+        copy_file library "\${f}"
+        local_found="\${f}"
     done
-    [ -n "$local_found" ] || echo "WARNING: no $local_libdir/$lib.? file" 1>&2
+    [ -n "\${local_found}" ] || echo "WARNING: no \${local_libdir}/\${lib}.? file" 1>&2
 done
 
 mkdir -p \$DESTDIR/etc/dhcp/dhclient-exit-hooks.d/

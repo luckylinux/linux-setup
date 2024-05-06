@@ -14,7 +14,7 @@ source $toolpath/config.sh
 mount /boot
 
 # Generate Timestamp for backup archive
-timestamp=$(date +"%Y%m%d")
+timestamp=$(date +"%Y%m%d-%H%M%S")
 
 # Backup Current /boot partition content
 cd /boot
