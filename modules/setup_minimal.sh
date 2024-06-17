@@ -26,7 +26,7 @@ cp "${toolpath}/repositories/${distribution}/${release}/sources.list" "${destina
 # Copy GRUB configuration files
 mkdir -p "${destination}/etc/default/grub.d"
 cp "${toolpath}/files/etc/default/grub" "${destination}/etc/default/grub"
-cp -ar "${toolpath}/files/etc/default/grub.d/*" "${destination}/etc/default/grub.d/"
+cp -ar ${toolpath}/files/etc/default/grub.d/* "${destination}/etc/default/grub.d/"
 
 # Configure hostname
 echo "${targethostname}" > "${destination}/etc/hostname"
