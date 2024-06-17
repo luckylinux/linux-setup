@@ -81,7 +81,7 @@ targetdomainname="mydomain.tld"
 
 # Backup Server
 backupserver="myipadddress"
-backupdataset="zdata/BACKUP/${name}"
+backupdataset="zdata/BACKUP/${targethostname}"
 
 # Backup Snapshot Name
 timestamp=$(date +%Y%m%d)
