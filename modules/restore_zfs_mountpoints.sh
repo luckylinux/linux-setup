@@ -22,6 +22,7 @@ then
 
 #            zfs set readonly=inherited $dataset
             zfs inherit readonly $dataset
+            zfs inherit mountpoint $dataset
         done <<< "$datasets"
 
         # Set properties for the main dataset
@@ -51,7 +52,8 @@ then
                 zfs set canmount=on $dataset
 #            fi
 
-            zfs set readonly=inherited $dataset
+            zfs inherit readonly $dataset
+            zfs inherit mountpoint $dataset
         done <<< "$datasets"
 
         # Set properties for the main dataset
