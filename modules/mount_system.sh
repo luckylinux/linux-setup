@@ -13,6 +13,13 @@ then
         zpool import -f $rootpool -R "${destination}"
         zfs mount $rootpool/ROOT/$distribution
         zfs set devices=off $rootpool
+
+        # Get list of datasets
+        datasets=$(zfs list -H -o name | grep -i "$rootpool" | xargs -n1)
+
+        while IFS= read -r dataset; do
+            zfs mount $dataset
+        done <<< "$datasets"
 fi
 
 # Import ZFS pool if not already mounted
@@ -20,4 +27,11 @@ if [ "$bootfs" == "zfs" ]
 then
         zpool import -f $bootpool -R "${destination}"
         zfs mount $bootpool/BOOT/$distribution
+
+        # Get list of datasets
+        datasets=$(zfs list -H -o name | grep -i "$bootpool" | xargs -n1)
+
+        while IFS= read -r dataset; do
+            zfs mount $dataset
+        done <<< "$datasets"
 fi
