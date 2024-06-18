@@ -20,7 +20,8 @@ then
                 zfs set canmount=on $dataset
 #            fi
 
-            zfs set readonly=inherited $dataset
+#            zfs set readonly=inherited $dataset
+            zfs inherit readonly $dataset
         done <<< "$datasets"
 
         # Set properties for the main dataset
