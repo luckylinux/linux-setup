@@ -37,6 +37,9 @@ then
         zfs set mountpoint=/ $rootpool/ROOT/$distribution
         zfs set canmount=noauto $rootpool/ROOT/$distribution
         zfs set readonly=off $rootpool/ROOT/$distribution
+
+        zfs set mountpoint=none $rootpool/USERDATA
+        zfs set canmount=off $rootpool/USERDATA
 fi
 
 # (Re)Set mountpoints for ZFS pools
