@@ -156,15 +156,16 @@ do
                              echo "Password Verification successful"
                       fi
                 done
+
+                echo $password | cryptsetup -q -v --type luks2 --cipher aes-xts-plain64 --hash sha512 --key-size 512 --use-random --iter-time 5000 luksFormat "${device}-part${root_num}"
+                echo -n $password | cryptsetup open --type luks2 "${device}-part${root_num}" "${disk}_crypt"
+                unset $password
+                unset $verify
+
         else
                 echo "Encryption mode <${encryptrootfs}> for / is NOT supported. Aborting !"
                 exit 1
         fi
-
-        echo $password | cryptsetup -q -v --type luks2 --cipher aes-xts-plain64 --hash sha512 --key-size 512 --use-random --iter-time 5000 luksFormat "${device}-part${root_num}"
-        echo -n $password | cryptsetup open --type luks2 "${device}-part${root_num}" "${disk}_crypt"
-        unset $password
-        unset $verify
 
 	# Increment counter
 	counter=$((counter+1))
