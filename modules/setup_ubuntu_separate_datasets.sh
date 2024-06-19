@@ -78,8 +78,16 @@ mkdir -p ${destination}/var/www
 chattr +i ${destination}/var/www
 zfs create $rootpool/ROOT/$distribution/var/www
 
+
+
 zfs create -o canmount=off -o mountpoint=/ \
     $rootpool/USERDATA
+
+
+
+mkdir -p ${destination}/var/www
+chattr +i ${destination}/var/www
+zfs create $rootpool/ROOT/$distribution/var/lib/libvirt
 
 
 
