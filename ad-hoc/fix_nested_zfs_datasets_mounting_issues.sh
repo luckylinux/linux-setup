@@ -13,32 +13,74 @@ source $toolpath/functions.sh
 # Unmount everything by default
 zfs umount -a
 
+# Wait a bit
+sleep 2
+
 # Mount just the root dataset
 zfs mount $rootpool/ROOT/$distribution
 
 # Get list of datasets
 datasets=$(zfs list -H -o name | grep -i "$rootpool" | xargs -n1)
 
+# Generate timestamp
+timestamp=$(date +"%Y%m%d")
+
+# Create Snapshot
+zfs snapshot -r $rootpool@${timestamp}_fix_nested_zfs_datasets
+
 # Loop over Datasets
 while IFS= read -r dataset
 do
     # Get mountpoint
-    mountpt=$(zfs get -H mountpoint -o value)
-    echo $mountp
+    mountpt=$(zfs get -H mountpoint -o value $dataset)
 
-
-    # Check if Mountpoint is empty or not
-    if test -n "$(find ./ -maxdepth 0 -empty)"
+    # If it's NOT the root dataset and it's a dataset that IS supposed to be mounted
+    if [ "${mountpt}" != "none" ] && [ "${mountpt}" != "$destination" ] && [ "${mountpt}" != "-" ]
     then
-        echo "Test"
+        # If it's really a dataset, NOT a zvol
+        if [ ! -b /dev/zvol/$dataset ]
+        then
+            # Echo
+            echo -e "Processing Dataset ${dataset} at ${mountpt}"
+
+            # Check if Mountpoint is empty or not
+            if [ -z "$(ls -A ${mountpt})" ]
+            then
+                # Echo
+                echo -e "\t Folder ${mountpt} is empty"
+            else
+                # Echo
+                echo -e "\t Folder ${mountpt} is NOT empty"
+
+                # Rename Folder to _local_${timestamp}
+                mv ${mountpt} ${mountpt}_local_${timestamp}
+
+                # Create empty Folder
+                mkdir -p ${mountpt}
+            fi
+
+            # Echo
+            echo -e "\t Set IMMUTABLE Flag on ${mountpt}"
+
+            # Set Immutable Flag
+            chattr +i ${mountpt}
+
+            # Echo
+            echo -e "\t Mount ${dataset} to ${mountpt}"
+
+            # Mount Filesystem
+            zfs mount ${dataset}
+
+            # Move files back and merge, if needed
+            if [[ -d "${mountpt}_local_${timestamp}" ]]
+            then
+                # Move Files
+                mv ${mountpt}_local_${timestamp}/* ${mountpt}/
+
+                # Remove Folder
+                rmdir ${mountpt}_local_${timestamp}
+            fi
+        fi
     fi
 
-    # If it's a dataset, NOT a zvol
-#	    if [ ! -b /dev/zvol/$dataset ]
-#            then
-#                zfs set canmount=on $dataset
-#            fi
-
-
 done <<< "$datasets"
-
