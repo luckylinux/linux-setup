@@ -18,7 +18,13 @@ then
         datasets=$(zfs list -H -o name | grep -i "$rootpool" | xargs -n1)
 
         while IFS= read -r dataset; do
-            zfs mount $dataset
+            # Check if indeed we should mount it
+            tomount=$(zfs get canmount -H -o value $dataset)
+
+            if [[ "${tomount}" == "on" ]]
+            then
+                zfs mount $dataset
+            fi
         done <<< "$datasets"
 fi
 
@@ -32,6 +38,12 @@ then
         datasets=$(zfs list -H -o name | grep -i "$bootpool" | xargs -n1)
 
         while IFS= read -r dataset; do
-            zfs mount $dataset
+            # Check if indeed we should mount it
+            tomount=$(zfs get canmount -H -o value $dataset)
+
+            if [[ "${tomount}" == "on" ]]
+            then
+                zfs mount $dataset
+            fi
         done <<< "$datasets"
 fi
