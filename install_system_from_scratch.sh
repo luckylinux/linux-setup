@@ -26,5 +26,8 @@ source $toolpath/modules/setup_partitions.sh
 # Setup datasets
 source $toolpath/modules/setup_datasets.sh
 
+# Setup additional datasets for Ubuntu
+source $toolpath/modules/setup_ubuntu_separate_datasets.sh
+
 # Setup minimal system
 source $toolpath/modules/setup_minimal.sh
