@@ -43,6 +43,11 @@ do
             # Echo
             echo -e "Processing Dataset ${dataset} at ${mountpt}"
 
+            # Get attributes
+            attrs=$(lsattr -Ra ${mountpt} | head -1 | sed -E "s|^([a-z-]+?)\s.*|\1|g")
+            #attrs=$(lsattr -Ra ${mountpt} | head -1 | head -c 22)
+            echo -e "\t Attributes: ${attrs}"
+
             # Check if Mountpoint is empty or not
             if [ -z "$(ls -A ${mountpt})" ]
             then
@@ -74,8 +79,12 @@ do
             # Move files back and merge, if needed
             if [[ -d "${mountpt}_local_${timestamp}" ]]
             then
-                # Move Files
-                mv ${mountpt}_local_${timestamp}/* ${mountpt}/
+                # Move Files (ONLY if they are newer)
+                rsync -aPAXUHEt --remove-source-files --update ${mountpt}_local_${timestamp}/ ${mountpt}
+                #mv ${mountpt}_local_${timestamp}/* ${mountpt}/
+
+		# Remove empty Folders
+		find ${mountpt}_local_${timestamp} -type d -empty -delete
 
                 # Remove Folder
                 rmdir ${mountpt}_local_${timestamp}
