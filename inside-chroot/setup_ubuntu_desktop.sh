@@ -23,17 +23,21 @@ addgroup --system sambashare
 # Setup user
 read -p "Enter username: " username
 
+adduser "$username"
+usermod -a -G adm,cdrom,dip,lpadmin,lxd,plugdev,sambashare,sudo $username
+
+# Create user Dataset
 ROOT_DS=$(zfs list -o name | awk '/ROOT\/$distribution/{print $1;exit}')
+
+mkdir -p "/home/${username}"
+
+chattr +i "/home/${username}"
+
 zfs create -o com.$distribution.zsys:bootfs-datasets=$ROOT_DS \
     -o canmount=on -o mountpoint="/home/${username}" \
     "$rootpool/USERDATA/${username}"
 
-
 mkdir -p "/home/${username}"
-
-adduser "$username"
-
-usermod -a -G adm,cdrom,dip,lpadmin,lxd,plugdev,sambashare,sudo $username
 
 #cp -a /etc/skel/. "/home/${username}"
 chown -R "${username}:${username}" "/home/${username}"
