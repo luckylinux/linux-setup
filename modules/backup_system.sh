@@ -24,4 +24,4 @@ zfs snapshot -r $rootpool@$snapshotname
 
 # Send to remote server
 #zfs send -Rv $rootpool@snapshotname | ssh root@backupserver zfs receive -F $backupdataset
-zfs send -Rv $rootpool@$snapshotname | ssh root@$backupserver zfs receive -Fduv $backupdataset
+zfs send -Rv $rootpool@$snapshotname | ssh root@$backupserver zfs receive -o readonly -Fduv $backupdataset
