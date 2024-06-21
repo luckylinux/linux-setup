@@ -28,7 +28,7 @@ apt-get install --yes mdadm
 apt-get install --yes cryptsetup
 
 # Install ZFS
-apt-get install --yes zfsutils-linux zfs-zed zfs-auto-snapshot zfs-dkms
+apt-get install --yes zfsutils-linux zfs-zed zfs-dkms
 
 # Fix MDADM automount
 echo "Disabling automatic mounting in /etc/mdadm/mdadm.conf"
