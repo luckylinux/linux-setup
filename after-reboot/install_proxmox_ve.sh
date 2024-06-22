@@ -40,7 +40,7 @@ apt-get remove linux-image-amd64
 
 # Also make sure to remove ZFS-DKMS since that referes to Debian Packages and is NOT part of Proxmox VE
 echo "Remove ZFS-DKMS since that referes to Debian Packages and is NOT part of Proxmox VE"
-apt-get removev zfs-dkms
+apt-get remove zfs-dkms
 
 # Configure PVE storage
 tee /etc/pve/storage.cfg <<EOF
