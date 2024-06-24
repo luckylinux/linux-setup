@@ -40,7 +40,7 @@ then
         fi
 
         # Create root pool
-        zpool create -f -o ashift=$ashift \
+        zpool create -f -o ashift=$ashift -o compatibility=openzfs-2.0-linux \
         -O acltype=posixacl -O canmount=off -O compression=lz4 \
         -O dnodesize=auto -O normalization=formD -O relatime=on \
         -O xattr=sa \
