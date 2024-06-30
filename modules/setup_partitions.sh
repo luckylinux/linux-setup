@@ -61,8 +61,7 @@ do
 
 	# Setup BIOS / EFI partition
 	# BIOS Partition
-        start_bios=1 				# MiB
-        end_bios=$((start_bios_efi + bios_size))	# MiB
+        end_bios=$((start_bios + bios_size))	# MiB
 
 	echo "Creating BIOS partition on ${device}-part${bios_num}"
 

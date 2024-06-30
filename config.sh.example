@@ -147,6 +147,7 @@ dropbearport="2222" # Listen on Port ${dropbearport}
 #    - partition #4: /
 
 disk_size=476940                                                # MiB
+start_bios=4                            			# MiB
 bios_size=64                                                    # MiB
 efi_size=1024                                                   # MiB
 boot_size=2048                                                  # MiB
