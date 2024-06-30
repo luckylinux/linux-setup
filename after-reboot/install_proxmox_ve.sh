@@ -58,3 +58,8 @@ EOF
 
 # Remove Proxmox VE enterprise repository
 rm -f /etc/apt/sources.list.d/pve-enterprise.list*
+
+# Remove zfs-dkms from Debian Backports
+rm -f /etc/apt/preferences.d/zfs-backports
+apt-get remove -y zfs-dkms
+apt-get -y dist-upgrade
