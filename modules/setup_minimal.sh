@@ -10,6 +10,58 @@ source $toolpath/config.sh
 # Mount system if not already mounted
 source $toolpath/modules/mount_system.sh
 
+# Create /boot and /boot/efi and prevent direct write to them, unless Partition has been mounted
+mkdir -p ${destination}/boot
+mkdir -p ${destination}/boot/efi
+chattr +i ${destination}/boot
+chattr +i ${destination}/boot/efi
+
+# Mount boot Filesystems
+if [ "$bootfs" == "ext4" ]
+then
+        if [ "$numdisks" -eq 2 ]
+        then
+                # Get UUID of MDADM Device
+                UUID=$(blkid -s UUID -o value /dev/${mdadm_boot_device})
+
+                # Mount Filesystem
+                mount /dev/${mdadm_boot_device} ${destination}/boot
+        elif [ "$numdisks" -eq 1 ]
+        then
+                # Get UUID of Single Disk Partition
+                UUID=$(blkid -s UUID -o value $device1-part${boot_num})
+
+                # Mount Filesystem
+                mount $device1-part${boot_num} ${destination}/boot
+        else
+                echo "Only 1-Disk and 2-Disks Setups are currently supported. Aborting !"
+                exit 1
+        fi
+fi
+
+# Mount efi Filesystems
+#if [ "xxxx" == "ext4" ]
+#then
+        if [ "$numdisks" -eq 2 ]
+        then
+                # Get UUID of MDADM Device
+                UUID=$(blkid -s UUID -o value /dev/${mdadm_efi_device})
+
+                # Mount Filesystem
+                mount /dev/${mdadm_efi_device} ${destination}/boot/efi
+        elif [ "$numdisks" -eq 1 ]
+        then
+                # Get UUID of Single Disk Partition
+                UUID=$(blkid -s UUID -o value $device1-part${efi_num})
+
+                # Mount Filesystem
+                mount $device1-part${efi_num} ${destination}/boot/efi
+        else
+                echo "Only 1-Disk and 2-Disks Setups are currently supported. Aborting !"
+                exit 1
+        fi
+#fi
+
 # Install minimal system
 debootstrap --exclude="${excludepackages}" --include="${includepackages}" "${release}" "${destination}" "${source}"
 

@@ -28,6 +28,10 @@ then
         done <<< "$datasets"
 fi
 
+# Create Folders for boot and efi
+mkdir -p ${destination}/boot
+mkdir -p ${destination}/boot/efi
+
 # Import ZFS pool if not already mounted
 if [ "$bootfs" == "zfs" ]
 then
