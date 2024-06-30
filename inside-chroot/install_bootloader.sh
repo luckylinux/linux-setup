@@ -75,28 +75,28 @@ then
 	# See issue https://github.com/zfsonlinux/grub/issues/18
 
 	# Choose file source
-	if [ "$distribution" == "debian" ]
-	then
-		dir="$toolpath/files/grub/ubuntu/2.06-2"
-	elif [ "$distribution" == "ubuntu" ]
-	then
-		dir="$toolpath/files/grub/ubuntu/2.12-rc1"
-	else
-		dir="$toolpath/files/grub/debian/2.06-2"
-		echo "Distribution <$distribution> not implemented yet. Continuing with GRUB installation using Debian GRUB2 scripts ..."
-	fi
+	#if [ "$distribution" == "debian" ]
+	#then
+	#	dir="$toolpath/files/grub/ubuntu/2.06-2"
+	#elif [ "$distribution" == "ubuntu" ]
+	#then
+	#	dir="$toolpath/files/grub/ubuntu/2.12-rc1"
+	#else
+	#	dir="$toolpath/files/grub/debian/2.06-2"
+	#	echo "Distribution <$distribution> not implemented yet. Continuing with GRUB installation using Debian GRUB2 scripts ..."
+	#fi
 
-	for f in $dir/*
-	do
-		# Get only filename without path
-		name=$(basename $f)
-
-		# Copy to /etc/grub.d
-		cp $f /etc/grub.d/
-
-		# Make it executable
-		chmod +x /etc/grub.d/$name
-	done
+	#for f in $dir/*
+	#do
+	#	# Get only filename without path
+	#	name=$(basename $f)
+	#
+	#	# Copy to /etc/grub.d
+	#	cp $f /etc/grub.d/
+	#
+	#	# Make it executable
+	#	chmod +x /etc/grub.d/$name
+	#done
 
 	# Disable some GRUB modules
 	chmod -x /etc/grub.d/30_os-prober
