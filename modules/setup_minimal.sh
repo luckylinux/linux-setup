@@ -65,10 +65,6 @@ fi
 # Install minimal system
 debootstrap --exclude="${excludepackages}" --include="${includepackages}" "${release}" "${destination}" "${source}"
 
-# Add swap to fstab
-mkdir -p "${destination}/etc/"
-echo "/dev/zvol/$rootpool/swap      none    swap    defaults        0       0" >> "${destination}/etc/fstab"
-
 # Bind required filesystems
 source $toolpath/modules/mount_bind.sh
 
