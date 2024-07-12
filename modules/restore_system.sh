@@ -19,7 +19,7 @@ sleep 5
 ssh root@$backupserver zfs send -Rv $backupdataset@$snapshotname | zfs receive -F $rootpool
 
 # Restore ZFS mountpoints
-source $toolpath/modules/restore_zfs_mountpoints.sh
+source $toolpath/ad-hoc/restore_zfs_mountpoints.sh
 
 # Move /boot files to dedicated BOOT pool
 #zfs umount $bootpool/BOOT/$distribution

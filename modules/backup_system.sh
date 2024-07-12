@@ -34,7 +34,7 @@ zfs snapshot -r $rootpool@$snapshotname
 #zfs send -Rv $rootpool@snapshotname | ssh root@backupserver zfs receive -F $backupdataset
 
 # Readonly Mode
-zfs send -Rv $rootpool@$snapshotname | ssh root@$backupserver zfs receive -o readonly -Fduv $backupdataset
+zfs send -Rv $rootpool@$snapshotname | ssh root@$backupserver zfs receive -o readonly=on -Fduv $backupdataset
 
 
 
