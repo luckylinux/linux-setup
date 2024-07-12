@@ -40,16 +40,23 @@ zfs send -Rv $rootpool@$snapshotname | ssh root@$backupserver zfs receive -o rea
 
 ## BACKUP BOOT
 # Get mountpoint Info
-boot_info=$(chroot ${destination} /usr/bin/findmnt --fstab)
+#boot_info=$(chroot ${destination} /usr/bin/findmnt --fstab)
 
 # Get only the SOURCE info (e.g. UUID=xxxx)
 boot_source=$(chroot ${destination} /usr/bin/findmnt --fstab --target /boot --noheadings --output=SOURCE)
 
-# Mount Partition
-mount ${boot_source} ${destination}/boot
+# Save Exit Code
+boot_exit_code=$?
+
+# If /boot is (already) a separate Partition
+if [ -n "${boot_source}" ] && [ "${boot_exit_code}" -eq 0 ]
+then
+    # Mount Partition
+    mount ${boot_source} ${destination}/boot
+fi
 
 # Backup Current Boot Partition Content
-cd /boot || exit
+cd ${destination}/boot || exit
 tar cvzf ${toolpath}/boot_$timestamp.tar.gz ./
 cd ../ || exit
 
@@ -57,17 +64,23 @@ cd ../ || exit
 
 ## BACKUP EFI
 # Get all info
-efi_info=$(chroot ${destination} /usr/bin/findmnt --fstab)
+#efi_info=$(chroot ${destination} /usr/bin/findmnt --fstab)
 
 # Get only the SOURCE info (e.g. UUID=xxxx)
 efi_source=$(chroot ${destination} /usr/bin/findmnt --fstab --target /boot/efi --noheadings --output=SOURCE)
 
-# Mount Partition
-mount ${efi_source} ${destination}/boot/efi
+# Save Exit Code
+efi_exit_code=$?
 
+# If /boot/efi is (already) a separate Partition
+if [ -n "${efi_source}" ] && [ "${efi_exit_code}" -eq 0 ]
+then
+    # Mount Partition
+    mount ${efi_source} ${destination}/boot/efi
+fi
 
 # Backup Current EFI Partition Content
-cd /boot/efi || exit
+cd ${destination}/boot/efi || exit
 tar cvzf ${toolpath}/efi_$timestamp.tar.gz ./
 cd ../../ || exit
 
