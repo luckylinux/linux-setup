@@ -10,6 +10,9 @@ source $toolpath/config.sh
 # Umount previosuly mounted bind mounts
 source $toolpath/modules/umount_bind.sh
 
+# Force Chroot Processes to stop
+source $toolpath/modules/stop_chroot_processes.sh
+
 # Umount previosuly mounted Chroot
 source $toolpath/modules/umount_chroot.sh
 
