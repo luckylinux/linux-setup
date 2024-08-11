@@ -112,6 +112,9 @@ efiraid="mdadm" # "mdadm"
 bootraid="auto" # "auto" ("zfs" if bootfs="zfs", else "mdadm" if numdisks > 1)
 rootraid="auto" # "auto" ("zfs" if rootfs="zfs", else "mdadm" if numdisks > 1)
 
+# Import ZFS Pool Readonly
+readonly="off"  # "off" (normal operation), "on" (for rescueing corrupted Systems)
+
 # Encryption
 encryptrootfs="luks" # "luks" or "no"
 

@@ -10,7 +10,7 @@ source $toolpath/config.sh
 # Import ZFS pool if not already mounted
 if [ "$rootfs" == "zfs" ]
 then
-        zpool import -f $rootpool -R "${destination}"
+        zpool import -f $rootpool -o readonly=$readonly -R "${destination}"
         zfs mount $rootpool/ROOT/$distribution
         zfs set devices=off $rootpool
 
@@ -35,7 +35,7 @@ mkdir -p ${destination}/boot/efi
 # Import ZFS pool if not already mounted
 if [ "$bootfs" == "zfs" ]
 then
-        zpool import -f $bootpool -R "${destination}"
+        zpool import -f $bootpool -o readonly=$readonly -R "${destination}"
         zfs mount $bootpool/BOOT/$distribution
 
         # Get list of datasets
