@@ -27,6 +27,9 @@ apt-get install --yes mdadm
 # Install cryptsetup / LUKS
 apt-get install --yes cryptsetup
 
+# Install clevis
+apt-get install --yes clevis clevis-luks clevis-initramfs cryptsetup-initramfs
+
 # Install ZFS
 apt-get install --yes zfsutils-linux zfs-zed zfs-dkms
 
