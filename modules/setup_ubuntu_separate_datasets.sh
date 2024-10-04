@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Determine toolpath if not set already
+relativepath="../" # Define relative path to go from this script to the root level of the tool
+if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
+
+# Load configuration
+source $toolpath/config.sh
+
 # Create Separate Datasets
 mkdir -p ${destination}/srv
 chattr +i ${destination}/srv
@@ -15,7 +22,7 @@ zfs create -o com.ubuntu.zsys:bootfs=no -o canmount=off \
 
 mkdir -p ${destination}/usr
 chattr +i ${destination}/usr
-zfs create $rootpoolt/ROOT/$distribution/usr/local
+zfs create $rootpool/ROOT/$distribution/usr/local
 
 
 mkdir -p ${destination}/var
