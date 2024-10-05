@@ -57,12 +57,17 @@ then
 	    # Install GRUB
 	    apt-get install --yes grub-efi-amd64
 
+            # Install Helpers
+            apt-get install --yes shim shim-helpers-amd64-signed
+
 	    # UEFI
-	    grub-install --target=x86_64-efi "${device1}"
+	    #grub-install --target=x86_64-efi "${device1}"
+	    grub-install --target=x86_64-efi --efi-directory=/boot/efi --boot-directory=/boot/ --no-nvram "${device1}"
 
 	    if [ "$numdisks" -eq 2 ]
             then
-		grub-install --target=x86_64-efi "${device2}"
+		#grub-install --target=x86_64-efi "${device2}"
+                grub-install --target=x86_64-efi --efi-directory=/boot/efi --boot-directory=/boot/ --no-nvram "${device2}"
 	    fi
 
 	    #grub-install --target=x86_64-efi --efi-directory=/boot/efi \
