@@ -51,6 +51,9 @@ then
             fi
 	elif [ "$bootloadermode" == "UEFI" ]
 	then
+            # Might be intesting to also rename UEFI Labels/Entries
+            # See for instance https://askubuntu.com/questions/1125920/how-can-i-change-the-names-of-items-in-the-efi-uefi-boot-menu
+
 	    # Install GRUB
 	    apt-get install --yes grub-efi-amd64
 
