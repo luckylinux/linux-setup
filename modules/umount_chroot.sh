@@ -59,3 +59,19 @@ then
     zfs umount -a
     zpool export -f $bootpool
 fi
+
+# This causes `lsof` to look MUCH Deeper for opened Files and Processes
+# User-Readable Information
+# lsof -w -x l -x f +D "${destination}"
+
+# Machine-Processable Information
+# PID (p) = Process ID
+# COMMAND (c) = Process Name
+# NAME (n) = File NAME / PATH
+#mapfile processes < <( lsof -f p,c,n -w -x l -x f +D "${destination}")
+mapfile processes < <( lsof -w +D "${destination}" -x l -x f | tail -n +2 | awk '{ print $2 }' | uniq)
+for process in "${processes[@]}"
+do
+        pid=process
+        kill -9 $pid
+done
