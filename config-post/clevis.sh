@@ -47,11 +47,11 @@ KEYSTR
 )
 
 # Debug
-echo ${tangkeyserverdict}
+# echo ${tangkeyserverdict}
 
 # Echo
-echo ${tangkeyserverdict} | jq
+# echo ${tangkeyserverdict} | jq
 
 # Compact Form
-echo ${tangkeyserverdict} | jq -r --color-output
+# echo ${tangkeyserverdict} | jq -r --color-output
 
