@@ -143,6 +143,9 @@ apt-get install --yes zfs-dkms zfs-initramfs
 apt-get install --yes nfs-client wget ssh sudo curl
 systemctl enable ssh
 
+# Allow SSH Root Login via Password Authentication until a safer Way is setup after reboot
+sed -Ei "s|#?PermitRootLogin(.*?)$|PermitRootLogin yes|g" /etc/ssh/sshd_config
+
 # Ensure that NFS tools are mounted if applicable
 #if [ -d "/tools_nfs" ]
 if [[ "$setupnfstools" == "yes" ]]
