@@ -109,12 +109,12 @@ read -s -p "Enter encryption password: " password
 # Use pre-build Dictionary
 echo "Install Keyservers onto $device1 LUKS Header"
 echo ${tangkeyserverdict} | jq -r --color-output
-echo $password | clevis luks bind -d $device1-part${root_num} sss "${tangkeyserverdict}"
+echo $password | clevis luks bind -d ${device1}-part${root_num} -s ${clevis_luks_keyslot} -f sss "${tangkeyserverdict}"
 
 
 echo "Install Keyservers onto $device2 LUKS Header"
 echo ${tangkeyserverdict} | jq -r --color-output
-echo $password | clevis luks bind -d $device2-part${root_num} sss "${tangkeyserverdict}"
+echo $password | clevis luks bind -d ${device2}-part${root_num} -s ${clevis_luks_keyslot} -f sss "${tangkeyserverdict}"
 
 
 # Clear password from memory

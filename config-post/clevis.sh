@@ -3,6 +3,8 @@
 # Select which Threshold to Use (how many Tang Servers need to Answer in order to successfully decrypt)
 keyservers_threshold=1
 
+clevis_luks_keyslot=1
+
 # Format Clevis TANG String
 tangkeyserverdict=$(cat <<KEYSTR
 {
