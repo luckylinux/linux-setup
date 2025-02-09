@@ -10,7 +10,7 @@ source $toolpath/load.sh
 # Ask for Password if Applicable
 if [[ "${clevisautounlock}" == "no" ]]
 then
-    read -s -p "Enter Password for unlocking Cryptsetup LUKS Encrypted Devices: " password
+    read -s -p "Enter Password for unlocking Cryptsetup LUKS Encrypted Devices for /: " password
 fi
 
 # If it's LUKS encrypted
@@ -22,10 +22,10 @@ then
 		if [[ "${clevisautounlock}" == "yes" ]]
 		then
 			# Clevis Unlock
-		        clevis luks unlock -d "/dev/disk/by-id/${disk}-part${root_num}" -n "${disk}_crypt"
+		        clevis luks unlock -d "/dev/disk/by-id/${disk}-part${root_num}" -n "${disk}_root_crypt"
 		else
       			# Password Unlock
-		        echo -n $password | cryptsetup open "/dev/disk/by-id/${disk}-part${root_num}" "${disk}_crypt"
+		        echo -n $password | cryptsetup open "/dev/disk/by-id/${disk}-part${root_num}" "${disk}_root_crypt"
 		fi
 
 		# Increment counter

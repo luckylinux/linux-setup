@@ -22,12 +22,18 @@ fi
 if [ "$encryptrootfs" == "luks" ]
 then
 	# Close $device1
-	cryptsetup luksClose ${disk1}_crypt
+        if [[ -e "/dev/mapper/${disk1}_root_crypt" ]]
+        then
+            cryptsetup luksClose ${disk1}_root_crypt
+        fi
 
 	if [ $numdisks -eq 2 ]
         then
 		# Close $device2
-		cryptsetup luksClose ${disk2}_crypt
+                if [[ -e "/dev/mapper/${disk2}_root_crypt" ]]
+                then
+		    cryptsetup luksClose ${disk2}_root_crypt
+                fi
 	fi
 fi
 
@@ -100,6 +106,28 @@ then
 
 	echo "Stopping /dev/${mdadm_root_device}"
 	mdadm --stop /dev/${mdadm_root_device}
+
+        sleep 2
+fi
+
+# /data
+if [ -e "/dev/${mdadm_data_device}" ]
+then
+	echo "Remove disks from /dev/${mdadm_data_device}"
+	mdadm --stop /dev/${mdadm_data_device}
+
+	sleep 2
+
+	mdadm ${mdadm_data_device} --fail "${device1}-part${data_num}"
+	mdadm ${mdadm_data_device} --fail "${device2}-part${data_num}"
+
+	sleep 2
+
+	mdadm ${mdadm_data_device} --remove "${device1}-part${data_num}"
+	mdadm ${mdadm_data_device} --remove "${device2}-part${data_num}"
+
+	echo "Stopping /dev/${mdadm_data_device}"
+	mdadm --stop /dev/${mdadm_data_device}
 
         sleep 2
 fi

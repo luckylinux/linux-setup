@@ -100,6 +100,7 @@ labels=("DISK1" "DISK2")
 # Filesystem Choices
 bootfs="ext4" # "ext4", "zfs" or "none" to skip altogether (leaves partition formatted but NOT mounted / empty)
 rootfs="zfs" # "ext4" or "zfs"
+datafs="zfs" # "ext4" or "zfs" (if using Separate Data Partition / Pool)
 
 # RAID Choices
 efiraid="mdadm" # "mdadm"
@@ -109,8 +110,11 @@ rootraid="auto" # "auto" ("zfs" if rootfs="zfs", else "mdadm" if numdisks > 1)
 # Import ZFS Pool Readonly
 readonly="off"  # "off" (normal operation), "on" (for rescueing corrupted Systems)
 
-# Encryption
+# Encrypt / ?
 encryptrootfs="luks" # "luks" or "no"
+
+# Encrypt data (if using separate data Pool/Partition) ?
+encryptdatafs="luks" # "luks" or "no"
 
 # Bootloader Choice
 bootloader="grub" # "grub" or "zbm"
@@ -157,7 +161,7 @@ data_separate="no"
 
 if [[ "${data_separate}" == "yes" ]]
 then
-   root_size=													# MiB
+   root_size=65536												# MiB
    data_size=$((disk_size - start_bios - bios_size - efi_size - boot_size - swap_size - margin_size))		# MiB
 else
    root_size=$((disk_size - start_bios - bios_size - efi_size - boot_size - swap_size - margin_size))		# MiB

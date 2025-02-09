@@ -86,8 +86,14 @@ source $toolpath/modules/configure_boot_partition.sh
 # Configure EFI Partition & /etc/fstab
 source $toolpath/modules/configure_efi_partition.sh
 
-# Configure / Partition & /etc/fstab
+# Configure root Partition & /etc/fstab
 source $toolpath/modules/configure_root_partition.sh
+
+# Configure data Partition & /etc/fstab
+if [[ "${separate_data}" == "yes" ]]
+then
+    source $toolpath/modules/configure_data_partition.sh
+fi
 
 # Umount /boot/efi to start "Clean"
 umount /boot/efi

@@ -23,8 +23,8 @@ source $toolpath/modules/init_partitioning.sh
 # Setup disks
 source $toolpath/modules/setup_partitions.sh
 
-# Setup datasets
-source $toolpath/modules/setup_datasets.sh
+# Setup root datasets
+source $toolpath/modules/setup_root_datasets.sh
 
 
 if [[ "${distribution}" == "ubuntu" ]]
