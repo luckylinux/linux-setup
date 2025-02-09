@@ -14,6 +14,8 @@ source $toolpath/load.sh
 # This module only deals with /boot and /boot/efi and can thus be executed on a live system
 if [ -e "/dev/${mdadm_efi_device}" ]
 then
+   umount -q /dev/${mdadm_efi_device}
+
    echo "Remove disks from /dev/${mdadm_efi_device}"
    mdadm --stop /dev/${mdadm_efi_device}
    echo "idle" >  /sys/block/${mdadm_efi_device}/md/sync_action
@@ -30,6 +32,8 @@ fi
 
 if [ -e "/dev/${mdadm_boot_device}" ]
 then
+   umount -q /dev/${mdadm_boot_device}
+
    echo "Remove disks from /dev/${mdadm_boot_device}"
    mdadm --stop /dev/${mdadm_boot_device}
    echo "idle" >  /sys/block/${mdadm_boot_device}/md/sync_action
@@ -46,6 +50,8 @@ fi
 
 if [ -e "/dev/${mdadm_root_device}" ]
 then
+   umount -q /dev/${mdadm_root_device}
+
    echo "Remove disks from /dev/${mdadm_root_device}"
    mdadm --stop /dev/${mdadm_root_device}
    echo "idle" >  /sys/block/${mdadm_root_device}/md/sync_action
@@ -62,6 +68,8 @@ fi
 
 if [ -e "/dev/${mdadm_data_device}" ]
 then
+   umount -q /dev/${mdadm_data_device}
+
    echo "Remove disks from /dev/${mdadm_data_device}"
    mdadm --stop /dev/${mdadm_data_device}
    echo "idle" >  /sys/block/${mdadm_data_device}/md/sync_action
@@ -81,6 +89,8 @@ mapfile mdadm_devices < <(find /sys/class/block -iname md* | sed -E "s|.+/md([0-
 
 for mdadm_device in "${mdadm_devices[@]}"
 do
+    umount -q /dev/${mdadm_device}
+
     echo "Stop MDADM Device /dev/${mdadm_device}"
     echo "idle" >  /sys/block/${mdadm_device}/md/sync_action
 
