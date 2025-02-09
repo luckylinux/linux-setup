@@ -5,7 +5,17 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load configuration
-source $toolpath/config.sh
+source $toolpath/load.sh
+
+# Make sure we are NOT in chroot
+# Abort if we are trying to run the script from the chroot environment
+if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]
+then
+        echo "This script must NOT be run from a chroot environment."
+        echo "Please execute this Script after Reboot !"
+        echo "Aborting Script Execution."
+        exit 2
+fi
 
 # Reconfigure keyboard
 dpkg-reconfigure keyboard-configuration

@@ -4,12 +4,6 @@
 relativepath="./" # Define relative path to go from this script to the root level of the tool
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
-# Load files in config-pre/ folder
-for f in $toolpath/config-pre/*.sh
-do
-  source $f
-done
-
 ##############################################################################
 # !! Important - Only Single and Mirror/RAID1 Setups are currently supported #
 ##############################################################################
@@ -184,9 +178,3 @@ keyservers=("192.168.1.15" "192.168.1.16" "192.168.1.17" "192.168.1.18")
 # Only relevant for grub installation
 # (both partition schemes are created in order to facilitate change - if needed)
 bootloadermode="BIOS"
-
-# Load files in config-post/ folder
-for f in $toolpath/config-post/*.sh
-do
-  source $f
-done

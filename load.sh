@@ -15,7 +15,8 @@ if [[ -f "$toolpath/config.sh" ]]
 then
     source $toolpath/config.sh
 else
-    echo "Configuration File $toolpath/config.sh does NOT exist !"
+    echo "Configuration File $toolpath/config.sh does NOT exist ! Aborting."
+    exit 1
 fi
 
 # Load files in config-post/ folder
@@ -23,3 +24,12 @@ for f in $toolpath/config-post/*.sh
 do
     source $f
 done
+
+# Load Functions
+if [[ -f "$toolpath/functions.sh" ]]
+then
+    source $toolpath/functions.sh
+else
+    echo "Functions $toolpath/config.sh does NOT exist ! Aborting."
+    exit 2
+fi

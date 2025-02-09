@@ -5,7 +5,7 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load configuration
-source $toolpath/config.sh
+source $toolpath/load.sh
 
 # Create dataset to act as container
 zfs create -o canmount=off -o mountpoint=none ${rootpool}/ROOT

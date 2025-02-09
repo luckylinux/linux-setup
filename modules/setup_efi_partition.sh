@@ -5,7 +5,7 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load Configuration
-source $toolpath/config.sh
+source $toolpath/load.sh
 
 # EFI Software Raid if more than 1 Disk is used
 if [ $numdisks -eq 1 ]

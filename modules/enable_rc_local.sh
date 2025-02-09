@@ -3,7 +3,7 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load Configuration
-source $toolpath/config.sh
+source $toolpath/load.sh
 
 # Create file /etc/rc.local if it doesn't exist yet
 if [ ! -f ${destination}/etc/rc.local ]
