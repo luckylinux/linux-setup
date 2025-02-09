@@ -43,7 +43,7 @@ chattr +i /boot/efi
                 # Configure MDADM Array in /etc/fstab
                 UUID=$(blkid -s UUID -o value /dev/${mdadm_efi_device})
                 echo "# /boot/efi on vfat with MDADM Software Raid-1" >> /etc/fstab
-                echo "UUID=$UUID	/boot/efi	vfat	nofail,x-systemd.automount,umask=0022,fmask=0022,dmask=0022	0       1" >> /etc/fstab
+                echo "UUID=$UUID	/boot/efi		vfat		nofail,x-systemd.automount,umask=0022,fmask=0022,dmask=0022		0	1" >> /etc/fstab
 
 		# Also add MDADM Array to /etc/mdadm/mdadm.conf
                 # When this is enabled, mdadm does NOT create the devices as expected
@@ -75,7 +75,7 @@ EOF
                 # Configure Partition in /etc/fstab
                 UUID=$(blkid -s UUID -o value $device1-part${efi_num})
 		echo "# /boot/efi on vfat" >> /etc/fstab
-                echo "UUID=$UUID        /boot/efi       vfat    nofail,x-systemd.automount,umask=0022,fmask=0022,dmask=0022        0       1" >> /etc/fstab
+                echo "UUID=$UUID	/boot/efi		vfat		nofail,x-systemd.automount,umask=0022,fmask=0022,dmask=0022		0	1" >> /etc/fstab
         else
                 echo "Only 1-Disk and 2-Disks Setups are currently supported. Aborting !"
                 exit 1
