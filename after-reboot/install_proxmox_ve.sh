@@ -51,15 +51,16 @@ apt-get remove os-prober
 # Remove linux-image-amd64
 apt-get remove linux-image-amd64
 
-# Remove linux-image
-aptitude search linux-image | grep -E ^i | sed -E "s|^.*?(linux-image-[a-z0-9_\.+-]+).*$|\1|g" | xargs -n1 aptitude remove
-
-# Remove linux-headers
-aptitude search linux-headers | grep -E ^i | sed -E "s|^.*?(linux-headers-[a-z0-9_\.+-]+).*$|\1|g" | xargs -n1 aptitude remove
+# Remove other linux-image & linux-headers
+mapfile packages < <(dpkg --get-selections | grep -v deinstall | cut -f1 | grep -E "linux-image|linux-headers")
+apt-get remove ${packages[@]}
 
 # Also make sure to remove ZFS-DKMS since that referes to Debian Packages and is NOT part of Proxmox VE
 echo "Remove ZFS-DKMS since that referes to Debian Packages and is NOT part of Proxmox VE"
 apt-get remove zfs-dkms
+
+# Make sure that zfs-initramfs is (still) installed though
+apt-get install zfs-initramfs
 
 # Configure PVE storage
 tee /etc/pve/storage.cfg <<EOF

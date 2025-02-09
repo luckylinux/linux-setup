@@ -55,6 +55,13 @@ apt-get remove linux-image-amd64
 echo "Remove ZFS-DKMS since that referes to Debian Packages and is NOT part of Proxmox PBS"
 apt-get remove zfs-dkms
 
+# Remove other linux-image & linux-headers
+mapfile packages < <(dpkg --get-selections | grep -v deinstall | cut -f1 | grep -E "linux-image|linux-headers")
+apt-get remove ${packages[@]}
+
+# Make sure that zfs-initramfs is (still) installed though
+apt-get install zfs-initramfs
+
 # Configure PVE storage
 #tee /etc/pve/storage.cfg <<EOF
 #dir: local
