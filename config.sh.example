@@ -144,25 +144,38 @@ dropbearport="2222" # Listen on Port ${dropbearport}
 # parted -s /dev/sdX unit MiB print free | sed -En "s/Disk \/dev\/sdX: (.*)MiB/\1/p"
 
 # Layout is always
-#    - partition #1: bios grub
-#    - partition #2: fat32 for EFI
-#    - partition #3: /boot
-#    - partition #4: /
+#    - Partition #1: bios grub
+#    - Partition #2: fat32 for EFI
+#    - Partition #3: /boot
+#    - Partition #4: /
+#    - Partition #5: (optional) separate Data Partition/Pool
 
-disk_size=476940                                                # MiB
-start_bios=4                            			# MiB
-bios_size=64                                                    # MiB
-efi_size=1024                                                   # MiB
-boot_size=2048                                                  # MiB
-swap_size=$((0*1000))                                           # MiB
-margin_size=512                                                 # MiB
-root_size=$((disk_size-bios_size-efi_size-boot_size-swap_size-margin_size))      # MiB
+disk_size=476940												# MiB
+start_bios=4													# MiB
+bios_size=64													# MiB
+efi_size=1024													# MiB
+boot_size=2048													# MiB
+swap_size=$((0*1000))												# MiB
+margin_size=512     					                                            		# MiB
+
+# Use a Separate Data Pool ?
+data_separate="no"
+
+if [[ "${data_separate}" == "yes" ]]
+then
+   root_size=													# MiB
+   data_size=$((disk_size - start_bios - bios_size - efi_size - boot_size - swap_size - margin_size))		# MiB
+else
+   root_size=$((disk_size - start_bios - bios_size - efi_size - boot_size - swap_size - margin_size))		# MiB
+   data_size=0													# MiB
+fi
 
 # Pool settings
 # Ashift=13 can lead to some overhead - Only applicable when using ZFS
 ashift=12
-rootpool="rpool"
 bootpool="bpool"
+rootpool="rpool"
+datapool="sdata"
 
 # CLEVIS/TANG Automated LUKS unlocking
 keyservers=("192.168.1.15" "192.168.1.16" "192.168.1.17" "192.168.1.18")
