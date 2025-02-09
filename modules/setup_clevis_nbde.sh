@@ -86,7 +86,8 @@ do
          echo "Keyserver <$keyserver> is already installed"
      else
          echo "Install Keyserver <$keyserver> onto $device1 LUKS Header"
-         echo $password | clevis luks bind -d $device1-part${root_num} tang "{\"url\": \"http://$keyserver\" , \"adv\": \"/tmp/keyserver-$counter.jws\" }"
+         # echo $password | clevis luks bind -d $device1-part${root_num} tang "{\"url\": \"http://$keyserver\" , \"adv\": \"/tmp/keyserver-$counter.jws\" }"
+         echo $password | clevis luks bind -d $device1-part${root_num} sss ${tangkeyserverdict}
      fi
 
      # Device 2
@@ -94,8 +95,9 @@ do
      then
          echo "Keyserver <$keyserver> is already installed"
      else
-          echo "Install Keyserver <$keyserver> onto $device2 LUKS Header"
-          echo $password | clevis luks bind -d $device2-part${root_num} tang "{\"url\": \"http://$keyserver\" , \"adv\": \"/tmp/keyserver-$counter.jws\" }"
+         echo "Install Keyserver <$keyserver> onto $device2 LUKS Header"
+         # echo $password | clevis luks bind -d $device2-part${root_num} tang "{\"url\": \"http://$keyserver\" , \"adv\": \"/tmp/keyserver-$counter.jws\" }"
+         echo $password | clevis luks bind -d $device2-part${root_num} sss ${tangkeyserverdict}
      fi
 
      # Increment counter
