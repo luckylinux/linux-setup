@@ -95,8 +95,11 @@ then
     source $toolpath/modules/configure_data_partition.sh
 fi
 
-# Umount /boot/efi to start "Clean"
-umount /boot/efi
+# Umount /boot/efi/<disk> to start "Clean"
+for disk in "${disks[@]}"
+do
+    umount "/boot/efi/${disk}"
+done
 
 # Mount /boot if not already mounted
 if mountpoint -q "/boot"
@@ -113,14 +116,28 @@ else
     # Create required Folders
     mkdir -p /boot/efi
     mkdir -p /boot/grub
+
+    # Make sure that /boot/efi is writable
+    chattr -i /boot/efi
+
+    # Make sure that nothing is currently mounted at /boot/efi
+    if mountpoint -q "${destination}/boot/efi"
+    then
+        umount /boot/efi
+    fi
 fi
 
-# Make sure that a filesystem is mounted at /boot/efi
-chattr +i /boot/efi
+for disk in "${disks[@]}"
+do
+    # Create Required Subfolder
+    mkdir -p "/boot/efi/${disk}"
 
-# Mount /boot/efi
-mount /boot/efi
+    # Make sure that a filesystem is mounted at /boot/efi
+    chattr +i "/boot/efi/${disk}"
 
+    # Mount /boot/efi/<disk>
+    mount "/boot/efi/${disk}"
+done
 
 # Install additionnal tools
 apt-get install --yes aptitude

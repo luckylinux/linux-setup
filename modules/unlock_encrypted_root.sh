@@ -29,7 +29,7 @@ then
 		fi
 
 		# Increment counter
-	        counter=$((counter+1))
+	    counter=$((counter+1))
 	done
 fi
 

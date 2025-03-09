@@ -14,10 +14,14 @@ swapoff -a
 source $toolpath/modules/umount_bind.sh
 
 # Umount root/boot
-if mountpoint -q "${destination}/boot/efi"
-then
-	umount -R "${destination}/boot/efi"
-fi
+
+for disk in "${disks[@]}"
+do
+    if mountpoint -q "${destination}/boot/efi/${disk}"
+    then
+	    umount -R "${destination}/boot/efi/${disk}"
+    fi
+done
 
 if mountpoint -q "${destination}/boot"
 then

@@ -76,30 +76,21 @@ read -s -p "Enter encryption password: " password
 #     curl -sfg http://$keyserver/adv -o /tmp/keyserver-$counter.jws
 # 
 #      # Check which keys are currently used via CLEVIS
-#      list_device1=$(clevis luks list -d $device1-part${root_num})
-#      list_device2=$(clevis luks list -d $device2-part${root_num})
+#      for disk in "${disks[@]}"
+#      do
+#          list_device=$(clevis luks list -d /dev/disk/by-id/${disk}-part${root_num})
 # 
-#      # Bind device to the TANG server via CLEVIS
-#      # Device 1
-#      if [[ "${list_device1}" == *"${keyserver}"* ]]
-#      then
-#          echo "Keyserver <$keyserver> is already installed"
-#      else
-#          echo "Install Keyserver <$keyserver> onto $device1 LUKS Header"
-#          # echo $password | clevis luks bind -d $device1-part${root_num} tang "{\"url\": \"http://$keyserver\" , \"adv\": \"/tmp/keyserver-$counter.jws\" }"
-#          echo $password | clevis luks bind -d $device1-part${root_num} sss ${tangkeyserverdict}
-#      fi
-# 
-#     # Device 2
-#      if [[ "${list_device2}" == *"${keyserver}"* ]]
-#      then
-#          echo "Keyserver <$keyserver> is already installed"
-#      else
-#          echo "Install Keyserver <$keyserver> onto $device2 LUKS Header"
-#          # echo $password | clevis luks bind -d $device2-part${root_num} tang "{\"url\": \"http://$keyserver\" , \"adv\": \"/tmp/keyserver-$counter.jws\" }"
-#          echo $password | clevis luks bind -d $device2-part${root_num} sss ${tangkeyserverdict}
-#      fi
-# 
+#          # Bind device to the TANG server via CLEVIS
+#          if [[ "${list_device}" == *"${keyserver}"* ]]
+#          then
+#              echo "Keyserver <$keyserver> is already installed"
+#          else
+#              echo "Install Keyserver <$keyserver> onto /dev/disk/by-id/${disk}-part${root_num} LUKS Header"
+#              # echo $password | clevis luks bind -d /dev/disk/by-id/${disk}-part${root_num} tang "{\"url\": \"http://$keyserver\" , \"adv\": \"/tmp/keyserver-$counter.jws\" }"
+#              echo $password | clevis luks bind -d /dev/disk/by-id/${disk}-part${root_num} sss ${tangkeyserverdict}
+#          fi
+#      done
+#
 #      # Increment counter
 #      counter=$((counter+1))
 # done
@@ -107,15 +98,12 @@ read -s -p "Enter encryption password: " password
 
 
 # Use pre-build Dictionary
-echo "Install Keyservers onto $device1 LUKS Header"
-echo ${tangkeyserverdict} | jq -r --color-output
-echo $password | clevis luks bind -d ${device1}-part${root_num} -s ${clevis_luks_keyslot} -f sss "${tangkeyserverdict}"
-
-
-echo "Install Keyservers onto $device2 LUKS Header"
-echo ${tangkeyserverdict} | jq -r --color-output
-echo $password | clevis luks bind -d ${device2}-part${root_num} -s ${clevis_luks_keyslot} -f sss "${tangkeyserverdict}"
-
+for disk in "${disks[@]}"
+do
+    echo "Install Keyservers onto /dev/disk/by-id/${disk}-part${root_num} LUKS Header"
+    echo ${tangkeyserverdict} | jq -r --color-output
+    echo $password | clevis luks bind -d /dev/disk/by-id/${disk}-part${root_num} -s ${clevis_luks_keyslot} -f sss "${tangkeyserverdict}"
+done
 
 # Clear password from memory
 unset $password
@@ -124,7 +112,8 @@ unset $password
 update-initramfs -c -k all
 
 # Get information
-cryptsetup luksDump $device1-part${root_num}
-cryptsetup luksDump $device2-part${root_num}
-clevis luks list -d $device1-part${root_num}
-clevis luks list -d $device2-part${root_num}
+for disk in "${disks[@]}"
+do
+    cryptsetup luksDump /dev/disk/by-id/${disk}-part${root_num}
+    clevis luks list -d /dev/disk/by-id/${disk}-part${root_num}
+done

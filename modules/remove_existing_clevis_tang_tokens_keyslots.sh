@@ -44,7 +44,8 @@ unset $password
 update-initramfs -c -k all
 
 # Get information
-cryptsetup luksDump $device1-part${root_num}
-cryptsetup luksDump $device2-part${root_num}
-clevis luks list -d $device1-part${root_num}
-clevis luks list -d $device2-part${root_num}
+for disk in "${disks[@]}"
+do
+    cryptsetup luksDump /dev/disk/by-id/${disk}-part${root_num}
+    clevis luks list -d /dev/disk/by-id/${disk}-part${root_num}
+done

@@ -10,56 +10,75 @@ source $toolpath/load.sh
 # Mount system if not already mounted
 source $toolpath/modules/mount_system.sh
 
-# Create /boot and /boot/efi and prevent direct write to them, unless Partition has been mounted
-mkdir -p ${destination}/boot
-mkdir -p ${destination}/boot/efi
-chattr +i ${destination}/boot
-chattr +i ${destination}/boot/efi
+# Create /boot and /boot/efi/<disk> and prevent direct write to them, unless Partition has been mounted
+mkdir -p "${destination}/boot"
+mkdir -p "${destination}/boot/efi"
+chattr +i "${destination}/boot"
+chattr -i "${destination}/boot/efi"
+
+for disk in "${disks[@]}"
+do
+     # Create required Subfolder
+     mkdir -p "${destination}/boot/efi/${disk}"
+
+     # Make sure that a Partition has been mounted there
+     chattr +i "${destination}/boot/efi/${disk}"
+done
 
 # Mount boot Filesystems
-if [ "$bootfs" == "ext4" ]
+if [ "${bootfs}" == "ext4" ]
 then
-        if [ "$numdisks" -eq 2 ]
+        if [ "${numdisks_total}" -eq 1 ]
         then
+                # Get UUID of Single Disk Partition
+                UUID=$(blkid -s UUID -o value ${devices[0]}-part${boot_num})
+
+                # Mount Filesystem
+                mount ${devices[0]}-part${boot_num} ${destination}/boot
+        else
                 # Get UUID of MDADM Device
                 UUID=$(blkid -s UUID -o value /dev/${mdadm_boot_device})
 
                 # Mount Filesystem
                 mount /dev/${mdadm_boot_device} ${destination}/boot
-        elif [ "$numdisks" -eq 1 ]
-        then
-                # Get UUID of Single Disk Partition
-                UUID=$(blkid -s UUID -o value $device1-part${boot_num})
-
-                # Mount Filesystem
-                mount $device1-part${boot_num} ${destination}/boot
-        else
-                echo "Only 1-Disk and 2-Disks Setups are currently supported. Aborting !"
-                exit 1
         fi
+
+        # else
+        #         echo "Only 1-Disk and 2-Disks Setups are currently supported. Aborting !"
+        #         exit 1
+        # fi
 fi
 
 # Mount efi Filesystems
+for disk in "${disks[@]}"
+do
+    # Get UUID of Single Disk Partition
+    UUID=$(blkid -s UUID -o value "/dev/disk/by-id/${disk}-part${efi_num}")
+
+    # Mount Filesystem
+    mount "/dev/disk/by-id/${disk}-part${efi_num}" "${destination}/boot/efi/${disk}"
+done
+
 #if [ "xxxx" == "ext4" ]
 #then
-        if [ "$numdisks" -eq 2 ]
-        then
-                # Get UUID of MDADM Device
-                UUID=$(blkid -s UUID -o value /dev/${mdadm_efi_device})
-
-                # Mount Filesystem
-                mount /dev/${mdadm_efi_device} ${destination}/boot/efi
-        elif [ "$numdisks" -eq 1 ]
-        then
-                # Get UUID of Single Disk Partition
-                UUID=$(blkid -s UUID -o value $device1-part${efi_num})
-
-                # Mount Filesystem
-                mount $device1-part${efi_num} ${destination}/boot/efi
-        else
-                echo "Only 1-Disk and 2-Disks Setups are currently supported. Aborting !"
-                exit 1
-        fi
+#        if [ "${numdisks_total}" -eq 2 ]
+#        then
+#                # Get UUID of MDADM Device
+#                UUID=$(blkid -s UUID -o value /dev/${mdadm_efi_device})
+#
+#                # Mount Filesystem
+#                mount /dev/${mdadm_efi_device} ${destination}/boot/efi
+#        elif [ "${numdisks_total}" -eq 1 ]
+#        then
+#                # Get UUID of Single Disk Partition
+#                UUID=$(blkid -s UUID -o value ${devices[0]}-part${efi_num})
+#
+#                # Mount Filesystem
+#                mount ${devices[0]}-part${efi_num} ${destination}/boot/efi
+#        else
+#                echo "Only 1-Disk and 2-Disks Setups are currently supported. Aborting !"
+#                exit 1
+#        fi
 #fi
 
 # Install minimal system

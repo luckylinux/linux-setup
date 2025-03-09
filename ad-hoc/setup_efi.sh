@@ -21,7 +21,13 @@ source $toolpath/modules/setup_efi_partition.sh
 
 # Create /boot/efi folder and prevent direct writing (i.e. a partition must first be mounted inside to enable writing)
 mkdir -p /boot/efi
-chattr +i /boot/efi
+
+# Create a Subfolder for each Disk ESP/EFI Partition
+for disk in "${disks[@]}"
+do
+    mkdir -p "/boot/efi/${disk}"
+    chattr +i "/boot/efi/${disk}"
+done
 
 # Configure FSTAB
 source $toolpath/modules/configure_efi_partition.sh

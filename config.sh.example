@@ -10,26 +10,34 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 
 # Other Configuration
 # Define disks
-disk1="ata-CT500MX500SSD1_1835E14E9C46"
-disk2="ata-CT500MX500SSD1_2025E2AE5EF0"
+disk1="ata-CT500MX500SSD1_aaaaaaaaaaaa"
+disk2="ata-CT500MX500SSD1_bbbbbbbbbbbb"
+disk3="ata-CT500MX500SSD1_cccccccccccc"
+disk4="ata-CT500MX500SSD1_dddddddddddd"
 
 # Full path
 device1="/dev/disk/by-id/${disk1}"
 device2="/dev/disk/by-id/${disk2}"
+device3="/dev/disk/by-id/${disk3}"
+device4="/dev/disk/by-id/${disk4}"
 
 # Put disks into array
 disks=()
 disks+=("$disk1")
 disks+=("$disk2")
+disks+=("$disk3")
+disks+=("$disk4")
 
 # Put devices into array
 devices=()
 devices+=("$device1")
 devices+=("$device2")
+devices+=("$device3")
+devices+=("$device4")
 
 # Get number of disks
-numdisks=${#disks[@]}
-numdevices=${#devices[@]}
+numdisks_total=${#disks[@]}
+numdevices_total=${#devices[@]}
 
 # Suppress output
 n="/dev/null"
@@ -104,9 +112,9 @@ datafs="zfs" # "ext4" or "zfs" (if using Separate Data Partition / Pool)
 
 # RAID Choices
 efiraid="mdadm" # "mdadm"
-bootraid="auto" # "auto" ("zfs" if bootfs="zfs", else "mdadm" if numdisks > 1)
-rootraid="auto" # "auto" ("zfs" if rootfs="zfs", else "mdadm" if numdisks > 1)
-dataraid="auto" # "auto" ("zfs" if rootfs="zfs", else "mdadm" if numdisks > 1)
+bootraid="auto" # "auto" ("zfs" if bootfs="zfs", else "mdadm" if numdisks_total > 1)
+rootraid="auto" # "auto" ("zfs" if rootfs="zfs", else "mdadm" if numdisks_total > 1)
+dataraid="auto" # "auto" ("zfs" if rootfs="zfs", else "mdadm" if numdisks_total > 1)
 
 # Import ZFS Pool Readonly
 readonly="off"  # "off" (normal operation), "on" (for rescueing corrupted Systems)
@@ -154,8 +162,8 @@ start_bios=4													# MiB
 bios_size=64													# MiB
 efi_size=1024													# MiB
 boot_size=2048													# MiB
-swap_size=$((0*1000))												# MiB
-margin_size=512     					                                            		# MiB
+swap_size=$((0*1000))										# MiB
+margin_size=512                                    # MiB
 
 # Use a Separate Data Pool ?
 data_separate="no"
@@ -172,9 +180,18 @@ fi
 # Pool settings
 # Ashift=13 can lead to some overhead - Only applicable when using ZFS
 ashift=12
+
 bootpool="bpool"
+
 rootpool="rpool"
+rootpool_number_stripes="1" # 1, 2, ...
+rootpool_type_each_vdev="mirror" # ZFS: {mirror, raidz1, raidz2}, MDADM: {1 for "RAID1", 5 for "RAID5", 6 for "RAID6" as used in mdadm --level=<LEVEL>}
+rootpool_number_disks_each_vdev=$((numdisks_total/rootpool_number_stripes))
+
 datapool="sdata"
+datapool_number_stripes="1" # 1, 2, ...
+datapool_type_each_vdev="mirror" # ZFS: {mirror, raidz1, raidz2}, MDADM: {1 for "RAID1", 5 for "RAID5", 6 for "RAID6" as used in mdadm --level=<LEVEL>}
+datapool_number_disks_each_vdev=$((numdisks_total/datapool_number_stripes))
 
 # CLEVIS/TANG Automated LUKS unlocking
 keyservers=("192.168.1.15" "192.168.1.16" "192.168.1.17" "192.168.1.18")

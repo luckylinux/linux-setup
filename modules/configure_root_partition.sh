@@ -14,14 +14,11 @@ then
         mkdir -p ${destination}/etc
 
         # Enable Disk in Crypttab for initramfs
-        echo "${disk1}_root_crypt" UUID=$(blkid -s UUID -o value ${device1}-part${root_num}) none \
-        luks,discard,initramfs > "${destination}/etc/crypttab"
-
-        if [ $numdisks -eq 2 ]
-        then
-                echo "${disk2}_root_crypt" UUID=$(blkid -s UUID -o value ${device2}-part${root_num}) none \
-                 luks,discard,initramfs >> "${destination}/etc/crypttab"
-        fi
+        for disk in "${disks[@]}"
+        do
+            echo "${disk}_root_crypt" UUID=$(blkid -s UUID -o value /dev/disk/by-id/${disk}-part${root_num}) none \
+            luks,discard,initramfs > "${destination}/etc/crypttab"
+        done
 fi
 
 if [ "$rootfs" == "zfs" ]
@@ -29,8 +26,13 @@ then
     echo "Skipping Configuration of FSTAB due to ZFS automount generator"
 elif [ "$rootfs" == "ext4" ]
 then
-        if [ "$numdisks" -eq 2 ]
+        if [ "${numdisks_total}" -eq 1 ]
         then
+                # Configure Partition in /etc/fstab
+                UUID=$(blkid -s UUID -o value ${devices[0]}-part${root_num})
+                echo "# / on ext4" >> /etc/fstab
+                echo "UUID=$UUID	/			ext4		auto,noatime									0	1" >> /etc/fstab
+        else
                 # Configure MDADM Array in /etc/fstab
                 UUID=$(blkid -s UUID -o value /dev/${mdadm_root_device})
                 echo "# / on ext4 with MDADM Software Raid-1" >> /etc/fstab
@@ -53,23 +55,22 @@ mdadm_device="/dev/${mdadm_root_device}"
 
 # List Member Devices
 member_devices=()
-member_devices+=( "${devices[0]}-part${root_num}" )
-member_devices+=( "${devices[1]}-part${root_num}" )
 EOF
+
+                # Add each Disk to the MDADM Configuration
+                for disk in "${disks[@]}"
+                do
+                    echo "member_devices+=( \"/dev/disk/by-id/${disk}-part${root_num}\" )" >> /etc/mdadm/root.mdadm
+                done
 
                 # Install tool
                 source $toolpath/modules/setup_systemd_mdadm_assemble.sh
-
-        elif [ "$numdisks" -eq 1 ]
-        then
-                # Configure Partition in /etc/fstab
-                UUID=$(blkid -s UUID -o value $device1-part${root_num})
-                echo "# / on ext4" >> /etc/fstab
-                echo "UUID=$UUID	/			ext4		auto,noatime									0	1" >> /etc/fstab
-        else
-                echo "Only 1-Disk and 2-Disks Setups are currently supported. Aborting !"
-                exit 1
         fi
+
+        # else
+        #         echo "Only 1-Disk and 2-Disks Setups are currently supported. Aborting !"
+        #         exit 1
+        # fi
 else
         echo "Only ZFS and EXT4 are currently supported. Aborting !"
         exit 1

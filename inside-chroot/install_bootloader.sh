@@ -23,55 +23,51 @@ else
 	mount /boot
 fi
 
-# Mount /boot/efi if not already mounted
-if mountpoint -q "/boot/efi"
-then
-	x=1	# Silent
-else
-	mount /boot/efi
-fi
+for disk in "${disks[@]}"
+do
+   # Mount /boot/efi/<disk> if not already mounted
+   if mountpoint -q "/boot/efi/${disk}"
+   then
+	   x=1	# Silent
+   else
+	   mount "/boot/efi/${disk}"
+   fi
+done
 
 # Update initramfs
 update-initramfs -k all -u
 
-if [ "$bootloader" == "grub" ]
+if [ "${bootloader}" == "grub" ]
 then
 	# Install GRUB to MBR
-	if [ "$bootloadermode" == "BIOS" ]
+	if [ "${bootloadermode}" == "BIOS" ]
 	then
 	    # Install GRUB
 	    apt-get install --yes grub-pc
 
 	    # BIOS
-	    grub-install "${device1}"
-
-            if [ "$numdisks" -eq 2 ]
-            then
-	         grub-install "${device2}"
-            fi
-	elif [ "$bootloadermode" == "UEFI" ]
+		for disk in "${disks[@]}"
+		do
+	        grub-install "/dev/disk/by-id/${disk}"
+        done
+	elif [ "${bootloadermode}" == "UEFI" ]
 	then
-            # Might be intesting to also rename UEFI Labels/Entries
-            # See for instance https://askubuntu.com/questions/1125920/how-can-i-change-the-names-of-items-in-the-efi-uefi-boot-menu
+        # Might be intesting to also rename UEFI Labels/Entries
+        # See for instance https://askubuntu.com/questions/1125920/how-can-i-change-the-names-of-items-in-the-efi-uefi-boot-menu
 
 	    # Install GRUB
 	    apt-get install --yes grub-efi-amd64
 
-            # Install Helpers
-            apt-get install --yes shim shim-helpers-amd64-signed
+        # Install Helpers
+        apt-get install --yes shim shim-helpers-amd64-signed
 
 	    # UEFI
-	    #grub-install --target=x86_64-efi "${device1}"
-	    grub-install --target=x86_64-efi --efi-directory=/boot/efi --boot-directory=/boot/ --no-nvram "${device1}"
-
-	    if [ "$numdisks" -eq 2 ]
-            then
-		#grub-install --target=x86_64-efi "${device2}"
-                grub-install --target=x86_64-efi --efi-directory=/boot/efi --boot-directory=/boot/ --no-nvram "${device2}"
-	    fi
-
-	    #grub-install --target=x86_64-efi --efi-directory=/boot/efi \
-	    #--bootloader-id=ubuntu --recheck --no-floppy
+		for disk in "${disks[@]}"
+		do
+	        # grub-install --target=x86_64-efi "/dev/disk/by-id/${disk}"
+			# grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=ubuntu --recheck --no-floppy
+	        grub-install --target=x86_64-efi --efi-directory="/boot/efi/${disk}" --boot-directory="/boot/" --no-nvram "/dev/disk/by-id/${disk}"
+	    done
 	else
 	    # Not Supported
 	    echo "Error - bootloadermode <${bootloadermode}> is NOT supported. Aborting"
@@ -118,7 +114,7 @@ then
 	# Check which filesystem is on /boot
 	grub-probe /boot
 
-elif [ "$bootloader" == "zbm" ]
+elif [ "${bootloader}" == "zbm" ]
 then
 	# Useful notes
 	# LUKS: https://github.com/zbm-dev/zfsbootmenu/blob/master/contrib/luks-unlock.sh

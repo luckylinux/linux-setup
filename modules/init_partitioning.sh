@@ -21,20 +21,14 @@ fi
 # If root device is encrypted
 if [ "$encryptrootfs" == "luks" ]
 then
-	# Close $device1
-        if [[ -e "/dev/mapper/${disk1}_root_crypt" ]]
+    for disk in "${disks[@]}"
+    do
+	    # Close Device
+        if [[ -e "/dev/mapper/${disk}_root_crypt" ]]
         then
-            cryptsetup luksClose ${disk1}_root_crypt
+            cryptsetup luksClose "${disk}_root_crypt"
         fi
-
-	if [ $numdisks -eq 2 ]
-        then
-		# Close $device2
-                if [[ -e "/dev/mapper/${disk2}_root_crypt" ]]
-                then
-		    cryptsetup luksClose ${disk2}_root_crypt
-                fi
-	fi
+	done
 fi
 
 # Kill all running processes

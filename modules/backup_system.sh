@@ -61,31 +61,38 @@ tar cvzf ${toolpath}/boot_$timestamp.tar.gz ./
 cd ../ || exit
 
 
-
 ## BACKUP EFI
-# Get all info
-#efi_info=$(chroot ${destination} /usr/bin/findmnt --fstab)
+for disk in "${disks[@]}"
+do
+    # Get all info
+    #efi_info=$(chroot ${destination} /usr/bin/findmnt --fstab)
 
-# Get only the SOURCE info (e.g. UUID=xxxx)
-efi_source=$(chroot ${destination} /usr/bin/findmnt --fstab --target /boot/efi --noheadings --output=SOURCE)
+    # Get only the SOURCE info (e.g. UUID=xxxx)
+    efi_source=$(chroot ${destination} /usr/bin/findmnt --fstab --target /boot/efi/${disk} --noheadings --output=SOURCE)
 
-# Save Exit Code
-efi_exit_code=$?
+    # Save Exit Code
+    efi_exit_code=$?
 
-# If /boot/efi is (already) a separate Partition
-if [ -n "${efi_source}" ] && [ "${efi_exit_code}" -eq 0 ]
-then
-    # Mount Partition
-    mount ${efi_source} ${destination}/boot/efi
-fi
+    # If /boot/efi is (already) a separate Partition
+    if [ -n "${efi_source}" ] && [ "${efi_exit_code}" -eq 0 ]
+    then
+        # Mount Partition
+        mount "${efi_source}" "${destination}/boot/efi/${disk}"
+    fi
 
-# Backup Current EFI Partition Content
-cd ${destination}/boot/efi || exit
-tar cvzf ${toolpath}/efi_$timestamp.tar.gz ./
-cd ../../ || exit
+    # Backup Current EFI Partition Content
+    cd "${destination}/boot/efi/${disk}" || exit
+    tar cvzf "${toolpath}/efi_${disk}_${timestamp}.tar.gz" ./
+    cd ../../ || exit
 
-# Unmount /boot/efi
-umount ${destination}/boot/efi
+    # Unmount /boot/efi
+    if mountpoint -q "${destination}/boot/efi/${disk}"
+    then
+        umount "${destination}/boot/efi/${disk}"
+    fi
+done
+
+
 
 # Unmount /boot
 umount ${destination}/boot

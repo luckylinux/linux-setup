@@ -84,12 +84,12 @@ then
     cat /etc/zfs/zfs-list.cache/$rootpool
 fi
 
-# Enable Disk in Crypttab for initramfs
-echo "${disk1}_root_crypt" UUID=$(blkid -s UUID -o value ${device1}-part${root_num}) none \
-    luks,discard,initramfs > "/etc/crypttab"
-
-echo "${disk2}_root_crypt" UUID=$(blkid -s UUID -o value ${device2}-part${root_num}) none \
-    luks,discard,initramfs >> "/etc/crypttab"
+# Enable Root Disks in Crypttab for initramfs
+for disk in "${disks[@]}"
+do
+    echo "${disk}_root_crypt" UUID=$(blkid -s UUID -o value /dev/disk/by-id/${disk}-part${root_num}) none \
+        luks,discard,initramfs > "/etc/crypttab"
+done
 
 # (Re)Install Bootloader
 source $toolpath/inside-chroot/install_bootloader.sh
