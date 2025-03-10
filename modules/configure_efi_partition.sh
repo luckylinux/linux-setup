@@ -48,7 +48,7 @@ do
      chattr +i "/boot/efi/${disk}"
 
      # Configure FSTAB
-     UUID=$(blkid -s UUID -o value /dev/disk/by-id/${disk}-${efi_num})
+     UUID=$(blkid -s UUID -o value /dev/disk/by-id/${disk}-part${efi_num})
 
      echo "UUID=$UUID           /boot/efi/${disk}		vfat		nofail,x-systemd.automount,umask=0022,fmask=0022,dmask=0022		0	1" >> /etc/fstab
 done
