@@ -59,6 +59,12 @@ apt-get remove ${packages[@]}
 echo "Remove ZFS-DKMS since that referes to Debian Packages and is NOT part of Proxmox VE"
 apt-get remove zfs-dkms
 
+# Remove Configuration File
+rm -f /etc/apt/preferences.d/zfs-backports
+
+# Removed Cached Packages
+rm -f /var/cache/apt/archives/zfs*
+
 # Make sure that zfs-initramfs is (still) installed though
 apt-get install zfs-initramfs
 

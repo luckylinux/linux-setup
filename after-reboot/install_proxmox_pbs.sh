@@ -55,6 +55,12 @@ apt-get remove linux-image-amd64
 echo "Remove ZFS-DKMS since that referes to Debian Packages and is NOT part of Proxmox PBS"
 apt-get remove zfs-dkms
 
+# Remove Configuration File
+rm -f /etc/apt/preferences.d/zfs-backports
+
+# Removed Cached Packages
+rm -f /var/cache/apt/archives/zfs*
+
 # Remove other linux-image & linux-headers
 mapfile packages < <(dpkg --get-selections | grep -v deinstall | cut -f1 | grep -E "linux-image|linux-headers")
 apt-get remove ${packages[@]}
