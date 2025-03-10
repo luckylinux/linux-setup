@@ -157,8 +157,15 @@ dropbearport="2222" # Listen on Port ${dropbearport}
 #    - Partition #4: /
 #    - Partition #5: (optional) separate Data Partition/Pool
 
+# Install Parted if not installed yet
+if [[ -z $(command -v parted) ]]
+then
+    apt-get install parted
+fi
+
 # Automatically Calculate Disk Size
 disk_size=999999999999999
+
 for disk in "${disks[@]}"
 do
     # Get Disk Size of Current Disk
