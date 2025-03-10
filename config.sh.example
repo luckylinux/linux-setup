@@ -180,7 +180,7 @@ bios_size=64													# MiB
 efi_size=1024													# MiB
 boot_size=2048													# MiB
 swap_size=$((0*1000))												# MiB
-margin_size=512                                    								# MiB
+margin_size=512													# MiB
 
 # Use a Separate Data Pool ?
 data_separate="no"

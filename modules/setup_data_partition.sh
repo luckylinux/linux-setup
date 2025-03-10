@@ -115,7 +115,7 @@ else
                 fi
         else
                 # Setup MDADM EXT4 Software Raid
-                
+
                 devicelist=""
                 # Build Device List
                 for disk in "${disks[@]}"

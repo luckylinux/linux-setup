@@ -90,7 +90,7 @@ then
                 # Dual Disk
                 # Setup MDADM RAID1 / mirror EXT4 Software Raid
 
-                devicelist="mirror"
+                devicelist=""
                 # Build Device List
                 for disk in "${disks[@]}"
                 do
@@ -99,7 +99,7 @@ then
                     # Create filesystem
                     #mkfs.ext4  "/dev/disk/by-id/${disk}-part${boot_num}"
                 done
-                     
+
 
                 # Assemble MDADM Array
                 echo "Assembling MDADM RAID1 array for boot device"
