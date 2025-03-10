@@ -17,7 +17,7 @@ then
         for disk in "${disks[@]}"
         do
             echo "${disk}_root_crypt" UUID=$(blkid -s UUID -o value /dev/disk/by-id/${disk}-part${root_num}) none \
-            luks,discard,initramfs > "${destination}/etc/crypttab"
+            luks,discard,initramfs >> "${destination}/etc/crypttab"
         done
 fi
 

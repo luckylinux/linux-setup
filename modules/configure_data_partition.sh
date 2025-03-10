@@ -17,7 +17,7 @@ then
         for disk in "${disks[@]}"
         do
             echo "${disk}_data_crypt" UUID=$(blkid -s UUID -o value /dev/disk/by-id/${disk}-part${data_num}) none \
-            luks,discard,initramfs > "${destination}/etc/crypttab"
+            luks,discard,initramfs >> "${destination}/etc/crypttab"
         done
 fi
 
@@ -32,7 +32,7 @@ then
                 UUID=$(blkid -s UUID -o value ${devices[0]}-part${data_num})
                 echo "# / on ext4" >> /etc/fstab
                 echo "UUID=$UUID	/			ext4		auto,noatime									0	1" >> /etc/fstab
-        
+
         else
                 # Configure MDADM Array in /etc/fstab
                 UUID=$(blkid -s UUID -o value /dev/${mdadm_data_device})
