@@ -66,11 +66,11 @@ includepackages="lsb-release,curl,wget,locales"
 usezfsbackports="yes" # "yes" or "no"
 
 # Use Kernel Backports Packages
-usekernelbackports="yes" # "yes" or "no"
+usekernelbackports="no" # "yes" or "no"
 
 # Hetzner ZFS Fix
 # This will remove their /usr/local/sbin/zfs dummy Package since we install directly from Debian Backports
-hetznerzfsfix="yes" # "yes" or "no"
+hetznerzfsfix="no" # "yes" or "no"
 
 # Define mountpoint
 destination="/mnt/$distribution"
@@ -129,10 +129,10 @@ encryptdatafs="luks" # "luks" or "no"
 bootloader="grub" # "grub" or "zbm"
 
 # Clevis Automatic Unlock
-clevisautounlock="no" # "yes" or "no"
+clevisautounlock="yes" # "yes" or "no"
 
 # Dropbear SSH Unlock at Boot Time
-dropbearunlock="yes" # "yes" or "no"
+dropbearunlock="no" # "yes" or "no"
 
 # Setup NFS Tools Mountpoint and FSTAB Entry
 setupnfstools="yes" # "yes" or "no"
@@ -148,7 +148,7 @@ dropbearport="2222" # Listen on Port ${dropbearport}
 # Disk size could be automatically be extracted with
 # parted -s /dev/sdX unit MiB print free | grep MiB | head -n1 | sed -En "s/.*: (.*)MiB/\1/p"
 # or
-# parted -s /dev/sdX unit MiB print free | sed -En "s/Disk \/dev\/sdX: (.*)MiB/\1/p"
+# parted -s /dev/disk/by-id/ata-Micron_5200_MTFDDAK1T9TDC_190520C8469E unit MiB print free 2> /dev/null | sed -En "s/Disk \/dev\/sd[a-z]: (.*)MiB/\1/p"
 
 # Layout is always
 #    - Partition #1: bios grub
@@ -157,13 +157,30 @@ dropbearport="2222" # Listen on Port ${dropbearport}
 #    - Partition #4: /
 #    - Partition #5: (optional) separate Data Partition/Pool
 
-disk_size=476940												# MiB
+# Automatically Calculate Disk Size
+disk_size=999999999999999
+for disk in "${disks[@]}"
+do
+    # Get Disk Size of Current Disk
+    disk_size_current=$(parted -s "/dev/disk/by-id/${disk}" unit MiB print free 2> /dev/null | sed -En "s/Disk \/dev\/sd[a-z]: (.*)MiB/\1/p")
+
+    # Update Overall Disk Size to the Minimum Value of the Disks
+    if [ ${disk_size_current} -lt ${disk_size} ]
+    then
+        disk_size=${disk_size_current}
+    fi
+done
+
+# Legacy Manual Disk Size Setting
+# disk_size=476940												# MiB
+
+# Partition Sizes
 start_bios=4													# MiB
 bios_size=64													# MiB
 efi_size=1024													# MiB
 boot_size=2048													# MiB
-swap_size=$((0*1000))										# MiB
-margin_size=512                                    # MiB
+swap_size=$((0*1000))												# MiB
+margin_size=512                                    								# MiB
 
 # Use a Separate Data Pool ?
 data_separate="no"
