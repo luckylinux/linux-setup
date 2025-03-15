@@ -9,6 +9,47 @@ basefolder="/etc/mokutil"
 # Create Folder if it doesn't exist yet
 mkdir -p "${basefolder}"
 
+# Create Mokutil Configuration Folder
+mkdir -p /etc/mokutil
+
+# Create Mokutil Template Configuration File
+tee /etc/mokutil/mokconfig.cnf << EOF
+# This definition stops the following lines choking if HOME isn't
+# defined.
+HOME                    = .
+RANDFILE                = $ENV::HOME/.rnd
+[ req ]
+distinguished_name      = req_distinguished_name
+x509_extensions         = v3
+string_mask             = utf8only
+prompt                  = no
+
+[ req_distinguished_name ]
+countryName             = <COUNTRY_CODE>
+stateOrProvinceName     = <STATE>
+localityName            = <CITY_OR_LOCALITY>
+0.organizationName      = <ORG_NAME>
+commonName              = Secure Boot Signing
+emailAddress            = secure@<MYDOMAIN>.<TLD>
+
+[ v3 ]
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always,issuer
+basicConstraints        = critical,CA:FALSE
+extendedKeyUsage        = codeSigning,1.3.6.1.4.1.311.10.3.6,1.3.6.1.4.1.2312.16.1.2
+nsComment               = "OpenSSL Generated Certificate"
+EOF
+
+# Install nano if not installed yet
+if [[ -z $(command -v nano) ]]
+then
+    apt-get update
+    apt-get install nano
+fi
+
+# Open the File for editing in Interactive Mode
+nano /etc/mokutil/mokconfig.cnf
+
 # Create Rand File if it doesn't exist
 openssl rand -writerand /root/.rnd
 
