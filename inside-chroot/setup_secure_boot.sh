@@ -13,6 +13,8 @@ mkdir -p "${basefolder}"
 mkdir -p /etc/mokutil
 
 # Create Mokutil Template Configuration File
+if [ ! -f "/etc/mokutil/mokconfig.cnf" ]
+then
 tee /etc/mokutil/mokconfig.cnf << EOF
 # This definition stops the following lines choking if HOME isn't
 # defined.
@@ -39,6 +41,7 @@ basicConstraints        = critical,CA:FALSE
 extendedKeyUsage        = codeSigning,1.3.6.1.4.1.311.10.3.6,1.3.6.1.4.1.2312.16.1.2
 nsComment               = "OpenSSL Generated Certificate"
 EOF
+fi
 
 # Install nano if not installed yet
 if [[ -z $(command -v nano) ]]
