@@ -241,6 +241,12 @@ grub-probe /
 # Update initramfs
 update-initramfs -u -k all
 
+# Setup Secure Boot
+if [ "$secureboot" == "yes" ]
+then
+    source ${toolpath}/inside-chroot/setup_secure_boot.sh
+fi
+
 # Snapshot the initial installation
 if [ "$bootfs" == "zfs" ]
 then

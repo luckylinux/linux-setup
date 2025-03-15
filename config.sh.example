@@ -224,4 +224,7 @@ keyservers=("192.168.1.15" "192.168.1.16" "192.168.1.17" "192.168.1.18")
 # Mode to be used ("BIOS" / "UEFI")
 # Only relevant for grub installation
 # (both partition schemes are created in order to facilitate change - if needed)
-bootloadermode="BIOS"
+bootloadermode="UEFI"
+
+# Enable and/or Setup Secure Boot
+secureboot="yes"

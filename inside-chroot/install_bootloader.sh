@@ -42,31 +42,34 @@ then
 	# Install GRUB to MBR
 	if [ "${bootloadermode}" == "BIOS" ]
 	then
-	    # Install GRUB
+	    # Install GRUB for BIOS (Primary)
 	    apt-get install --yes grub-pc
 
+            # Install GRUB for UEFI (Secondary)
+            apt-get install --yes grub-efi-amd64-bin shim-signed
+
 	    # BIOS
-		for disk in "${disks[@]}"
-		do
+	    for disk in "${disks[@]}"
+	    do
 	        grub-install "/dev/disk/by-id/${disk}"
-        done
+            done
 	elif [ "${bootloadermode}" == "UEFI" ]
-	then
-        # Might be intesting to also rename UEFI Labels/Entries
-        # See for instance https://askubuntu.com/questions/1125920/how-can-i-change-the-names-of-items-in-the-efi-uefi-boot-menu
+            then
+            # Might be intesting to also rename UEFI Labels/Entries
+            # See for instance https://askubuntu.com/questions/1125920/how-can-i-change-the-names-of-items-in-the-efi-uefi-boot-menu
 
-	    # Install GRUB
-	    apt-get install --yes grub-efi-amd64
+            # Install GRUB and Shim for UEFI (Primary)
+            apt-get install --yes grub-efi-amd64 shim-signed shim-helpers-amd64-signed
 
-        # Install Helpers
-        apt-get install --yes shim shim-helpers-amd64-signed
+            # Install GRUB for BIOS (Secondary)
+            apt-get install --yes grub-pc-bin
 
-	    # UEFI
-		for disk in "${disks[@]}"
-		do
-	        # grub-install --target=x86_64-efi "/dev/disk/by-id/${disk}"
-			# grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=ubuntu --recheck --no-floppy
-	        grub-install --target=x86_64-efi --efi-directory="/boot/efi/${disk}" --boot-directory="/boot/" --no-nvram "/dev/disk/by-id/${disk}"
+            # UEFI
+            for disk in "${disks[@]}"
+	    do
+	       # grub-install --target=x86_64-efi "/dev/disk/by-id/${disk}"
+	       # grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=ubuntu --recheck --no-floppy
+	       grub-install --target=x86_64-efi --efi-directory="/boot/efi/${disk}" --boot-directory="/boot/" --no-nvram "/dev/disk/by-id/${disk}"
 	    done
 	else
 	    # Not Supported
