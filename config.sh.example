@@ -173,7 +173,7 @@ do
     disk_real_path=$(readlink --canonicalize-missing "/dev/disk/by-id/${disk}")
 
     # Get Disk Size of Current Disk
-    disk_size_current=$(parted -s "/dev/disk/by-id/${disk}" unit MiB print free 2> /dev/null | sed -En "s/Disk \/dev\/${disk_real_path}: (.*)MiB/\1/p")
+    disk_size_current=$(parted -s "${disk_real_path}" unit MiB print free 2> /dev/null | grep -E "^Disk /dev/" | head -n1 | sed -E "s|Disk ${disk_real_path}: ([0-9]+)MiB|\1|g")
 
     # Update Overall Disk Size to the Minimum Value of the Disks
     if [ ${disk_size_current} -lt ${disk_size} ]
