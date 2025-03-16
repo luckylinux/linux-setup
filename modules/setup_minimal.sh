@@ -10,10 +10,34 @@ source $toolpath/load.sh
 # Mount system if not already mounted
 source $toolpath/modules/mount_system.sh
 
+# Unmount Existing boot Device (if mounted)
+if mountpoint -q "${destination}/boot"
+then
+    umount "${destination}/boot"
+fi
+
+# Unmount Existing efi Devices (if mounted)
+if [[ -d "${destination}/boot/efi" ]]
+then
+    for disk in "${disks[@]}"
+    do
+        if [[ -d "${destination}/boot/efi/${disk}" ]]
+        then
+            # Unmount Existing efi Devices (if mounted)
+            if mountpoint -q "${destination}/boot/efi/${disk}"
+            then
+                umount "${destination}/boot/efi/${disk}"
+            fi
+        fi
+    fi
+fi
+
 # Create /boot and /boot/efi/<disk> and prevent direct write to them, unless Partition has been mounted
 mkdir -p "${destination}/boot"
-mkdir -p "${destination}/boot/efi"
 chattr +i "${destination}/boot"
+mount "${destination}/boot"
+
+mkdir -p "${destination}/boot/efi"
 chattr -i "${destination}/boot/efi"
 
 for disk in "${disks[@]}"
