@@ -59,7 +59,10 @@ then
             # See for instance https://askubuntu.com/questions/1125920/how-can-i-change-the-names-of-items-in-the-efi-uefi-boot-menu
 
             # Install GRUB and Shim for UEFI (Primary)
-            apt-get install --yes grub-efi-amd64 shim-signed shim-helpers-amd64-signed
+            apt-get install --yes grub-efi-amd64 shim-signed
+
+            # Attempt to install SHIM Helpers (Debian only)
+            apt-get install --yes shim-helpers-amd64-signed
 
             # Install GRUB for BIOS (Secondary)
             apt-get install --yes grub-pc-bin

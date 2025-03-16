@@ -3,6 +3,9 @@
 # References:
 # - https://github.com/jakeday/linux-surface/blob/3267e4ea1f318bb9716d6742d79162de8277dea2/SIGNING.md
 
+# Install Requirements
+apt-get install mokutil
+
 # Define Base Folder
 basefolder="/etc/mokutil"
 
