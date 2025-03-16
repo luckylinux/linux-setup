@@ -16,7 +16,7 @@ zfs create -o com.ubuntu.zsys:bootfs=no \
 
 mkdir -p ${destination}/usr
 chattr +i ${destination}/usr
-zfs create -o com.ubuntu.zsys:bootfs=no -o canmount=off \
+zfs create -o com.ubuntu.zsys:bootfs=no -o canmount=on \
     $rootpool/ROOT/$distribution/usr
 
 
@@ -27,7 +27,7 @@ zfs create $rootpool/ROOT/$distribution/usr/local
 
 mkdir -p ${destination}/var
 chattr +i ${destination}/var
-zfs create -o com.ubuntu.zsys:bootfs=no -o canmount=off \
+zfs create -o com.ubuntu.zsys:bootfs=no -o canmount=on \
     $rootpool/ROOT/$distribution/var
 
 
