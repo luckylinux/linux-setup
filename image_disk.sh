@@ -43,10 +43,21 @@ targetpath="${destinationpath}/${timestamp}"
 # Create Folder if not exist yet
 mkdir -p "${targetpath}"
 
+# Labetling of NVME Partitions is slightly different, so need to adjust for that
+if [[ "${device}" == "/dev/nvme"* ]]
+then
+    partition_prefix="p"
+# elif [[ "${device}" == "/dev/sd"* ]]
+# then
+else
+   partition_prefix=""
+fi
+
 # For each partition
+
 # mapfile -t listPartitions < <( find / -iname $device[0-9]* )
 # mapfile -t listPartitions < <( find /dev -iwholename "${device}[0-9]"* | sed -E "s|$\{device\}||g" )
-mapfile -t listPartitions < <( find /dev -iwholename "${device}[0-9]"* | sed -E "s|${device}||g" )
+mapfile -t listPartitions < <( find /dev -iwholename "${device}${partition_prefix}[0-9]"* | sed -E "s|${device}${partition_prefix}||g" )
 # partitions=$(find / -iname $device[0-9]*)
 # echo "Found $partitions"
 # totalPartitions=$(grep -c "$disk[0-9]" /proc/partitions)
@@ -60,15 +71,15 @@ do
     echo "Check if ${device}${p} is a valid Block Device"
     if [[ -b "${device}${p}" ]]
     then
-        umount "${device}${p}"
+        umount "${device}${partition_prefix}${p}"
     fi
 done
 
 # Backup partition table
-sfdisk -d $device > partition_table_$timestamp.txt
+sfdisk -d $device > ${targetpath}/partition_table_$timestamp.txt
 
 # Backup MBR
-dd if="${device}" of="mbr-${timestamp}.img" bs=512 count=1
+dd if="${device}" of="${targetpath}/mbr-${timestamp}.img" bs=512 count=1
 
 if [[ "${create_image}" == "yes" ]]
 then
@@ -83,7 +94,7 @@ then
        if [[ -b "${device}${p}" ]]
        then
            echo "Back up Partition ${device}${p} as a .img.gz Compressed Image"
-           dd if="${device}${p}" conv=noerror,sync iflag=fullblock status=progress | gzip -$compression -c > "${targetpath}/partition-${p}.img.gz"
+           dd if="${device}${partition_prefix}${p}" conv=noerror,sync iflag=fullblock status=progress | gzip -$compression -c > "${targetpath}/partition-${p}.img.gz"
        fi
    done
 fi
@@ -103,12 +114,12 @@ then
            umount "/mnt/backup/part${p}"
            mkdir -p "/mnt/backup/part${p}"
            chattr +i "/mnt/backup/part${p}"
-           mount "${device}${p}" "/mnt/backup/part${p}"
+           mount "${device}${partition_prefix}${p}" "/mnt/backup/part${p}"
            cd "/mnt/backup/part${p}"
            mkdir -p "${targetpath}/part${p}"
            tar cvfz "${targetpath}/part${p}/part${p}-${timestamp}.tar.gz" "./"
            cd /mnt/backup
-           umount "${device}${p}"
+           umount "${device}${partition_prefix}${p}"
         fi
     done
 fi
