@@ -57,18 +57,27 @@ fi
 nano /etc/mokutil/mokconfig.cnf
 
 # Create Rand File if it doesn't exist
-openssl rand -writerand /root/.rnd
+if [[ ! -f "/root/.rnd" ]]
+then
+    openssl rand -writerand /root/.rnd
+fi
 
 # Generate Signing Keys
 # Create the public and private key for signing the kernel
-openssl req -config "${basefolder}/mokconfig.cnf" \
-        -new -x509 -newkey rsa:4096 \
-        -nodes -days 36500 -outform DER \
-        -keyout "${basefolder}/MOK.priv" \
-        -out "${basefolder}/MOK.der"
+if [ ! -f "${basefolder}/MOK.priv" ] && [ ! -f "${basefolder}/MOK.der" ]
+then
+   openssl req -config "${basefolder}/mokconfig.cnf" \
+           -new -x509 -newkey rsa:4096 \
+           -nodes -days 36500 -outform DER \
+           -keyout "${basefolder}/MOK.priv" \
+           -out "${basefolder}/MOK.der"
+fi
 
 # Convert the key also to PEM format (mokutil needs DER, sbsign needs PEM)
-openssl x509 -in "${basefolder}/MOK.der" -inform DER -outform PEM -out "${basefolder}/MOK.pem"
+if [[ ! -f "${basefolder}/MOK.pem" ]]
+then
+   openssl x509 -in "${basefolder}/MOK.der" -inform DER -outform PEM -out "${basefolder}/MOK.pem"
+fi
 
 # Enroll the key to your shim installation
 # You will be asked for a password, you will just use it to confirm your key selection in the next step, so choose any
