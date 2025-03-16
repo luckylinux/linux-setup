@@ -29,7 +29,7 @@ then
                 umount "${destination}/boot/efi/${disk}"
             fi
         fi
-    fi
+    done
 fi
 
 # Create /boot and /boot/efi/<disk> and prevent direct write to them, unless Partition has been mounted
