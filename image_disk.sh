@@ -68,8 +68,8 @@ mapfile -t listPartitions < <( find /dev -iwholename "${device}${partition_prefi
 # for (( p=1; p<$totalPartitions; p++ ))
 for p in "${listPartitions[@]}"
 do
-    echo "Check if ${device}${p} is a valid Block Device"
-    if [[ -b "${device}${p}" ]]
+    echo "Check if ${device}${partition_prefix}${p} is a valid Block Device"
+    if [[ -b "${device}${partition_prefix}${p}" ]]
     then
         umount "${device}${partition_prefix}${p}"
     fi
@@ -90,10 +90,10 @@ then
    # for (( p=1; p<$totalPartitions; p++ ))
    for p in "${listPartitions[@]}"
    do
-       echo "Check if ${device}${p} is a valid Block Device"
-       if [[ -b "${device}${p}" ]]
+       echo "Check if ${device}${partition_prefix}${p} is a valid Block Device"
+       if [[ -b "${device}${partition_prefix}${p}" ]]
        then
-           echo "Back up Partition ${device}${p} as a .img.gz Compressed Image"
+           echo "Back up Partition ${device}${partition_prefix}${p} as a .img.gz Compressed Image"
            dd if="${device}${partition_prefix}${p}" conv=noerror,sync iflag=fullblock status=progress | gzip -$compression -c > "${targetpath}/partition-${p}.img.gz"
        fi
    done
@@ -107,10 +107,10 @@ then
    # for (( p=1; p<$totalPartitions; p++ ))
    for p in "${listPartitions[@]}"
    do
-       echo "Check if ${device}${p} is a valid Block Device"
-       if [[ -b "${device}${p}" ]]
+       echo "Check if ${device}${partition_prefix}${p} is a valid Block Device"
+       if [[ -b "${device}${partition_prefix}${p}" ]]
        then
-           echo "Back up Partition ${device}${p} as a .tar.gz Archive"
+           echo "Back up Partition ${device}${partition_prefix}${p} as a .tar.gz Archive"
            umount "/mnt/backup/part${p}"
            mkdir -p "/mnt/backup/part${p}"
            chattr +i "/mnt/backup/part${p}"
