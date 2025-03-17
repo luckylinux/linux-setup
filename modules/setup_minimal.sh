@@ -119,6 +119,11 @@ mkdir -p "${destination}/etc/default/grub.d"
 cp "${toolpath}/files/etc/default/grub" "${destination}/etc/default/grub"
 cp -ar ${toolpath}/files/etc/default/grub.d/* "${destination}/etc/default/grub.d/"
 
+if [[ -f "${destination}/etc/default/grub.d/zfs.cfg" ]]
+then
+    sed -Ei "s|${rootpool}/ROOT/debian|${rootpool}/ROOT/${distribution}|g" "${destination}/etc/default/grub.d/zfs.cfg"
+fi
+
 # Configure hostname
 echo "${targethostname}" > "${destination}/etc/hostname"
 
