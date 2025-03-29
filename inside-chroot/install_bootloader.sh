@@ -66,14 +66,6 @@ then
 
             # Install GRUB for BIOS (Secondary)
             apt-get install --yes grub-pc-bin
-
-            # UEFI
-            for disk in "${disks[@]}"
-	    do
-	       # grub-install --target=x86_64-efi "/dev/disk/by-id/${disk}"
-	       # grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=ubuntu --recheck --no-floppy
-	       grub-install --target=x86_64-efi --efi-directory="/boot/efi/${disk}" --boot-directory="/boot/" --no-nvram "/dev/disk/by-id/${disk}"
-	    done
 	else
 	    # Not Supported
 	    echo "Error - bootloadermode <${bootloadermode}> is NOT supported. Aborting"
@@ -107,6 +99,22 @@ then
 	#	# Make it executable
 	#	chmod +x /etc/grub.d/$name
 	#done
+
+        # Install **BOTH** BIOS Bootloader **AND** UEFI Bootloader
+
+        # BIOS
+        for disk in "${disks[@]}"
+	do
+	    grub-install "/dev/disk/by-id/${disk}"
+        done
+
+        # UEFI
+        for disk in "${disks[@]}"
+        do
+	    # grub-install --target=x86_64-efi "/dev/disk/by-id/${disk}"
+	    # grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=ubuntu --recheck --no-floppy
+	    grub-install --target=x86_64-efi --efi-directory="/boot/efi/${disk}" --boot-directory="/boot/" --no-nvram "/dev/disk/by-id/${disk}"
+	done
 
 	# Disable some GRUB modules
 	chmod -x /etc/grub.d/30_os-prober
