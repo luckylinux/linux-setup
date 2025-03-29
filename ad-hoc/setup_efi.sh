@@ -19,8 +19,11 @@ timestamp=$(date +"%Y%m%d")
 # Execute EFI Device(s) Setup
 source $toolpath/modules/setup_efi_partition.sh
 
-# Create /boot/efi folder and prevent direct writing (i.e. a partition must first be mounted inside to enable writing)
+# Create /boot/efi Folder
 mkdir -p /boot/efi
+
+# Allow direct writing to the Folder
+chattr -i /boot/efi
 
 # Create a Subfolder for each Disk ESP/EFI Partition
 for disk in "${disks[@]}"
@@ -32,5 +35,8 @@ done
 # Configure FSTAB
 source $toolpath/modules/configure_efi_partition.sh
 
-# Mount the newly created boot device
-mount /boot/efi
+# Mount the newly created ESP/EFI device
+for disk in "${disks[@]}"
+do
+    mount "/boot/efi/${disk}"
+done
