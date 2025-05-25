@@ -131,7 +131,12 @@ cp -ar ${toolpath}/files/etc/default/grub.d/* "${destination}/etc/default/grub.d
 
 if [[ -f "${destination}/etc/default/grub.d/zfs.cfg" ]]
 then
-    sed -Ei "s|${rootpool}/ROOT/debian|${rootpool}/ROOT/${distribution}|g" "${destination}/etc/default/grub.d/zfs.cfg"
+    if [[ "${rootfs}" == "ext4" ]]
+    then
+        rm -f "${destination}/etc/default/grub.d/zfs.cfg"
+    else
+        sed -Ei "s|${rootpool}/ROOT/debian|${rootpool}/ROOT/${distribution}|g" "${destination}/etc/default/grub.d/zfs.cfg"
+    fi
 fi
 
 # Configure hostname
