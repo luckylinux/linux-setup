@@ -161,8 +161,11 @@ apt-get install --yes initramfs-tools
 apt-get install --yes linux-headers-$(uname -r)
 apt-get install --yes gdisk linux-image-amd64
 
-# Install ZFS
-apt-get install --yes zfs-dkms zfs-initramfs
+if [ "${rootfs}" == "zfs" ] || [ "${bootfs}" == "zfs" ]
+then
+    # Install ZFS
+    apt-get install --yes zfs-dkms zfs-initramfs
+fi
 
 # Install nfs-client, wget, ssh, sudo and curl
 apt-get install --yes nfs-client wget ssh sudo curl
