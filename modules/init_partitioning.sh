@@ -5,21 +5,21 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load config
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Load ZFS module
 modprobe spl
 modprobe zfs
 
 # Export pool if in use
-if [ "$rootfs" == "zfs" ]
+if [ "${rootfs}" == "zfs" ]
 then
-    zpool export -f $rootpool
+    zpool export -f ${rootpool}
 fi
 
 # Close LUKS devices if applicable
 # If root device is encrypted
-if [ "$encryptrootfs" == "luks" ]
+if [ "${encryptrootfs}" == "luks" ]
 then
     for disk in "${disks[@]}"
     do
@@ -38,4 +38,4 @@ killall parted
 systemctl start mdadm
 
 # Stop existing arrays if exists
-source $toolpath/modules/umount_mdadm.sh
+source ${toolpath}/modules/umount_mdadm.sh

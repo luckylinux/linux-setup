@@ -5,18 +5,18 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load config
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Wait a few seconds
 sleep 5
 
 # Determine Root device(s)
 # Path / Device changes whether encryption is used or not
-if [ "$encryptrootfs" == "no" ]
+if [ "${encryptrootfs}" == "no" ]
 then
         firstdevice="/dev/disk/by-id/${disk1}-part${root_num}"
         seconddevice="/dev/disk/by-id/${disk2}-part${root_num}"
-elif [ "$encryptrootfs" == "luks" ]
+elif [ "${encryptrootfs}" == "luks" ]
 then
         firstdevice="/dev/mapper/${disk1}_root_crypt"
         seconddevice="/dev/mapper/${disk2}_root_crypt"
@@ -25,15 +25,15 @@ else
         exit 1
 fi
 
-if [ "$rootfs" == "zfs" ]
+if [ "${rootfs}" == "zfs" ]
 then
         # Check if it's a single disk or a mirror RAID
         if [ "${numdisks_total}" -eq 1 ]
         then
-                if [ "$encryptrootfs" == "no" ]
+                if [ "${encryptrootfs}" == "no" ]
                 then
                         devicelist="/dev/disk/by-id/${disks[0]}-part${root_num}"
-                elif [ "$encryptrootfs" == "luks" ]
+                elif [ "${encryptrootfs}" == "luks" ]
                 then
                         devicelist="/dev/mapper/${disks[0]}_root_crypt"
                 fi
@@ -44,10 +44,10 @@ then
                 do
                     disk_index=$((disk_counter - 1))
                     disk=${disks[${disk_index}]}
-                    if [ "$encryptrootfs" == "no" ]
+                    if [ "${encryptrootfs}" == "no" ]
                     then
                         devicelist="${devicelist} /dev/disk/by-id/${disk}-part${root_num}"
-                    elif [ "$encryptrootfs" == "luks" ]
+                    elif [ "${encryptrootfs}" == "luks" ]
                     then
                         devicelist="${devicelist} /dev/mapper/${disk}_root_crypt"
                     fi
@@ -64,8 +64,8 @@ then
         -O acltype=posixacl -O canmount=off -O compression=lz4 \
         -O dnodesize=auto -O normalization=formD -O relatime=on \
         -O xattr=sa \
-        -O mountpoint=/ -R "$destination" \
-        $rootpool $devicelist
+        -O mountpoint=/ -R "${destination}" \
+        ${rootpool} $devicelist
 
         sleep 1
 
@@ -82,10 +82,10 @@ then
                     disk_index=$((disk_counter - 1))
                     disk=${disks[${disk_index}]}
 
-                    if [ "$encryptrootfs" == "no" ]
+                    if [ "${encryptrootfs}" == "no" ]
                     then
                         devicelist="${devicelist} /dev/disk/by-id/${disk}-part${root_num}"
-                    elif [ "$encryptrootfs" == "luks" ]
+                    elif [ "${encryptrootfs}" == "luks" ]
                     then
                         devicelist="${devicelist} /dev/mapper/${disk}_root_crypt"
                     fi
@@ -105,10 +105,10 @@ else
                 # Use EXT4 Directly
 
                 # Create filesystem
-                if [ "$encryptrootfs" == "no" ]
+                if [ "${encryptrootfs}" == "no" ]
                 then
                     mkfs.ext4 "/dev/disk/by-id/${disk}-part${root_num}"
-                elif [ "$encryptrootfs" == "luks" ]
+                elif [ "${encryptrootfs}" == "luks" ]
                 then
                     mkfs.ext4 "/dev/mapper/${disk}_root_crypt"
                 fi
@@ -119,10 +119,10 @@ else
                 # Build Device List
                 for disk in "${disks[@]}"
                 do
-                    if [ "$encryptrootfs" == "no" ]
+                    if [ "${encryptrootfs}" == "no" ]
                     then
                         devicelist="${devicelist} /dev/disk/by-id/${disk}-part${root_num}"
-                    elif [ "$encryptrootfs" == "luks" ]
+                    elif [ "${encryptrootfs}" == "luks" ]
                     then
                         devicelist="${devicelist} /dev/mapper/${disk}_root_crypt"
                     fi

@@ -5,11 +5,14 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load Configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Standalone EFI/ESP Setup
 for disk in "${disks[@]}"
 do
+    # Get EFI Mount Path
+    efi_mount_path=$(get_efi_mount_path "${disk}")
+
     # Create Filesystem
     echo "Creating FAT32 filesystem on /dev/disk/by-id/${disk}-part${efi_num}"
     mkfs.vfat -F 32 "/dev/disk/by-id/${disk}-part${efi_num}"

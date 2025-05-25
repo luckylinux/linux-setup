@@ -215,6 +215,7 @@ rootpool="rpool"
 rootpool_number_stripes="1" # 1, 2, ...
 rootpool_type_each_vdev="mirror" # ZFS: {mirror, raidz1, raidz2}, MDADM: {1 for "RAID1", 5 for "RAID5", 6 for "RAID6" as used in mdadm --level=<LEVEL>}
 rootpool_number_disks_each_vdev=$((numdisks_total/rootpool_number_stripes))
+rootpool_separate_datasets="no"
 
 datapool="sdata"
 datapool_number_stripes="1" # 1, 2, ...

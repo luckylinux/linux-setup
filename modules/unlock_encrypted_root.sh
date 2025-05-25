@@ -5,7 +5,7 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Ask for Password if Applicable
 if [[ "${clevisautounlock}" == "no" ]]
@@ -14,7 +14,7 @@ then
 fi
 
 # If it's LUKS encrypted
-if [ "$encryptrootfs" == "luks" ]
+if [ "${encryptrootfs}" == "luks" ]
 then
 	counter=0
 	for disk in "${disks[@]}"

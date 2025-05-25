@@ -13,7 +13,7 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load Configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Store current Path
 currentpath=$(pwd)
@@ -81,23 +81,26 @@ then
 fi
 
 # Configure /boot Partition & /etc/fstab
-source $toolpath/modules/configure_boot_partition.sh
+source ${toolpath}/modules/configure_boot_partition.sh
 
 # Configure EFI Partition & /etc/fstab
-source $toolpath/modules/configure_efi_partition.sh
+source ${toolpath}/modules/configure_efi_partition.sh
 
 # Configure root Partition & /etc/fstab
-source $toolpath/modules/configure_root_partition.sh
+source ${toolpath}/modules/configure_root_partition.sh
 
 # Configure data Partition & /etc/fstab
 if [[ "${separate_data}" == "yes" ]]
 then
-    source $toolpath/modules/configure_data_partition.sh
+    source ${toolpath}/modules/configure_data_partition.sh
 fi
 
 # Umount /boot/efi/<disk> to start "Clean"
 for disk in "${disks[@]}"
 do
+    # Get EFI Mount Path
+    efi_mount_path=$(get_efi_mount_path "${disk}")
+
     umount "/boot/efi/${disk}"
 done
 
@@ -127,17 +130,22 @@ else
     fi
 fi
 
+
 for disk in "${disks[@]}"
 do
+    # Get EFI Mount Path
+    efi_mount_path=$(get_efi_mount_path "${disk}")
+
     # Create Required Subfolder
-    mkdir -p "/boot/efi/${disk}"
+    mkdir -p "${efi_mount_path}"
 
     # Make sure that a filesystem is mounted at /boot/efi
-    chattr +i "/boot/efi/${disk}"
+    chattr +i "${efi_mount_path}"
 
     # Mount /boot/efi/<disk>
-    mount "/boot/efi/${disk}"
+    mount "${efi_mount_path}"
 done
+
 
 # Install additionnal tools
 apt-get install --yes aptitude
@@ -172,15 +180,15 @@ fi
 
 if [ "$bootfs" == "zfs" ]
 then
-	# Setup GRUB Testing to ensure that ZFS $bootpool works correctly
+	# Setup GRUB Testing to ensure that ZFS ${bootpool} works correctly
 	#currentpath=$(pwd)
 	#cd /tools_nfs/Debian
 	#bash setup_grub_testing.sh
 	#apt-get update
 	#cd $currentpath
 
-	# Enable importing $bootpool
-	tee /etc/systemd/system/zfs-import-$bootpool.service << EOF
+	# Enable importing ${bootpool}
+	tee /etc/systemd/system/zfs-import-${bootpool}.service << EOF
 [Unit]
 DefaultDependencies=no
 Before=zfs-import-scan.service
@@ -189,7 +197,7 @@ Before=zfs-import-cache.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/sbin/zpool import -N -o cachefile=none $bootpool
+ExecStart=/sbin/zpool import -N -o cachefile=none ${bootpool}
 # Work-around to preserve zpool cache:
 ExecStartPre=-/bin/mv /etc/zfs/zpool.cache /etc/zfs/preboot_zpool.cache
 ExecStartPost=-/bin/mv /etc/zfs/preboot_zpool.cache /etc/zfs/zpool.cache
@@ -200,7 +208,7 @@ EOF
 
 
 
-	systemctl enable zfs-import-$bootpool.service
+	systemctl enable zfs-import-${bootpool}.service
 fi
 
 # Install kernel
@@ -218,11 +226,11 @@ echo "# Tell Initramfs to use custom keyboard" >> "/etc/initramfs-tools/initramf
 echo "KEYMAP=Y" >> "/etc/initramfs-tools/initramfs.conf"
 
 # Reconfigure System (Install Bootloader, configure /etc/fstab, /etc/mdadm/mdadm.conf, ...)
-source $toolpath/inside-chroot/reconfigure_system.sh
+source ${toolpath}/inside-chroot/reconfigure_system.sh
 
 # Enable /etc/rc.local
 # This calls dhclient to automatically get an IP Address, which should prevent us from getting locked out of the server
-source $toolpath/modules/enable_rc_local.sh
+source ${toolpath}/modules/enable_rc_local.sh
 
 if [ "$bootfs" == "zfs" ]
 then
@@ -242,18 +250,18 @@ grub-probe /
 update-initramfs -u -k all
 
 # Setup Secure Boot
-if [ "$secureboot" == "yes" ]
+if [ "${secureboot}" == "yes" ]
 then
     source ${toolpath}/inside-chroot/setup_secure_boot.sh
 fi
 
 # Snapshot the initial installation
-if [ "$bootfs" == "zfs" ]
+if [ "${bootfs}" == "zfs" ]
 then
-    zfs snapshot -r $bootpool/BOOT/$distribution@install
+    zfs snapshot -r ${bootpool}/BOOT/${distribution}@install
 fi
 
-if [ "$rootfs" == "zfs" ]
+if [ "${rootfs}" == "zfs" ]
 then
-    zfs snapshot $rootpool/ROOT/$distribution@install
+    zfs snapshot ${rootpool}/ROOT/${distribution}@install
 fi

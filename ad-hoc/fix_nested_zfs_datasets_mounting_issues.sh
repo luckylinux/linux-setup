@@ -5,10 +5,10 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Load Functions
-source $toolpath/functions.sh
+source ${toolpath}/functions.sh
 
 # Unmount everything by default
 zfs umount -a
@@ -17,28 +17,28 @@ zfs umount -a
 sleep 2
 
 # Mount just the root dataset
-zfs mount $rootpool/ROOT/$distribution
+zfs mount ${rootpool}/ROOT/$distribution
 
 # Get list of datasets
-datasets=$(zfs list -H -o name | grep -i "$rootpool" | xargs -n1)
+datasets=$(zfs list -H -o name | grep -i "${rootpool}" | xargs -n1)
 
 # Generate timestamp
 timestamp=$(date +"%Y%m%d")
 
 # Create Snapshot
-zfs snapshot -r $rootpool@${timestamp}_fix_nested_zfs_datasets
+zfs snapshot -r ${rootpool}@${timestamp}_fix_nested_zfs_datasets
 
 # Loop over Datasets
 while IFS= read -r dataset
 do
     # Get mountpoint
-    mountpt=$(zfs get -H mountpoint -o value $dataset)
+    mountpt=$(zfs get -H mountpoint -o value ${dataset})
 
     # If it's NOT the root dataset and it's a dataset that IS supposed to be mounted
-    if [ "${mountpt}" != "none" ] && [ "${mountpt}" != "$destination" ] && [ "${mountpt}" != "-" ]
+    if [ "${mountpt}" != "none" ] && [ "${mountpt}" != "${destination}" ] && [ "${mountpt}" != "-" ]
     then
         # If it's really a dataset, NOT a zvol
-        if [ ! -b /dev/zvol/$dataset ]
+        if [ ! -b /dev/zvol/${dataset} ]
         then
             # Echo
             echo -e "Processing Dataset ${dataset} at ${mountpt}"
@@ -92,4 +92,4 @@ do
         fi
     fi
 
-done <<< "$datasets"
+done <<< "${dataset}s"

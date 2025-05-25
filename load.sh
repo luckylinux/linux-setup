@@ -13,7 +13,7 @@ done
 # Load User Configuration
 if [[ -f "$toolpath/config.sh" ]]
 then
-    source $toolpath/config.sh
+    source ${toolpath}/config.sh
 else
     echo "Configuration File $toolpath/config.sh does NOT exist ! Aborting."
     exit 1
@@ -28,7 +28,7 @@ done
 # Load Functions
 if [[ -f "$toolpath/functions.sh" ]]
 then
-    source $toolpath/functions.sh
+    source ${toolpath}/functions.sh
 else
     echo "Functions $toolpath/config.sh does NOT exist ! Aborting."
     exit 2

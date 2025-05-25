@@ -8,7 +8,7 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Mount Current /boot partition
 mount /boot
@@ -17,7 +17,7 @@ mount /boot
 timestamp=$(date +"%Y%m%d")
 
 # Execute EFI Device(s) Setup
-source $toolpath/modules/setup_efi_partition.sh
+source ${toolpath}/modules/setup_efi_partition.sh
 
 # Create /boot/efi Folder
 mkdir -p /boot/efi
@@ -28,15 +28,21 @@ chattr -i /boot/efi
 # Create a Subfolder for each Disk ESP/EFI Partition
 for disk in "${disks[@]}"
 do
-    mkdir -p "/boot/efi/${disk}"
-    chattr +i "/boot/efi/${disk}"
+    # Get EFI Mount Path
+    efi_mount_path=$(get_efi_mount_path "${disk}")
+
+    mkdir -p "${efi_mount_path}"
+    chattr +i "${efi_mount_path}"
 done
 
 # Configure FSTAB
-source $toolpath/modules/configure_efi_partition.sh
+source ${toolpath}/modules/configure_efi_partition.sh
 
-# Mount the newly created ESP/EFI device
+# Mount the newly created ESP/EFI Devices
 for disk in "${disks[@]}"
 do
+    # Get EFI Mount Path
+    efi_mount_path=$(get_efi_mount_path "${disk}")
+
     mount "/boot/efi/${disk}"
 done

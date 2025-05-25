@@ -13,7 +13,7 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load Configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Setup system groups
 addgroup --system lpadmin
@@ -35,7 +35,7 @@ chattr +i "/home/${username}"
 
 zfs create -o com.$distribution.zsys:bootfs-datasets=$ROOT_DS \
     -o canmount=on -o mountpoint="/home/${username}" \
-    "$rootpool/USERDATA/${username}"
+    "${rootpool}/USERDATA/${username}"
 
 mkdir -p "/home/${username}"
 
@@ -44,21 +44,21 @@ chown -R "${username}:${username}" "/home/${username}"
 
 #chattr +i "/home/${username}"
 
-zfs mount "$rootpool/USERDATA/${username}"
+zfs mount "${rootpool}/USERDATA/${username}"
 
 chown -R "${username}:${username}" "/home/${username}"
 
 # Fix filesystem mount ordering
 mkdir /etc/zfs/zfs-list.cache
 
-if [ "$bootfs" == "zfs" ]
+if [ "${bootfs}" == "zfs" ]
 then
-    touch /etc/zfs/zfs-list.cache/$bootpool
+    touch /etc/zfs/zfs-list.cache/${bootpool}
 fi
 
-if [ "$rootfs" == "zfs" ]
+if [ "${rootfs}" == "zfs" ]
 then
-    touch /etc/zfs/zfs-list.cache/$rootpool
+    touch /etc/zfs/zfs-list.cache/${rootpool}
 fi
 
 ln -s /usr/lib/zfs-linux/zed.d/history_event-zfs-list-cacher.sh /etc/zfs/zed.d

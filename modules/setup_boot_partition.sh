@@ -5,7 +5,7 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load Configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 if [ "$bootfs" == "zfs" ]
 then
@@ -56,12 +56,12 @@ then
        -o autotrim=on \
        -O acltype=posixacl -O canmount=off -O compression=lz4 \
        -O devices=off -O normalization=formD -O relatime=on -O xattr=sa \
-       -O mountpoint=/boot -R "$destination" \
-       $bootpool $devicelist
+       -O mountpoint=/boot -R "${destination}" \
+       ${bootpool} $devicelist
 
     # Create datasets
-    zfs create -o canmount=off -o mountpoint=none $bootpool/BOOT
-    zfs create -o mountpoint=/boot $bootpool/BOOT/$DISTRIBUTION
+    zfs create -o canmount=off -o mountpoint=none ${bootpool}/BOOT
+    zfs create -o mountpoint=/boot ${bootpool}/BOOT/$DISTRIBUTION
 
 elif [ "$bootfs" == "ext4" ]
 then

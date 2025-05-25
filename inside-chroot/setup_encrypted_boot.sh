@@ -13,19 +13,19 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load Configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Update ZFS pool cache
 mkdir -p /etc/zfs/zfs-list.cache
 
-if [ "$bootfs" == "zfs" ]
+if [ "${bootfs}" == "zfs" ]
 then
-    touch /etc/zfs/zfs-list.cache/$bootpool
+    touch /etc/zfs/zfs-list.cache/${bootpool}
 fi
 
-if [ "$rootfs" == "zfs" ]
+if [ "${rootfs}" == "zfs" ]
 then
-    touch /etc/zfs/zfs-list.cache/$rootpool
+    touch /etc/zfs/zfs-list.cache/${rootpool}
 fi
 
 zed -F &
@@ -37,51 +37,51 @@ sleep 5
 killall zed
 
 # Cat
-if [ "$bootfs" == "zfs" ]
+if [ "${bootfs}" == "zfs" ]
 then
     echo "============================================================="
     echo "========================= BOOT POOL ========================="
     echo "============================================================="
-    cat /etc/zfs/zfs-list.cache/$bootpool
+    cat /etc/zfs/zfs-list.cache/${bootpool}
 fi
 
 # Cat
-if [ "$rootfs" == "zfs" ]
+if [ "${rootfs}" == "zfs" ]
 then
     echo "============================================================="
     echo "========================= ROOT POOL ========================="
     echo "============================================================="
-    cat /etc/zfs/zfs-list.cache/$rootpool
+    cat /etc/zfs/zfs-list.cache/${rootpool}
 fi
 
-if [ "$rootfs" == "zfs" ] || [ "$bootfs" == "zfs" ]
+if [ "${rootfs}" == "zfs" ] || [ "${bootfs}" == "zfs" ]
 then
     # Replace $destination (e.g. /mnt/debian, /mnt/ubuntu, ...) with /
     sed -Ei "s|$destination/?|/|" /etc/zfs/zfs-list.cache/*
 fi
 
-if [ "$bootfs" == "zfs" ]
+if [ "${bootfs}" == "zfs" ]
 then
     # Replace // / for boot
     sed -Ei "s|//boot?|/boot|" /etc/zfs/zfs-list.cache/*
 fi
 
 # Cat
-if [ "$bootfs" == "zfs" ]
+if [ "${bootfs}" == "zfs" ]
 then
     echo "============================================================="
     echo "========================= BOOT POOL ========================="
     echo "============================================================="
-    cat /etc/zfs/zfs-list.cache/$bootpool
+    cat /etc/zfs/zfs-list.cache/${bootpool}
 fi
 
 # Cat
-if [ "$rootfs" == "zfs" ]
+if [ "${rootfs}" == "zfs" ]
 then
     echo "============================================================="
     echo "========================= ROOT POOL ========================="
     echo "============================================================="
-    cat /etc/zfs/zfs-list.cache/$rootpool
+    cat /etc/zfs/zfs-list.cache/${rootpool}
 fi
 
 # Enable Root Disks in Crypttab for initramfs
@@ -92,18 +92,18 @@ do
 done
 
 # (Re)Install Bootloader
-source $toolpath/inside-chroot/install_bootloader.sh
+source ${toolpath}/inside-chroot/install_bootloader.sh
 
 # Setup automatic Disk Unlock
-if [ "$clevisautounlock" == "yes" ]
+if [ "${clevisautounlock}" == "yes" ]
 then
-    source $toolpath/modules/setup_clevis_nbde.sh
+    source ${toolpath}/modules/setup_clevis_nbde.sh
 fi
 
 # Setup remote Disk Unlock
-if [ "$dropbearunlock" == "yes" ]
+if [ "${dropbearunlock}" == "yes" ]
 then
-    source $toolpath/modules/setup_dropbear_unlock.sh
+    source ${toolpath}/modules/setup_dropbear_unlock.sh
 fi
 
 # Update initramfs

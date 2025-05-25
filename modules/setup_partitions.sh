@@ -5,7 +5,7 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load config
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Erase all partitions
 echo "=================================================================================================="
@@ -157,10 +157,10 @@ do
         # Need to get the short disk name / device name
         disk="${disks[$counter]}"
 
-        if [ "$encryptrootfs" == "no" ]
+        if [ "${encryptrootfs}" == "no" ]
         then
                 echo "Skip Encryption Process for /"
-        elif [ "$encryptrootfs" == "luks" ]
+        elif [ "${encryptrootfs}" == "luks" ]
         then
                 # Ask for password
                 # Initial values need to be intentionally different in order for the while loop to work correctly
@@ -212,10 +212,10 @@ do
             # Need to get the short disk name /data device name
             disk="${disks[$counter]}"
 
-            if [ "$encryptdatafs" == "no" ]
+            if [ "${encryptdatafs}" == "no" ]
             then
                 echo "Skip Encryption Process for /data"
-            elif [ "$encryptdatafs" == "luks" ]
+            elif [ "${encryptdatafs}" == "luks" ]
             then
                 # Ask for password
                 # Initial values need to be intentionally different in order for the while loop to work correctly
@@ -270,20 +270,20 @@ echo "==========================================================================
 sleep 5
 
 # Setup EFI Partition / RAID1
-source $toolpath/modules/setup_efi_partition.sh
+source ${toolpath}/modules/setup_efi_partition.sh
 
 # Setup /boot Partition / RAID1
-source $toolpath/modules/setup_boot_partition.sh
+source ${toolpath}/modules/setup_boot_partition.sh
 
 # Setup / Partition / RAID1
-source $toolpath/modules/setup_root_partition.sh
+source ${toolpath}/modules/setup_root_partition.sh
 
 # Setup / Partition /data RAID1
 if [[ "${separate_data}" == "yes" ]]
 then
-    source $toolpath/modules/setup_data_partition.sh
+    source ${toolpath}/modules/setup_data_partition.sh
 fi
 
 # Configure root partition
 # PROBABLY NOT CORRECT, SINCE IT WILL AFFECT THE HOST, NOT THE CHROOT ENVIRONMENT !
-source $toolpath/modules/configure_root_partition.sh
+source ${toolpath}/modules/configure_root_partition.sh

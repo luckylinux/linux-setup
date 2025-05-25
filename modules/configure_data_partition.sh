@@ -5,10 +5,10 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load config
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # If data device is encrypted
-if [ "$encryptdatafs" == "luks" ]
+if [ "${encryptdatafs}" == "luks" ]
 then
         # Make sure that the mountpoint already exists
         mkdir -p ${destination}/etc
@@ -21,10 +21,10 @@ then
         done
 fi
 
-if [ "$datafs" == "zfs" ]
+if [ "${datafs}" == "zfs" ]
 then
     echo "Skipping Configuration of FSTAB due to ZFS automount generator"
-elif [ "$datafs" == "ext4" ]
+elif [ "${datafs}" == "ext4" ]
 then
         if [ "${numdisks_total}" -eq 1 ]
         then
@@ -65,7 +65,7 @@ EOF
                 done
 
                 # Install tool
-                source $toolpath/modules/setup_systemd_mdadm_assemble.sh
+                source ${toolpath}/modules/setup_systemd_mdadm_assemble.sh
 
         fi
         

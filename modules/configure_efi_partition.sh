@@ -5,7 +5,7 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load Configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Ensure that /boot is mounted
 if mountpoint -q "/boot"
@@ -35,22 +35,25 @@ chattr -i /boot/efi
 echo "# EFI/ESP Devices" >> /etc/fstab
 for disk in "${disks[@]}"
 do
-     # Create Folder
-     mkdir -p "/boot/efi/${disk}"
+    # Get EFI Mount Path
+    efi_mount_path=$(get_efi_mount_path "${disk}")
 
-     # Ensure that nothing is mounted there
-     if mountpoint -q "/boot/efi/${disk}"
-     then
-	umount "/boot/efi/${disk}"
-     fi
+    # Create Folder
+    mkdir -p "${efi_mount_path}"
 
-     # Ensure that /boot/efi/<disk> CANNOT be written directly (a partition must be mounted there)
-     chattr +i "/boot/efi/${disk}"
+    # Ensure that nothing is mounted there
+    if mountpoint -q "${efi_mount_path}"
+    then
+        umount "${efi_mount_path}"
+    fi
 
-     # Configure FSTAB
-     UUID=$(blkid -s UUID -o value /dev/disk/by-id/${disk}-part${efi_num})
+    # Ensure that /boot/efi/<disk> CANNOT be written directly (a partition must be mounted there)
+    chattr +i "${efi_mount_path}"
 
-     echo "UUID=$UUID           /boot/efi/${disk}		vfat		nofail,x-systemd.automount,umask=0022,fmask=0022,dmask=0022		0	1" >> /etc/fstab
+    # Configure FSTAB
+    UUID=$(blkid -s UUID -o value /dev/disk/by-id/${disk}-part${efi_num})
+
+    echo "UUID=$UUID           ${efi_mount_path}		vfat		nofail,x-systemd.automount,umask=0022,fmask=0022,dmask=0022		0	1" >> /etc/fstab
 done
 
 
@@ -91,7 +94,7 @@ done
 #EOF
 #
 #                # Install tool
-#                source $toolpath/modules/setup_systemd_mdadm_assemble.sh
+#                source ${toolpath}/modules/setup_systemd_mdadm_assemble.sh
 #
 #        elif [ "${numdisks_total}" -eq 1 ]
 #        then
@@ -110,5 +113,8 @@ systemctl daemon-reload
 # Mount EFI partition
 for disk in "${disks[@]}"
 do
-    mount "/boot/efi/${disk}"
+    # Get EFI Mount Path
+    efi_mount_path=$(get_efi_mount_path "${disk}")
+
+    mount "${efi_mount_path}"
 done

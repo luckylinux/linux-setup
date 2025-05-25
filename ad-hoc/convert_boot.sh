@@ -8,7 +8,7 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Mount Current /boot partition
 mount /boot
@@ -23,15 +23,15 @@ cd ..
 
 # Check if ZFS boot pool exists
 # If so, export it
-v=$(zpool list | grep $bootpool | tail -n1)
+v=$(zpool list | grep ${bootpool} | tail -n1)
 if [ ! "$v" == "" ]
 then
-   echo "Unmount ZFS boot pool <$bootpool>"
-   zpool export $bootpool
+   echo "Unmount ZFS boot pool <${bootpool}>"
+   zpool export ${bootpool}
 fi
 
 # Execute Boot Device(s) Setup
-source $toolpath/modules/setup_boot_partition.sh
+source ${toolpath}/modules/setup_boot_partition.sh
 
 # Move /boot to /boot_local_$timestamp
 chattr -i /boot
@@ -42,7 +42,7 @@ mkdir -p /boot
 chattr +i /boot
 
 # Configure FSTAB
-source $toolpath/modules/configure_boot_partition.sh
+source ${toolpath}/modules/configure_boot_partition.sh
 
 # Mount the newly created boot device
 mount /boot

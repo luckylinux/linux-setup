@@ -13,7 +13,7 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load Configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Mount /boot if not already mounted
 if mountpoint -q "/boot"
@@ -23,15 +23,19 @@ else
 	mount /boot
 fi
 
+
 for disk in "${disks[@]}"
 do
-   # Mount /boot/efi/<disk> if not already mounted
-   if mountpoint -q "/boot/efi/${disk}"
-   then
-	   x=1	# Silent
-   else
-	   mount "/boot/efi/${disk}"
-   fi
+	# Get EFI Mount Path
+	efi_mount_path=$(get_efi_mount_path "${disk}")
+
+	# Mount /boot/efi/<disk> if not already mounted
+	if mountpoint -q "${efi_mount_path}"
+	then
+		x=1 # Silent
+	else
+		mount "${efi_mount_path}"
+	fi
 done
 
 # Update initramfs
@@ -72,7 +76,7 @@ then
 	    exit 1
 	fi
 
-	# Copy files to /etc/grub.d to be sure that the correct root=ZFS=$rootpool/ROOT/$distribution is generated
+	# Copy files to /etc/grub.d to be sure that the correct root=ZFS=${rootpool}/ROOT/$distribution is generated
 	# (otherwise sometimes root=ZFS=/ROOT/$distribution is used instead which of course fails, returning you to busybox without any error/message)
 	# See issue https://github.com/zfsonlinux/grub/issues/18
 
@@ -104,17 +108,20 @@ then
 
         # BIOS
         for disk in "${disks[@]}"
-	do
-	    grub-install "/dev/disk/by-id/${disk}"
+	    do
+	        grub-install "/dev/disk/by-id/${disk}"
         done
-
-        # UEFI
-        for disk in "${disks[@]}"
-        do
-	    # grub-install --target=x86_64-efi "/dev/disk/by-id/${disk}"
-	    # grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=ubuntu --recheck --no-floppy
-	    grub-install --target=x86_64-efi --efi-directory="/boot/efi/${disk}" --boot-directory="/boot/" --no-nvram "/dev/disk/by-id/${disk}"
-	done
+        
+		# UEFI
+		for disk in "${disks[@]}"
+		do
+			# Get EFI Mount Path
+			efi_mount_path=$(get_efi_mount_path "${disk}")
+		
+			# grub-install --target=x86_64-efi "/dev/disk/by-id/${disk}"
+			# grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=ubuntu --recheck --no-floppy
+			grub-install --target=x86_64-efi --efi-directory="/boot/efi/${disk}" --boot-directory="/boot/" --no-nvram "/dev/disk/by-id/${disk}"
+		done
 
 	# Disable some GRUB modules
 	chmod -x /etc/grub.d/30_os-prober

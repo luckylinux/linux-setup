@@ -7,7 +7,7 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Generate Timestamp for backup archive
 timestamp=$(date +"%Y%m%d-%H%M%S")
@@ -21,20 +21,20 @@ modprobe zfs
 # Import existing pool
 mkdir -p $destination
 chattr +i $destination
-zpool import -R $destination -f $rootpool
+zpool import -R $destination -f ${rootpool}
 
 # Wait a few seconds
 sleep 5
 
 # Snapshot all
-zfs snapshot -r $rootpool@$snapshotname
+zfs snapshot -r ${rootpool}@$snapshotname
 
 # Send to remote server
 # Normal Mode
-#zfs send -Rv $rootpool@snapshotname | ssh root@backupserver zfs receive -F $backupdataset
+#zfs send -Rv ${rootpool}@snapshotname | ssh root@backupserver zfs receive -F $backupdataset
 
 # Readonly Mode
-zfs send -Rv $rootpool@$snapshotname | ssh root@$backupserver zfs receive -o readonly=on -Fduv $backupdataset
+zfs send -Rv ${rootpool}@$snapshotname | ssh root@$backupserver zfs receive -o readonly=on -Fduv $backupdataset
 
 
 
@@ -64,11 +64,14 @@ cd ../ || exit
 ## BACKUP EFI
 for disk in "${disks[@]}"
 do
+    # Get EFI Mount Path
+    efi_mount_path=$(get_efi_mount_path "${disk}")
+
     # Get all info
     #efi_info=$(chroot ${destination} /usr/bin/findmnt --fstab)
 
     # Get only the SOURCE info (e.g. UUID=xxxx)
-    efi_source=$(chroot ${destination} /usr/bin/findmnt --fstab --target /boot/efi/${disk} --noheadings --output=SOURCE)
+    efi_source=$(chroot ${destination} /usr/bin/findmnt --fstab --target "${efi_mount_path}" --noheadings --output=SOURCE)
 
     # Save Exit Code
     efi_exit_code=$?
@@ -77,26 +80,25 @@ do
     if [ -n "${efi_source}" ] && [ "${efi_exit_code}" -eq 0 ]
     then
         # Mount Partition
-        mount "${efi_source}" "${destination}/boot/efi/${disk}"
+        mount "${efi_source}" "${destination}${efi_mount_path}"
     fi
 
     # Backup Current EFI Partition Content
-    cd "${destination}/boot/efi/${disk}" || exit
+    cd "${destination}${efi_mount_path}" || exit
     tar cvzf "${toolpath}/efi_${disk}_${timestamp}.tar.gz" ./
     cd ../../ || exit
 
     # Unmount /boot/efi
-    if mountpoint -q "${destination}/boot/efi/${disk}"
+    if mountpoint -q "${destination}${efi_mount_path}"
     then
-        umount "${destination}/boot/efi/${disk}"
+        umount "${destination}${efi_mount_path}"
     fi
 done
 
 
-
 # Unmount /boot
-umount ${destination}/boot
+umount "${destination}/boot"
 
 ## UNMOUNT AND EXPORT POOL
 zfs umount -a
-zpool export -f ${rootpool}
+zpool export -f "${rootpool}"

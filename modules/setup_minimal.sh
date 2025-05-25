@@ -1,26 +1,29 @@
-#/bin/bash
+#!/bin/bash
 
 # Determine toolpath if not set already
 relativepath="../" # Define relative path to go from this script to the root level of the tool
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # (Re)load configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Mount system if not already mounted
-source $toolpath/modules/mount_system.sh
+source ${toolpath}/modules/mount_system.sh
 
 # Unmount Existing efi Devices (if mounted)
 if [[ -d "${destination}/boot/efi" ]]
 then
     for disk in "${disks[@]}"
     do
-        if [[ -d "${destination}/boot/efi/${disk}" ]]
+        # Get EFI Mount Path
+        efi_mount_path=$(get_efi_mount_path "${disk}")
+
+        if [[ -d "${destination}${efi_mount_path}" ]]
         then
             # Unmount Existing efi Devices (if mounted)
-            if mountpoint -q "${destination}/boot/efi/${disk}"
+            if mountpoint -q "${destination}${efi_mount_path}"
             then
-                umount "${destination}/boot/efi/${disk}"
+                umount "${destination}${efi_mount_path}"
             fi
         fi
     done
@@ -42,17 +45,20 @@ chattr -i "${destination}/boot/efi"
 
 for disk in "${disks[@]}"
 do
-     # Create required Subfolder
-     mkdir -p "${destination}/boot/efi/${disk}"
+    # Get EFI Mount Path
+    efi_mount_path=$(get_efi_mount_path "${disk}")
 
-     # Make sure that a Partition has been mounted there
-     chattr +i "${destination}/boot/efi/${disk}"
+    # Create required Subfolder
+    mkdir -p "${destination}${efi_mount_path}"
+
+    # Make sure that a Partition has been mounted there
+    chattr +i "${destination}${efi_mount_path}"
 done
 
 # Mount boot Filesystems
-if [ "${bootfs}" == "ext4" ]
+if [[ "${bootfs}" == "ext4" ]]
 then
-        if [ "${numdisks_total}" -eq 1 ]
+        if [[ "${numdisks_total}" -eq 1 ]]
         then
                 # Get UUID of Single Disk Partition
                 UUID=$(blkid -s UUID -o value ${devices[0]}-part${boot_num})
@@ -76,12 +82,16 @@ fi
 # Mount efi Filesystems
 for disk in "${disks[@]}"
 do
+    # Get EFI Mount Path
+    efi_mount_path=$(get_efi_mount_path "${disk}")
+
     # Get UUID of Single Disk Partition
     UUID=$(blkid -s UUID -o value "/dev/disk/by-id/${disk}-part${efi_num}")
 
     # Mount Filesystem
-    mount "/dev/disk/by-id/${disk}-part${efi_num}" "${destination}/boot/efi/${disk}"
+    mount "/dev/disk/by-id/${disk}-part${efi_num}" "${destination}${efi_mount_path}"
 done
+
 
 #if [ "xxxx" == "ext4" ]
 #then
@@ -109,7 +119,7 @@ done
 debootstrap --exclude="${excludepackages}" --include="${includepackages}" "${release}" "${destination}" "${source}"
 
 # Bind required filesystems
-source $toolpath/modules/mount_bind.sh
+source ${toolpath}/modules/mount_bind.sh
 
 # Copy APT sources
 cp "${toolpath}/repositories/${distribution}/${release}/sources.list" "${destination}/etc/apt/sources.list"
@@ -179,4 +189,4 @@ then
 fi
 
 # Setup & perform chroot
-source $toolpath/modules/setup_chroot.sh
+source ${toolpath}/modules/setup_chroot.sh

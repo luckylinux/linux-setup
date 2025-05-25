@@ -19,7 +19,7 @@ fi
 echo "Starting script"
 
 # Load Configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Load default Shell Profile
 source /etc/profile

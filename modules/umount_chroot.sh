@@ -5,21 +5,24 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load config
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Disable swap
 swapoff -a
 
 # Umount proc, sys, dev
-source $toolpath/modules/umount_bind.sh
+source ${toolpath}/modules/umount_bind.sh
 
 # Umount root/boot
 
 for disk in "${disks[@]}"
 do
-    if mountpoint -q "${destination}/boot/efi/${disk}"
+    # Get EFI Mount Path
+    efi_mount_path=$(get_efi_mount_path "${disk}")
+
+    if mountpoint -q "${destination}${efi_mount_path}"
     then
-	    umount -R "${destination}/boot/efi/${disk}"
+	    umount -R "${destination}${efi_mount_path}"
     fi
 done
 
@@ -36,9 +39,9 @@ fi
 # Try to unmount all ZFS filesystems first
 zfs umount -a
 
-# Kill all processes that keep $rootpool busy
+# Kill all processes that keep ${rootpool} busy
 # grep -i rpool /proc/*/mounts shows additional PID that are NOT shown by `mount -l`
-mapfile processes < <(grep -i $rootpool /proc/*/mounts)
+mapfile processes < <(grep -i ${rootpool} /proc/*/mounts)
 # Output might be something like
 #/proc/1539/mounts:rpool/ROOT/debian /mnt/rescue zfs rw,nodev,noatime,xattr,noacl,casesensitive 0 0
 #/proc/1555/mounts:rpool/ROOT/debian /mnt/rescue zfs rw,nodev,noatime,xattr,noacl,casesensitive 0 0
@@ -52,16 +55,16 @@ do
 done
 
 # Export pool
-if [ "$rootfs" == "zfs" ]
+if [ "${rootfs}" == "zfs" ]
 then
     zfs umount -a
-    zpool export -f $rootpool
+    zpool export -f ${rootpool}
 fi
 
-if [ "$bootfs" == "zfs" ]
+if [ "${bootfs}" == "zfs" ]
 then
     zfs umount -a
-    zpool export -f $bootpool
+    zpool export -f ${bootpool}
 fi
 
 # This causes `lsof` to look MUCH Deeper for opened Files and Processes

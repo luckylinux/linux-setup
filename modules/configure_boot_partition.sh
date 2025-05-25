@@ -5,7 +5,7 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load Configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Configure FSTAB
 if [ "$bootfs" == "zfs" ]
@@ -59,7 +59,7 @@ EOF
                 done
 
 	        # Install Tool / Wrapper for Managing MDADM Devices
-                source $toolpath/modules/setup_systemd_mdadm_assemble.sh
+                source ${toolpath}/modules/setup_systemd_mdadm_assemble.sh
 
         fi
         # else

@@ -5,7 +5,7 @@ relativepath="../" # Define relative path to go from this script to the root lev
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load configuration
-source $toolpath/load.sh
+source "${toolpath}/load.sh"
 
 # Make sure we are NOT in chroot
 # Abort if we are trying to run the script from the chroot environment
@@ -77,7 +77,7 @@ apt-get install zfs-initramfs
 #        shared 0
 #
 #zfspool: local-zfs
-#        pool $rootpool/data
+#        pool ${rootpool}/data
 #        content images,rootdir
 #        sparse 1
 #EOF
