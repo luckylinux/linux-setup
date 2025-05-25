@@ -283,7 +283,3 @@ if [[ "${separate_data}" == "yes" ]]
 then
     source ${toolpath}/modules/setup_data_partition.sh
 fi
-
-# Configure root partition
-# PROBABLY NOT CORRECT, SINCE IT WILL AFFECT THE HOST, NOT THE CHROOT ENVIRONMENT !
-source ${toolpath}/modules/configure_root_partition.sh
