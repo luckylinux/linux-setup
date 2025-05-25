@@ -17,8 +17,11 @@ source ${toolpath}/modules/setup_mountpoint.sh
 installroot="" # Needed to ensure that we install on the Host
 source ${toolpath}/modules/setup_requirements.sh
 
-# Unlock encrypted root (if applicable)
-source ${toolpath}/modules/unlock_encrypted_root.sh
+if [ "${encryptrootfs}" == "luks" ] || [ "${encryptdatafs}" == "zfs" ]
+then
+    # Unlock encrypted root (if applicable)
+    source ${toolpath}/modules/unlock_encrypted_root.sh
+fi
 
 # Mount system
 source ${toolpath}/modules/mount_system.sh
