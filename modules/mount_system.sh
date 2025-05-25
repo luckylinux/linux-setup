@@ -29,7 +29,7 @@ then
 else
     if [ "${numdisks_total}" -eq 1 ]
     then
-        mount ${devices[0]} "${destination}"
+        mount ${devices[0]}${root_num} "${destination}"
     else
         mount /dev/${mdadm_root_device} "${destination}"
     fi
