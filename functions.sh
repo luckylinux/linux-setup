@@ -5,7 +5,8 @@ relativepath="./" # Define relative path to go from this script to the root leve
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
 # Load config
-source "${toolpath}/load.sh"
+# Do **NOT** use load.sh here, since it will create an Infitite Loop
+source "${toolpath}/config.sh"
 
 # Get OS Release
 get_os_release() {
