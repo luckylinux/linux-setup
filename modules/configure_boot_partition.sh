@@ -18,8 +18,7 @@ then
                 # Configure Partition in /etc/fstab
                 UUID=$(blkid -s UUID -o value ${devices[0]}-part${boot_num})
 		echo "# /boot on ext4" >> /etc/fstab
-                echo "UUID=$UUID	/boot			ext4		auto,noatime,nofail,x-systemd.automount						0	1" >> /etc/fstab
-        
+                echo "UUID=$UUID	/boot			ext4		auto,noatime,nofail,x-systemd.automount					0	1" >> /etc/fstab
         else
                 # Install mdadm if not already installed
                 if [[ -z $(command -v mdadm) ]]
@@ -30,7 +29,7 @@ then
                 # Configure MDADM Array in /etc/fstab
                 UUID=$(blkid -s UUID -o value /dev/${mdadm_boot_device})
                 echo "# /boot on ext4 with MDADM Software Raid-1" >> /etc/fstab
-                echo "UUID=$UUID	/boot			ext4		auto,noatime,nofail,x-systemd.automount						0	1" >> /etc/fstab
+                echo "UUID=$UUID	/boot			ext4		auto,noatime,nofail,x-systemd.automount					0	1" >> /etc/fstab
 
 		# Also add MDADM Array to /etc/mdadm/mdadm.conf
                 # When this is enabled, mdadm does NOT create the devices as expected

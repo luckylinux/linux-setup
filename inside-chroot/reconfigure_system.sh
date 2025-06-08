@@ -15,6 +15,21 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Load Configuration
 source "${toolpath}/load.sh"
 
+# Ask User if want to Start with a clean /etc/fstab
+read -p "Do you want to start with a clean /etc/fsta [yes/no]: " clean_fstab
+
+# Generate Timestamp
+timestamp=$(date +"%Y%m%d-%H%M%S")
+
+# Backup existing /etc/fstab
+cp /etc/fstab /etc/fstab.backup.${timestamp}
+
+
+if [[ "${clean_fstab}" == "yes" ]]
+then
+   rm /etc/fstab
+fi
+
 # Configure /boot Partition & /etc/fstab
 source ${toolpath}/modules/configure_boot_partition.sh
 
