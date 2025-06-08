@@ -57,4 +57,25 @@ then
                 zfs mount ${dataset}
             fi
         done <<< "${dataset}s"
+else
+    if [ "${numdisks_total}" -eq 1 ]
+    then
+        mount ${devices[0]}-part${boot_num} "${destination}/boot"
+    else
+        mount /dev/${mdadm_boot_device} "${destination}/boot"
+    fi
 fi
+
+
+# Mount efi Filesystems
+for disk in "${disks[@]}"
+do
+    # Get EFI Mount Path
+    efi_mount_path=$(get_efi_mount_path "${disk}")
+
+    # Get UUID of Single Disk Partition
+    UUID=$(blkid -s UUID -o value "/dev/disk/by-id/${disk}-part${efi_num}")
+
+    # Mount Filesystem
+    mount "/dev/disk/by-id/${disk}-part${efi_num}" "${destination}${efi_mount_path}"
+done
