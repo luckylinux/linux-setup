@@ -7,6 +7,9 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Load configuration
 source "${toolpath}/load.sh"
 
+# Install rsync
+apt-get install rsync
+
 # Check to See if restore_from_mountpoint is set and exists
 if [ -z "${restore_from_mountpoint}" ] || [ ! -d "${restore_from_mountpoint}" ]
 then
