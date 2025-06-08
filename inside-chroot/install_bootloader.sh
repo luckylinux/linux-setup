@@ -120,7 +120,7 @@ then
 		
 			# grub-install --target=x86_64-efi "/dev/disk/by-id/${disk}"
 			# grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=ubuntu --recheck --no-floppy
-			grub-install --target=x86_64-efi --efi-directory="/boot/efi/${disk}" --boot-directory="/boot/" --no-nvram "/dev/disk/by-id/${disk}"
+			grub-install --target=x86_64-efi --efi-directory="${efi_mount_path}" --boot-directory="/boot/" --no-nvram "/dev/disk/by-id/${disk}"
 		done
 
 	# Disable some GRUB modules
