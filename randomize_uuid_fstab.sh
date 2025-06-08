@@ -7,6 +7,12 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Load configuration
 source "${toolpath}/load.sh"
 
+# Generate Timestamp
+timestamp=$(date +"%Y%m%d%H%M%S")
+
+# Backup current /etc/fstab
+cp /etc/fstab /etc/fstab.backup.${timestamp}
+
 # Process Lines in /etc/fstab starting with UUID=
 mapfile lines < <(cat /etc/fstab | grep -E "^UUID=")
 
