@@ -26,11 +26,11 @@ source ${toolpath}/modules/init_partitioning.sh
 # Setup disks
 source ${toolpath}/modules/setup_partitions.sh
 
-# Migrate system
-source ${toolpath}/modules/migrate_system.sh
-
 # Mount system
 source ${toolpath}/modules/mount_system.sh
+
+# Migrate system
+source ${toolpath}/modules/migrate_system.sh
 
 # Mount bind
 source ${toolpath}/modules/mount_bind.sh
