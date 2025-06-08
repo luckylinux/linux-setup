@@ -45,6 +45,10 @@ then
     source ${toolpath}/modules/configure_data_partition.sh
 fi
 
+# Interactive Mode
+read -p "/etc/fstab is going to be opened in Interactive Mode for you to remove any old Lines at the Top. Press ENTER to Continue" keep_going
+nano /etc/fstab
+
 # Setup Clevis
 if [ "$clevisautounlock" == "yes" ]
 then
