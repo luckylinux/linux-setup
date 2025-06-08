@@ -34,8 +34,11 @@ fi
 # Kill all running processes
 killall parted
 
-# Load mdadm if not running already
-systemctl start mdadm
+if [ "${bootfs}" != "zfs" ] && [ ${numdisks_total} -gt 1 ]
+then
+    # Load mdadm if not running already
+    systemctl start mdadm
 
-# Stop existing arrays if exists
-source ${toolpath}/modules/umount_mdadm.sh
+    # Stop existing arrays if exists
+    source ${toolpath}/modules/umount_mdadm.sh
+fi
