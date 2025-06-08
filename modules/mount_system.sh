@@ -37,7 +37,6 @@ fi
 
 # Create Folders for boot and efi
 mkdir -p ${destination}/boot
-mkdir -p ${destination}/boot/efi
 
 # Import ZFS pool if not already mounted
 if [ "${bootfs}" == "zfs" ]
@@ -66,6 +65,8 @@ else
     fi
 fi
 
+# Create Folder for /boot/efi
+mkdir -p ${destination}/boot/efi
 
 # Mount efi Filesystems
 for disk in "${disks[@]}"
