@@ -35,8 +35,12 @@ else
     fi
 fi
 
-# Create Folders for boot and efi
-mkdir -p ${destination}/boot
+# Create Folders for /boot & make it immutable
+if [[ ! -d "${destination}/boot" ]]
+then
+    mkdir -p ${destination}/boot
+    chattr +i ${destination}/boot
+fi
 
 # Import ZFS pool if not already mounted
 if [ "${bootfs}" == "zfs" ]
@@ -65,8 +69,14 @@ else
     fi
 fi
 
-# Create Folder for /boot/efi
-mkdir -p ${destination}/boot/efi
+
+# Create Folders for /boot & make it immutable
+if [[ ! -d "${destination}/boot/efi" ]]
+then
+    mkdir -p ${destination}/boot/efi
+    chattr +i ${destination}/boot/efi
+fi
+
 
 # Mount efi Filesystems
 for disk in "${disks[@]}"
