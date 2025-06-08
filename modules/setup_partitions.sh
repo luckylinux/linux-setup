@@ -39,25 +39,28 @@ do
 	# Get label
 	label="${labels[$counter]}"
 
-	# Clear superblock if mdadm was used previously
-        if [[ -e "${device}-part${efi_num}" ]]
+        if [[ $(command -v mdadm) ]]
         then
-	     mdadm --zero-superblock --force "${device}-part${efi_num}" >> $n
-        fi
+            # Clear superblock if mdadm was used previously
+            if [[ -e "${device}-part${efi_num}" ]]
+            then
+	        mdadm --zero-superblock --force "${device}-part${efi_num}" >> $n
+            fi
 
-        if [[ -e "${device}-part${boot_num}" ]]
-        then
-	    mdadm --zero-superblock --force "${device}-part${boot_num}" >> $n
-        fi
+            if [[ -e "${device}-part${boot_num}" ]]
+            then
+	        mdadm --zero-superblock --force "${device}-part${boot_num}" >> $n
+            fi
 
-        if [[ -e "${device}-part${root_num}" ]]
-        then
-	     mdadm --zero-superblock --force "${device}-part${root_num}" >> $n
-        fi
+            if [[ -e "${device}-part${root_num}" ]]
+            then
+	        mdadm --zero-superblock --force "${device}-part${root_num}" >> $n
+            fi
 
-        if [[ -e "${device}-part${data_num}" ]]
-        then
-             mdadm --zero-superblock --force "${device}-part${data_num}" >> $n
+            if [[ -e "${device}-part${data_num}" ]]
+            then
+                mdadm --zero-superblock --force "${device}-part${data_num}" >> $n
+            fi
         fi
 
 	# Pause
