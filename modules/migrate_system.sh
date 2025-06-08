@@ -42,7 +42,19 @@ then
         fi
     fi
 
+    # Make sure that Folders are NOT mounted (they shouldn't be to begin with, but better to make sure)
+    if mountpoint -q "${restore_from_mountpoint}/mnt"
+    then
+       umount -l -f "${restore_from_mountpoint}/mnt"
+    fi
+
+    if mountpoint -q "${restore_from_mountpoint}/media"
+    then
+       umount -l -f "${restore_from_mountpoint}/media"
+    fi
+
     # Copy Data using rsync
+    # rsync -aPAUHEtv -X --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found"} ${restore_from_mountpoint}/ ${destination}
     rsync -aPAXUHEtv --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found"} ${restore_from_mountpoint}/ ${destination}
 else
     # Abort
