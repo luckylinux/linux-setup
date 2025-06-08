@@ -8,8 +8,14 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 source "${toolpath}/load.sh"
 
 # Load ZFS module
-modprobe spl
-modprobe zfs
+if [[ $(command -v zfs) ]]
+then
+    if [ "${rootfs}" == "zfs" ] || [ "${bootfs}" == "zfs" ] 
+    then
+        modprobe spl
+        modprobe zfs
+    fi
+fi
 
 # Export pool if in use
 if [ "${rootfs}" == "zfs" ]
@@ -23,7 +29,7 @@ if [ "${encryptrootfs}" == "luks" ]
 then
     for disk in "${disks[@]}"
     do
-	    # Close Device
+        # Close Device
         if [[ -e "/dev/mapper/${disk}_root_crypt" ]]
         then
             cryptsetup luksClose "${disk}_root_crypt"
