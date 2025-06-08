@@ -37,7 +37,10 @@ then
 fi
 
 # Try to unmount all ZFS filesystems first
-zfs umount -a
+if [[ $(command -v zfs) ]]
+then
+    zfs umount -a
+fi
 
 # Kill all processes that keep ${rootpool} busy
 # grep -i rpool /proc/*/mounts shows additional PID that are NOT shown by `mount -l`
@@ -57,14 +60,28 @@ done
 # Export pool
 if [ "${rootfs}" == "zfs" ]
 then
-    zfs umount -a
-    zpool export -f ${rootpool}
+    if [[ $(command -v zfs) ]]
+    then
+        zfs umount -a
+    fi
+
+    if [[ $(command -v zpool) ]]
+    then
+        zpool export -f ${rootpool}
+    fi
 fi
 
 if [ "${bootfs}" == "zfs" ]
 then
-    zfs umount -a
-    zpool export -f ${bootpool}
+    if [[ $(command -v zfs) ]]
+    then
+        zfs umount -a
+    fi
+
+    if [[ $(command -v zpool) ]]
+    then
+        zpool export -f ${bootpool}
+    fi
 fi
 
 # This causes `lsof` to look MUCH Deeper for opened Files and Processes

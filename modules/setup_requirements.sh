@@ -12,7 +12,10 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Must be perfomed also on the Host if the Guest uses Backports
 if [[ "${usezfsbackports}" == "yes" ]]
 then
-    source ${toolpath}/modules/setup_zfs_backports.sh
+    if [ "${rootfs}" == "zfs" ] || [ "${bootfs}" == "zfs" ]
+    then
+        source ${toolpath}/modules/setup_zfs_backports.sh
+    fi
 fi
 
 # Install system tools
@@ -22,20 +25,35 @@ apt-get install --yes aptitude nload htop lm-sensors net-tools debootstrap dosfs
 apt-get install --yes gdisk parted
 
 # Install mdadm
-apt-get install --yes mdadm
+if [ "${bootfs}" != "zfs" ] && [ ${numdisks_total} -gt 1 ]
+then
+    apt-get install --yes mdadm
+fi
 
 # Install cryptsetup / LUKS
-apt-get install --yes cryptsetup
+if [ "${encryptrootfs}" == "luks" ] || [ "${encryptdatafs}" == "yes" ]
+then
+    apt-get install --yes cryptsetup
+fi
 
 # Install clevis
-apt-get install --yes clevis clevis-luks clevis-initramfs cryptsetup-initramfs
+if [[ "${clevisautounlock}" == "yes" ]]
+then
+    apt-get install --yes clevis clevis-luks clevis-initramfs cryptsetup-initramfs
+fi
 
 # Install ZFS
-apt-get install --yes zfsutils-linux zfs-zed zfs-dkms
+if [ "${rootfs}" == "zfs" ] || [ "${bootfs}" == "zfs" ]
+then
+    apt-get install --yes zfsutils-linux zfs-zed zfs-dkms
+fi
 
 # Fix MDADM automount
-echo "Disabling automatic mounting in /etc/mdadm/mdadm.conf"
-sed -i -e 's/\#DEVICE partitions containers/DEVICE \/dev\/null/g' '/etc/mdadm/mdadm.conf'
+if [[ -f /etc/mdadm/mdadm.conf ]]
+then
+    echo "Disabling automatic mounting in /etc/mdadm/mdadm.conf"
+    sed -i -e 's/\#DEVICE partitions containers/DEVICE \/dev\/null/g' '/etc/mdadm/mdadm.conf'
+fi
 
 # Enable mdadm service with systemd
 # If this is a link remove it

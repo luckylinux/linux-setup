@@ -10,32 +10,50 @@ source "${toolpath}/load.sh"
 # If either Root Filesystem and/or Boot Filesystem is on ZFS
 if [ "${rootfs}" == "zfs" ] || [ "${bootfs}" == "zfs" ]
 then
-    zfs umount -a
+    if [[ $(command -v zfs) ]]
+    then
+        zfs umount -a
+    fi
 fi
 
 # Unmount ZFS Root Pool
 if [ "${rootfs}" == "zfs" ]
 then
-    zfs umount ${rootpool}
-    zfs umount ${rootpool}/ROOT/${distribution}
+    if [[ $(command -v zfs) ]]
+    then
+        zfs umount ${rootpool}
+        zfs umount ${rootpool}/ROOT/${distribution}
+    fi
 
-    # Export Pool
-    zpool export -f ${rootpool}
+    if [[ $(command -v zpool) ]]
+    then
+        # Export Pool
+        zpool export -f ${rootpool}
+    fi
 fi
 
 # Unmount ZFS Boot Pool
 if [ "${bootfs}" == "zfs" ]
 then
-    zfs umount ${bootpool}
-    zfs umount ${bootpool}/BOOT/${distribution}
+    if [[ $(command -v zfs) ]]
+    then
+        zfs umount ${bootpool}
+        zfs umount ${bootpool}/BOOT/${distribution}
+    fi
 
-    # Export Pool
-    zpool export -f ${bootpool}
+    if [[ $(command -v zpool) ]]
+    then
+        # Export Pool
+        zpool export -f ${bootpool}
+    fi
 fi
 
 # If either Root Filesystem and/or Boot Filesystem is on ZFS
 # Try to unmount everything again
 if [ "${rootfs}" == "zfs" ] || [ "${bootfs}" == "zfs" ]
 then
-    zfs umount -a
+    if [[ $(command -v zfs) ]]
+    then
+        zfs umount -a
+    fi
 fi
