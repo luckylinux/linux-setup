@@ -311,7 +311,7 @@ do
         for item in /dev/disk/by-id/*
         do
             # Get Real Path
-            check_realpath=$(readlink --canonicalize-missing "/dev/disk/by-id/${item}")
+            check_realpath=$(readlink --canonicalize-missing "${item}")
 
             # Echo
             echo -e "\t\t- Compare ${item} -> ${check_realpath} against ${device_real_path}"
