@@ -322,7 +322,7 @@ do
                 if [[ "${device_id}" == "" ]]
                 then
                     # Set Device id
-                    device_id=$(basename "${check_realpath}")
+                    device_id=$(basename "${item}")
                 else
                     # Error: Duplicate Entry Found
                     echo -e "\t\tERROR: Duplicate Entry found for ${device_id}"
