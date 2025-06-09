@@ -46,7 +46,7 @@ do
     line=$(echo "${line}" | head -n1)
 
     # Store in old_lines
-    old_lines+=(line)
+    old_lines+=("${line}")
 done
 
 # Mount System Chroot
