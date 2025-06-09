@@ -11,7 +11,7 @@ source "${toolpath}/load.sh"
 timestamp=$(date +"%Y%m%d%H%M%S")
 
 # Install Requirements
-apt-get install uuid-runtime
+apt-get install uuid-runtime mtools
 
 # Unmount System to have a "Clean Start"
 source ${toolpath}/umount_everything.sh
@@ -45,12 +45,26 @@ do
     # Clean line
     line=$(echo "${line}" | head -n1)
 
+    # Store in old_lines
+    old_lines+=(line)
+done
+
+# Mount System Chroot
+source ${toolpath}/modules/mount_system.sh
+source ${toolpath}/modules/mount_bind.sh
+
+# Perform Replacement
+for index_line in $(seq 0 ${#new_lines[@]})
+do
+    # Extract Values
+    old_line=${old_lines[${index_line}]}
+
     # Extract Filesystem Part
-    filesystem=$(echo "${line}" | awk '{print $1}')
-    targetmount=$(echo "${line}" | awk '{print $2}')
+    filesystem=$(echo "${old_line}" | awk '{print $1}')
+    targetmount=$(echo "${old_line}" | awk '{print $2}')
 
     # Echo
-    # echo "Processing Line: ${line}"
+    # echo "Processing Line: ${old_line}"
     # echo "(${filesystem} -> ${targetmount})"
 
     # Get current UUID
@@ -68,8 +82,6 @@ do
     # Check if Device actually exists
     if [[ -e "${device_uuid_path}" ]]
     then
-        # Store in old_lines
-        old_lines+=(line)
 
         # Get Device /dev/sdX by reading where the Link Points to
         device_real_path=$(readlink --canonicalize-missing "${device_uuid_path}")
@@ -130,31 +142,19 @@ do
         echo "Define Change in UUID from ${current_uuid} to ${new_uuid} for Mount Point ${targetmount}"
 
         # New /etc/fstab Line
-        updated_line=$(echo "${line}" | sed -E "s|^UUID=([0-9a-zA-Z-]+)(\s.*)$|UUID=${new_uuid}\2|")
+        new_line=$(echo "${old_line}" | sed -E "s|^UUID=([0-9a-zA-Z-]+)(\s.*)$|UUID=${new_uuid}\2|")
 
         # Store in new_lines
-        new_lines+=(updated_line)
-
-        # Echo
-        # echo "Replace Line ${line} with Line ${updated_line} in /etc/fstab"
+        new_lines+=(new_line)
     else
         # Error
         echo "ERROR: Device ${device_uuid_path} does NOT exist. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
         echo "ABORTING !"
         exit 6
     fi
-done
 
-# Mount System Chroot
-source ${toolpath}/modules/mount_system.sh
-source ${toolpath}/modules/mount_bind.sh
-
-# Perform Replacement
-for index_line in $(seq 0 ${#new_lines[@]})
-do
-    # Extract Values
-    old_line=${old_lines[${index_line}]}
-    new_line=${new_lines[${index_line}]}
+    # Not really needed anymore
+    # new_line=${new_lines[${index_line}]}
 
     # Echo
     echo "Changing ${destination}/etc/fstab Line"
@@ -162,7 +162,7 @@ do
     echo -e "\t- New: ${new_line}"
 
     # Perform Replacement
-    sed -Ei "s|${line}|${updated_line}|"  /etc/fstab
+    sed -Ei "s|${old_line}|${updated_line}|" /etc/fstab
 done
 
 # Copy tool to chroot folder
