@@ -16,6 +16,22 @@ then
     exit 1
 fi
 
+# Display Warning
+echo -e "**WARNING**"
+echo -e "This Script will change the UUID and PARTUUID for the Following Devices"
+for device in "${devices[@]}"
+do
+    echo -e "\t- ${device}"
+done
+
+read -p "Are you sure you want to proceed [yes/no]: " keep_going
+
+if [[ "${keep_going}" != "yes" ]]
+then
+    echo -e "ABORTING Execution"
+    exit 2
+fi
+
 # Generate Timestamp
 backup_timestamp=$(date +"%Y%m%d%H%M%S")
 
