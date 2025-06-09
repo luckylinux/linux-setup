@@ -55,7 +55,12 @@ do
         partition_number=$(basename "${device_real_path}" | sed -E "s|^([a-zA-Z]+)([0-9]+)$|\2|")
 
         # Get Filesystem Type
-        filesystem_type=$(lsblk -o FSTYPE --raw --noheadings --nodeps "/dev/${device_name}${partition_number}")
+        # ** does NOT work inside Chroot since lsblk relies on udev which relies on systemd which does NOT work inside Chroots **
+        # filesystem_type=$(lsblk -o FSTYPE --raw --noheadings --nodeps "/dev/${device_name}${partition_number}")
+
+        # Get Filesystem Type
+        # filesystem_type=$(parted -s "/dev/${device_name}${partition_number}" print --json | grep -Ei '"filesystem": ".*"' | sed -E 's|^\s?*"filesystem": "([a-zA-Z0-9]+)"$|\1|')
+        filesystem_type=$(parted -s "/dev/${device_name}${partition_number}" print --machine | tail -n1 | cut -d: -f5)
 
         # Get Current PARTUUID
         # This returns an empty String :/
@@ -77,7 +82,7 @@ do
 
             # Use sgdisk for PARTUUID
             sgdisk -u "${partition_number}:${new_partuuid}" "/dev/${device_name}"
-        elif [[ "${filesystem_type}" == vfat ]]
+        elif [[ "${filesystem_type}" == "fat32" ]]
         then
             # Need to use a shorter UUID in the Form of 4 Characters + "-" + 4 Characters (all uppercase)
             part_one=$(echo "${new_uuid}" | cut -c 1-4)
