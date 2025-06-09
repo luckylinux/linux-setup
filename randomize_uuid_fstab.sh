@@ -160,7 +160,7 @@ do
         new_line=$(echo "${old_line}" | sed -E "s|^UUID=([0-9a-zA-Z-]+)(\s.*)$|UUID=${new_uuid}\2|")
 
         # Store in new_lines
-        new_lines+=(new_line)
+        new_lines+=("${new_line}")
     else
         # Error
         echo "ERROR: Device ${device_uuid_path} does NOT exist. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
