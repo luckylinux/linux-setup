@@ -7,6 +7,14 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Load configuration
 source "${toolpath}/load.sh"
 
+# Parse Action
+action="$1"
+
+if [[ -z "${action}" ]]
+then
+    echo "ERROR: you must specify an Action. Choose between: [update-fstab,update-devices]"
+fi
+
 # Generate Timestamp
 backup_timestamp=$(date +"%Y%m%d%H%M%S")
 
@@ -73,6 +81,12 @@ do
     # Extract Values
     old_line=${old_lines[${index_line}]}
 
+    if [[ "${action}" == "update-devices" ]]
+    then
+        # Use the existing Line in /etc/fstab
+        new_line="${old_line}"
+    fi
+
     # Extract Filesystem Part
     filesystem=$(echo "${old_line}" | awk '{print $1}')
     targetmount=$(echo "${old_line}" | awk '{print $2}')
@@ -85,19 +99,12 @@ do
     # Get current UUID
     current_uuid=$(echo "${filesystem}" | sed -E "s|UUID=([0-9a-zA-Z-]+)|\1|")
 
-    # Generate new UUID
-    new_uuid=$(uuidgen)
-
-    # Generte new PARTUUID
-    new_partuuid=$(uuidgen)
-
     # Get Device link from /dev/disk/by-uuid/<current_uuid>
     device_uuid_path="/dev/disk/by-uuid/${current_uuid}"
 
-    # Check if Device actually exists
-    if [[ -e "${device_uuid_path}" ]]
+    # Check if Device actually exists and is a Symlink
+    if [[ -L "${device_uuid_path}" ]]
     then
-
         # Get Device /dev/sdX by reading where the Link Points to
         device_real_path=$(readlink --canonicalize-missing "${device_uuid_path}")
 
@@ -106,6 +113,22 @@ do
 
         # Get Device Partition Number
         partition_number=$(basename "${device_real_path}" | sed -E "s|^([a-zA-Z]+)([0-9]+)$|\2|")
+
+        # Get Current PARTUUID
+        current_partuuid=$(udevadm info --property=ID_PART_ENTRY_UUID --query=property "/dev/${device_name}${partition_number}" | sed -E "s|ID_PART_ENTRY_UUID=([0-9a-zA-Z-]+)|\1|")
+
+        if [[ "${action}" == "update-fstab" ]]
+        then
+            # Generate new UUID
+            new_uuid=$(uuidgen)
+
+            # Generte new PARTUUID
+            new_partuuid=$(uuidgen)
+        else
+            # Use old Values
+            new_uuid="${current_uuid}"
+            new_partuuid="${current_partuuid}"
+        fi
 
         # Get Filesystem Type
         # ** does NOT work inside Chroot since lsblk relies on udev which relies on systemd which does NOT work inside Chroots **
@@ -119,9 +142,6 @@ do
         # This returns an empty String :/
         # current_partuuid=$(lsblk -o PARTUUID --raw --noheadings --nodeps "/dev/${device_name}${partition_number}")
 
-        # Get Current PARTUUID
-        current_partuuid=$(udevadm info --property=ID_PART_ENTRY_UUID --query=property "/dev/${device_name}${partition_number}" | sed -E "s|ID_PART_ENTRY_UUID=([0-9a-zA-Z-]+)|\1|")
-
         # Echo
         echo -e "\t\tProcessing Partition Number ${partition_number} of Device ${device_name}"
 
@@ -130,11 +150,17 @@ do
             # Must perform a fresh Check of the Filesystem in order to use tune2fs
             e2fsck -f "${device_real_path}"
 
-            # Use tune2fs for FS UUID
-            tune2fs -U "${new_uuid}" "${device_real_path}"
+            if [[ "${current_uuid}" != "${new_uuid}" ]]
+            then
+                # Use tune2fs for FS UUID
+                tune2fs -U "${new_uuid}" "${device_real_path}"
+            fi
 
-            # Use sgdisk for PARTUUID
-            sgdisk -u "${partition_number}:${new_partuuid}" "/dev/${device_name}"
+            if [[ "${current_partuuid}" != "${new_partuuid}" ]]
+            then
+                # Use sgdisk for PARTUUID
+                sgdisk -u "${partition_number}:${new_partuuid}" "/dev/${device_name}"
+            fi
         elif [[ "${filesystem_type}" == "fat32" ]]
         then
             # Need to use a shorter UUID in the Form of 4 Characters + "-" + 4 Characters (all uppercase)
@@ -143,21 +169,30 @@ do
             new_uuid="${part_one}${part_two}"
             new_uuid=${new_uuid^^}
 
-            # Use mlabel for FS UUID
-            mlabel -N "${new_uuid}" -i  "${device_real_path}" ::
+            if [[ "${current_uuid}" != "${new_uuid}" ]]
+            then
+                # Use mlabel for FS UUID
+                mlabel -N "${new_uuid}" -i  "${device_real_path}" ::
+            fi
 
-            # Use sgdisk for PARTUUID
-            sgdisk -u "${partition_number}:${new_partuuid}" "/dev/${device_name}"
+            if [[ "${current_partuuid}" != "${new_partuuid}" ]]
+            then
+                # Use sgdisk for PARTUUID
+                sgdisk -u "${partition_number}:${new_partuuid}" "/dev/${device_name}"
+            fi
         else
             echo "ERROR: ${filesystem_type} is NOT supported. Aborting !"
             exit 9
         fi
 
-        # Echo
-        echo -e "\t\tDefine Change in UUID from ${current_uuid} to ${new_uuid} for Mount Point ${targetmount}"
+        if [[ "${action}" == "update-fstab" ]]
+        then
+            # Echo
+            echo -e "\t\tDefine Change in UUID from ${current_uuid} to ${new_uuid} for Mount Point ${targetmount}"
 
-        # New /etc/fstab Line
-        new_line=$(echo "${old_line}" | sed -E "s|^UUID=([0-9a-zA-Z-]+)(\s.*)$|UUID=${new_uuid}\2|")
+            # New /etc/fstab Line
+            new_line=$(echo "${old_line}" | sed -E "s|^UUID=([0-9a-zA-Z-]+)(\s.*)$|UUID=${new_uuid}\2|")
+        fi
 
         # Store in new_lines
         new_lines+=("${new_line}")
@@ -195,8 +230,11 @@ do
     echo -e "\t\t\t- Old: ${old_line}"
     echo -e "\t\t\t- New: ${new_line}"
 
-    # Perform Replacement
-    sed -Ei "s|${old_line}|${updated_line}|" ${destination}/etc/fstab
+    if [[ "${old_line}" != "${new_line}" ]]
+    then
+        # Perform Replacement
+        sed -Ei "s|${old_line}|${updated_line}|" ${destination}/etc/fstab
+    fi
 done
 
 # Copy tool to chroot folder
