@@ -211,19 +211,19 @@ do
                 if [[ "${filesystem_type}" == ext* ]]
                 then
                     # Must perform a fresh Check of the Filesystem in order to use tune2fs
-                    e2fsck -f "${device_real_path}"
+                    e2fsck -f "/dev/${device_name}${partition_number}"
 
                     if [[ "${current_device_uuid}" != "${new_uuid}" ]]
                     then
                         # Use tune2fs for FS UUID
-                        tune2fs -U "${new_uuid}" "${device_real_path}"
+                        tune2fs -U "${new_uuid}" "/dev/${device_name}${partition_number}"
                     fi
                 elif [[ "${filesystem_type}" == "fat32" ]]
                 then
                     if [[ "${current_device_uuid}" != "${new_uuid}" ]]
                     then
                         # Use mlabel for FS UUID
-                        mlabel -N "${new_uuid}" -i  "${device_real_path}" ::
+                        mlabel -N "${new_uuid}" -i  "/dev/${device_name}${partition_number}" ::
                     fi
                 else
                     echo "ERROR: ${filesystem_type} is NOT supported. Aborting !"
