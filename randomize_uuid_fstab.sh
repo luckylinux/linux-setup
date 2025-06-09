@@ -10,9 +10,13 @@ source "${toolpath}/load.sh"
 # Parse Action
 action="$1"
 
+# Define Devices Base Folder
+devices_basepath="${toolpath}/data/devices"
+
+# Abort if Action not set
 if [[ -z "${action}" ]]
 then
-    echo "ERROR: you must specify an Action. Choose between: [update-fstab,update-devices]"
+    echo "ERROR: you must specify an Action. Choose between: [generate-new,update-fstab,update-devices]"
     exit 1
 fi
 
@@ -39,113 +43,95 @@ backup_timestamp=$(date +"%Y%m%d%H%M%S")
 apt-get install uuid-runtime mtools
 
 # Unmount System to have a "Clean Start"
-source ${toolpath}/umount_everything.sh
-source ${toolpath}/umount_everything.sh
+source "${toolpath}/umount_everything.sh"
 
 # Mount System Chroot
-source ${toolpath}/modules/mount_system.sh
+source "${toolpath}/modules/mount_system.sh"
 
+# Abort if / of Chroot couldn't be mounted
 if ! mountpoint -q ${destination}
 then
     echo "ERROR: ${destination} cannot be mounted. Aborting !"
+    exit 3
 fi
 
 # Backup current /etc/fstab
-cp ${destination}/etc/fstab ${destination}/etc/fstab.backup.${backup_timestamp}
+cp "${destination}/etc/fstab" "${destination}/etc/fstab.backup.${backup_timestamp}"
 
 # Echo
 echo "Reading Lines from ${destination}/etc/fstab"
 
 # Get Lines in /etc/fstab starting with UUID=
-mapfile lines < <(cat ${destination}/etc/fstab | grep -E "^UUID=")
+mapfile fstab_lines < <(cat ${destination}/etc/fstab | grep -E "^UUID=")
 
 # Echo
 echo "Unmounting Everything from Target Mountpoint"
 
 # Unmount System Chroot in order to be able to run tune2fs and e2fsck
-source ${toolpath}/umount_everything.sh
-source ${toolpath}/umount_everything.sh
+source "${toolpath}/umount_everything.sh"
+
+# Echo
+echo -e "Performing Step #1 - Reading /etc/fstab Contents"
 
 # Initialize Arrays
-old_lines=()
-new_lines=()
-
-# Echo
-echo -e "Performing Step #1"
+old_fstab_lines=()
+new_fstab_lines=()
 
 # Loop over FSTAB Lines
-for line in "${lines[@]}"
+for fstab_line in "${fstab_lines[@]}"
 do
     # Clean line
-    line=$(echo "${line}" | head -n1)
+    fstab_line=$(echo "${fstab_line}" | head -n1)
 
     # Echo
-    echo -e "\tStore Cleaned Line ${line} from /etc/fstab in Array"
+    echo -e "\tStore Cleaned Line ${fstab_line} from /etc/fstab in Array"
 
-    # Store in old_lines
-    old_lines+=("${line}")
+    # Store in old_fstab_lines
+    old_fstab_lines+=("${fstab_line}")
 done
 
-# Counter the Number of Items
-number_lines="${#old_lines[@]}"
+# Counter the Number of Items in /etc/fstab
+fstab_number_lines="${#old_fstab_lines[@]}"
 
 # Echo
-echo -e "Performing Step #2"
+echo -e "Performing Step #2 - Updating Devices UUID/PARTUUID"
 
-# Change Partitions PARTUUID / Filesystems UUID
-for index_line in $(seq 0 $((number_lines-1)))
+# Loop over Devices
+for device in "${devices[@]}"
 do
-    # Extract Values
-    old_line=${old_lines[${index_line}]}
+    # Create Folder Structure
+    mkdir -p "${devices_basepath}/${device}"
 
-    if [[ "${action}" == "update-devices" ]]
-    then
-        # Use the existing Line in /etc/fstab
-        new_line="${old_line}"
-    fi
+    # Get Device /dev/sdX by reading where the Link Points to
+    device_real_path=$(readlink --canonicalize-missing "${device}")
 
-    # Extract Filesystem Part
-    filesystem=$(echo "${old_line}" | awk '{print $1}')
-    targetmount=$(echo "${old_line}" | awk '{print $2}')
+    # Get Device Name
+    device_name=$(basename "${device_real_path}" | sed -E "s|^([a-zA-Z]+)([0-9]+)$|\1|")
 
-    # Echo
-    echo -e "\t[$((index_line+1))]"
-    echo -e "\t\tProcessing Line: ${old_line}"
-    echo -e "\t\t(${filesystem} -> ${targetmount})"
+    # Get List of Partitions
+    mapfile -t partitions_number < <( find /dev -iwholename "${device}[0-9]"* | sed -E "s|${device}||g" | sort --human )
 
-    # Get current UUID
-    current_uuid=$(echo "${filesystem}" | sed -E "s|UUID=([0-9a-zA-Z-]+)|\1|")
+    # Loop over Partitions
+    for partition_number in "${partitions_number[@]}"
+    do
+        # Echo
+        echo -e "\t\tProcessing Partition Number ${partition_number} of Device ${device_name}"
 
-    # Get Device link from /dev/disk/by-uuid/<current_uuid>
-    device_uuid_path="/dev/disk/by-uuid/${current_uuid}"
-
-    # Check if Device actually exists and is a Symlink
-    if [[ -L "${device_uuid_path}" ]]
-    then
-        # Get Device /dev/sdX by reading where the Link Points to
-        device_real_path=$(readlink --canonicalize-missing "${device_uuid_path}")
-
-        # Get Device Name
-        device_name=$(basename "${device_real_path}" | sed -E "s|^([a-zA-Z]+)([0-9]+)$|\1|")
-
-        # Get Device Partition Number
-        partition_number=$(basename "${device_real_path}" | sed -E "s|^([a-zA-Z]+)([0-9]+)$|\2|")
+        # Get current UUID
+        current_device_uuid=$(udevadm info --property=ID_FS_UUID --query=property "/dev/${device_name}${partition_number}" | sed -E "s|ID_FS_UUID=([0-9a-zA-Z-]+)|\1|")
 
         # Get Current PARTUUID
-        current_partuuid=$(udevadm info --property=ID_PART_ENTRY_UUID --query=property "/dev/${device_name}${partition_number}" | sed -E "s|ID_PART_ENTRY_UUID=([0-9a-zA-Z-]+)|\1|")
+        # This returns an empty String - lsblk / udev / systemd NOT working inside Chroot
+        # current_device_partuuid=$(lsblk -o PARTUUID --raw --noheadings --nodeps "/dev/${device_name}${partition_number}")        
 
-        if [[ "${action}" == "update-fstab" ]]
-        then
-            # Generate new UUID
-            new_uuid=$(uuidgen)
+        # Get Current PARTUUID
+        current_device_partuuid=$(udevadm info --property=ID_PART_ENTRY_UUID --query=property "/dev/${device_name}${partition_number}" | sed -E "s|ID_PART_ENTRY_UUID=([0-9a-zA-Z-]+)|\1|")
 
-            # Generte new PARTUUID
-            new_partuuid=$(uuidgen)
-        else
-            # Use old Values
-            new_uuid="${current_uuid}"
-            new_partuuid="${current_partuuid}"
-        fi
+        # Get Device link from /dev/disk/by-uuid/<current_device_uuid>
+        device_uuid_path="/dev/disk/by-uuid/${current_device_uuid}"
+
+        # Get Device link from /dev/disk/by-partuuid/<current_device_partuuid>
+        device_partuuid_path="/dev/disk/by-uuid/${current_device_partuuid}"
 
         # Get Filesystem Type
         # ** does NOT work inside Chroot since lsblk relies on udev which relies on systemd which does NOT work inside Chroots **
@@ -155,132 +141,244 @@ do
         # filesystem_type=$(parted -s "/dev/${device_name}${partition_number}" print --json | grep -Ei '"filesystem": ".*"' | sed -E 's|^\s?*"filesystem": "([a-zA-Z0-9]+)"$|\1|')
         filesystem_type=$(parted -s "/dev/${device_name}${partition_number}" print --machine | tail -n1 | cut -d: -f5)
 
-        # Get Current PARTUUID
-        # This returns an empty String :/
-        # current_partuuid=$(lsblk -o PARTUUID --raw --noheadings --nodeps "/dev/${device_name}${partition_number}")
+        # Create Folder Structure
+        mkdir -p "${devices_basepath}/${device}/${partition_number}"
 
-        # Echo
-        echo -e "\t\tProcessing Partition Number ${partition_number} of Device ${device_name}"
-
-        if [[ "${filesystem_type}" == ext* ]]
+        # Save Current UUID if not done already
+        if [[ ! -f "${devices_basepath}/${device}/old.uuid" ]]
         then
-            # Must perform a fresh Check of the Filesystem in order to use tune2fs
-            e2fsck -f "${device_real_path}"
+            echo "${current_device_uuid}" >> "${devices_basepath}/${device}/old.uuid"
+        fi
 
-            if [[ "${current_uuid}" != "${new_uuid}" ]]
-            then
-                # Use tune2fs for FS UUID
-                tune2fs -U "${new_uuid}" "${device_real_path}"
-            fi
-
-            if [[ "${current_partuuid}" != "${new_partuuid}" ]]
-            then
-                # Use sgdisk for PARTUUID
-                sgdisk -u "${partition_number}:${new_partuuid}" "/dev/${device_name}"
-            fi
-        elif [[ "${filesystem_type}" == "fat32" ]]
+        # Save Current PARTUUID if not done already
+        if [[ ! -f "${devices_basepath}/${device}/old.partuuid" ]]
         then
-            # Need to use a shorter UUID in the Form of 4 Characters + "-" + 4 Characters (all uppercase)
-            part_one=$(echo "${new_uuid}" | cut -c 1-4)
-            part_two=$(echo "${new_uuid}" | cut -c 5-8)
-            new_uuid="${part_one}${part_two}"
-            new_uuid=${new_uuid^^}
+            echo "${current_device_partuuid}" >> "${devices_basepath}/${device}/old.partuuid"
+        fi                
 
-            if [[ "${current_uuid}" != "${new_uuid}" ]]
-            then
-                # Use mlabel for FS UUID
-                mlabel -N "${new_uuid}" -i  "${device_real_path}" ::
-            fi
+        # Determine new UUID
+        if [[ ! -f "${devices_basepath}/${device}/new.uuid" ]]
+        then
+            # Generate new UUID
+            new_uuid=$(uuidgen)
 
-            if [[ "${current_partuuid}" != "${new_partuuid}" ]]
+            # Shorten it in case of FAT32 to 8 Characters
+            if [[ "${filesystem_type}" == "fat32" ]]
             then
-                # Use sgdisk for PARTUUID
-                sgdisk -u "${partition_number}:${new_partuuid}" "/dev/${device_name}"
+                # Need to use a shorter UUID in the Form of 8 Characters
+                new_uuid=$(echo "${new_uuid}" | cut -c 1-8)
+
+                # Transform into all Uppercase
+                new_uuid=${new_uuid^^}
+
+                # Write to File
+                echo "${new_uuid}" >> "${devices_basepath}/${device}/new.uuid"
             fi
         else
-            echo "ERROR: ${filesystem_type} is NOT supported. Aborting !"
-            exit 9
+            # Load new UUID from File
+            new_uuid=$(cat "${devices_basepath}/${device}/new.uuid")
         fi
 
-        if [[ "${action}" == "update-fstab" ]]
+        # Determine new PARTUUID
+        if [[ ! -f "${devices_basepath}/${device}/new.partuuid" ]]
         then
-            # Echo
-            echo -e "\t\tDefine Change in UUID from ${current_uuid} to ${new_uuid} for Mount Point ${targetmount}"
+            # Generte new PARTUUID
+            new_partuuid=$(uuidgen)
 
-            # New /etc/fstab Line
-            new_line=$(echo "${old_line}" | sed -E "s|^UUID=([0-9a-zA-Z-]+)(\s.*)$|UUID=${new_uuid}\2|")
+            # Write to File
+            echo "${new_partuuid}" >> "${devices_basepath}/${device}/new.partuuid"
+        else
+            # Load new UUID from File
+            new_partuuid=$(cat "${devices_basepath}/${device}/new.partuuid")
         fi
 
-        # Store in new_lines
-        new_lines+=("${new_line}")
-    else
-        # Error
-        echo "ERROR: Device ${device_uuid_path} does NOT exist. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
-        echo "ABORTING !"
-        exit 6
-    fi
 
-    # Not really needed anymore
-    # new_line=${new_lines[${index_line}]}
+        # Check if Device & Partition actually exists and is a Symlink
+        if [[ -L "${device_uuid_path}" ]]
+        then
+            # Update UUID
+            if [[ "${filesystem_type}" == ext* ]]
+            then
+                # Must perform a fresh Check of the Filesystem in order to use tune2fs
+                e2fsck -f "${device_real_path}"
+
+                if [[ "${current_device_uuid}" != "${new_uuid}" ]]
+                then
+                    # Use tune2fs for FS UUID
+                    tune2fs -U "${new_uuid}" "${device_real_path}"
+                fi
+            elif [[ "${filesystem_type}" == "fat32" ]]
+            then
+                # Need to use a shorter UUID in the Form of 4 Characters + "-" + 4 Characters (all uppercase)
+                part_one=$(echo "${new_uuid}" | cut -c 1-4)
+                part_two=$(echo "${new_uuid}" | cut -c 5-8)
+                new_uuid="${part_one}${part_two}"
+                new_uuid=${new_uuid^^}
+
+                if [[ "${current_device_uuid}" != "${new_uuid}" ]]
+                then
+                    # Use mlabel for FS UUID
+                    mlabel -N "${new_uuid}" -i  "${device_real_path}" ::
+                fi
+            else
+                echo "ERROR: ${filesystem_type} is NOT supported. Aborting !"
+                exit 9
+            fi
+
+            # Update PARTUUID
+            if [[ "${current_device_partuuid}" != "${new_partuuid}" ]]
+            then
+                # Use sgdisk for PARTUUID
+                sgdisk -u "${partition_number}:${new_partuuid}" "/dev/${device_name}"
+            fi
+
+        else
+            # Error
+            echo "ERROR: Device ${device_uuid_path} does NOT exist. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
+            echo "ABORTING !"
+            exit 6
+        fi
+    done
 done
+
 
 # Echo
 echo "Mount Target System to Target Mountpoint ${destination}"
 
 # Mount System Chroot
-source ${toolpath}/modules/mount_system.sh
-source ${toolpath}/modules/mount_bind.sh
+source "${toolpath}/modules/mount_system.sh"
+source "${toolpath}/modules/mount_bind.sh"
 
 # Echo
-echo -e "Performing Step #3"
+echo -e "Performing Step #3 - Update /etc/fstab"
 
-# Perform Replacement
-for index_line in $(seq 0 $((number_lines-1)))
+# Loop over FSTAB Entries
+for index_fstab_line in $(seq 0 $((fstab_number_lines-1)))
 do
     # Extract Values
-    old_line=${old_lines[${index_line}]}
-    new_line=${new_lines[${index_line}]}
+    old_fstab_line=${old_fstab_lines[${index_fstab_line}]}
+
+    # Extract Filesystem Part
+    filesystem=$(echo "${old_fstab_line}" | awk '{print $1}')
+    targetmount=$(echo "${old_fstab_line}" | awk '{print $2}')
+
+    # Get current Fstab UUID
+    current_fstab_uuid=$(echo "${filesystem}" | sed -E "s|UUID=([0-9a-zA-Z-]+)|\1|")
 
     # Echo
-    echo -e "\t[$((index_line+1))]"
-    echo -e "\t\tChanging ${destination}/etc/fstab Line"
-    echo -e "\t\t\t- Old: ${old_line}"
-    echo -e "\t\t\t- New: ${new_line}"
+    echo -e "\tProcessing current Fstab Line: ${old_fstab_line}"
 
-    if [[ "${old_line}" != "${new_line}" ]]
+    # Define UUID Path
+    device_uuid_path="/dev/disk/by-uuid/${current_fstab_uuid}"
+
+    # Check if Device exists
+    if [[ -L "${device_uuid_path}" ]]
     then
-        # Perform Replacement
-        sed -Ei "s|${old_line}|${updated_line}|" ${destination}/etc/fstab
+        # Get Device /dev/sdX by reading where the Link Points to
+        device_real_path=$(readlink --canonicalize-missing "${device_uuid_path}")
+
+        # Echo
+        echo -e 
+
+        # Initialize Value
+        device_id=""
+
+        # Find Link in Reverse to by-id Folder
+        for item in /dev/disk/by-id/*
+        do
+            # Echo
+            echo -e "\t\t- Compare ${item} against ${device_real_path}"
+
+            # Get Real Path
+            check_realpath=$(readlink --canonicalize-missing "/dev/disk/by-id/${item}")
+
+            # Compare
+            if [[ "${check_realpath}" == "${device_real_path}" ]]
+            then
+                if [[ "${device_id}" == "" ]]
+                then
+                    # Set Device id
+                    device_id=$(basename "${check_realpath}")
+                else
+                    # Error: Duplicate Entry Found
+                    echo "ERROR: Duplicate Entry found for ${device_id}"
+                fi
+            fi
+        done
+
+        if [[ -z "${device_id}" ]]
+        then
+            # Error
+            echo "ERROR: Device ID couldn't be found for ${device_uuid_path} / ${device_real_path}"
+            exit 8
+        fi
+
+        # Echo
+        echo -e "\t\tFound Matching Device ID in /dev/disk/by-id/${device_id}"
+
+        # Load new UUID
+        if [[ -f "${devices_basepath}/${device_id}/new.uuid" ]]
+        then
+            new_uuid=$(cat "${devices_basepath}/${device_id}/new.uuid")
+        else
+            # Error
+            echo "ERROR: new UUID not set for Device ${device_uuid_path} / ${device_real_path}"
+            exit 11
+        fi
+
+        # Load new PARTUUID
+        if [[ -f "${devices_basepath}/${device_id}/new.partuuid" ]]
+        then
+            new_partuuid=$(cat "${devices_basepath}/${device_id}/partnew.uuid")
+        else
+            # Error
+            echo "ERROR: new PARTUUID not set for Device ${device_uuid_path} / ${device_real_path}"
+            exit 12
+        fi
+
+        # Echo
+        echo -e "\t[$((index_fstab_line+1))]"
+        echo -e "\t\tProcessing Line: ${old_fstab_line}"
+        echo -e "\t\t(Filesystem: ${filesystem} -> Target Mount Point: ${targetmount})"
+
+        # Echo
+        echo -e "\t\tDefine Change in UUID from ${current_fstab_uuid} to ${new_uuid} for Mount Point ${targetmount}"
+
+        # New /etc/fstab Line
+        new_fstab_line=$(echo "${old_fstab_line}" | sed -E "s|^UUID=([0-9a-zA-Z-]+)(\s.*)$|UUID=${new_uuid}\2|")
+
+        # Store in new_fstab_lines
+        # Not really needed anymore
+        new_fstab_lines+=("${new_fstab_line}")
+
+        # Echo
+        echo -e "\t[$((index_fstab_line+1))]"
+        echo -e "\t\tChanging ${destination}/etc/fstab Line"
+        echo -e "\t\t\t- Old: ${old_fstab_line}"
+        echo -e "\t\t\t- New: ${new_fstab_line}"
+
+        # Check if old and new Fstab Lines are any different
+        if [[ "${old_fstab_line}" != "${new_fstab_line}" ]]
+        then
+            # Perform Replacement
+            sed -Ei "s|${old_fstab_line}|${new_fstab_line}|" "${destination}/etc/fstab"
+        fi
+    else
+        # Error
+        echo "ERROR: Device ${device_uuid_path} does NOT exist. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
+        echo "ABORTING !"
+        exit 7
     fi
 done
 
 # Copy tool to chroot folder
-source ${toolpath}/modules/copy_tool_to_chroot.sh
+source "${toolpath}/modules/copy_tool_to_chroot.sh"
 
 # Run inside-chroot/install_bootloader.sh inside chroot
-chroot ${destination} /bin/bash -c "/tools_install/${timestamp}/inside-chroot/install_bootloader.sh"
-
-# Update Grub Configuration
-#if [[ $(command -v update-grub) ]]
-#then
-#    update-grub
-#elif [[ $(command -v grub2-mkconfig) ]]
-#then
-#    grub2-mkconfig -o /boot/grub2/grub.cfg
-#fi
-
-# Update Initramfs
-#if [[ $(command -v update-initramfs) ]]
-#then
-#    update-initramfs -k all -u
-#elif [[ $(command -v dracut) ]]
-#then
-#    dracut --regenerate-all --force
-#fi
+chroot "${destination}" /bin/bash -c "/tools_install/${timestamp}/inside-chroot/install_bootloader.sh"
 
 # Echo
 echo "Unmounting Everything from Target Mountpoint"
 
 # Unmount Chroot again
-source ${toolpath}/umount_everything.sh
-source ${toolpath}/umount_everything.sh
+source "${toolpath}/umount_everything.sh"
