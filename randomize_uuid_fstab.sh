@@ -28,8 +28,14 @@ fi
 # Backup current /etc/fstab
 cp ${destination}/etc/fstab ${destination}/etc/fstab.backup.${backup_timestamp}
 
+# Echo
+echo "Reading Lines from ${destination}/etc/fstab"
+
 # Get Lines in /etc/fstab starting with UUID=
 mapfile lines < <(cat ${destination}/etc/fstab | grep -E "^UUID=")
+
+# Echo
+echo "Unmounting Everything from Target Mountpoint"
 
 # Unmount System Chroot in order to be able to run tune2fs and e2fsck
 source ${toolpath}/umount_everything.sh
@@ -166,6 +172,9 @@ do
     # new_line=${new_lines[${index_line}]}
 done
 
+# Echo
+echo "Mount Target System to Target Mountpoint ${destination}"
+
 # Mount System Chroot
 source ${toolpath}/modules/mount_system.sh
 source ${toolpath}/modules/mount_bind.sh
@@ -209,6 +218,9 @@ chroot ${destination} /bin/bash -c "/tools_install/${timestamp}/inside-chroot/in
 #then
 #    dracut --regenerate-all --force
 #fi
+
+# Echo
+echo "Unmounting Everything from Target Mountpoint"
 
 # Unmount Chroot again
 source ${toolpath}/umount_everything.sh
