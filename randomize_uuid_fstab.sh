@@ -220,12 +220,6 @@ do
                     fi
                 elif [[ "${filesystem_type}" == "fat32" ]]
                 then
-                    # Need to use a shorter UUID in the Form of 4 Characters + "-" + 4 Characters (all uppercase)
-                    part_one=$(echo "${new_uuid}" | cut -c 1-4)
-                    part_two=$(echo "${new_uuid}" | cut -c 5-8)
-                    new_uuid="${part_one}${part_two}"
-                    new_uuid=${new_uuid^^}
-
                     if [[ "${current_device_uuid}" != "${new_uuid}" ]]
                     then
                         # Use mlabel for FS UUID
