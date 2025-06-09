@@ -39,11 +39,17 @@ source ${toolpath}/umount_everything.sh
 old_lines=()
 new_lines=()
 
+# Echo
+echo -e "Performing Step #1"
+
 # Loop over FSTAB Lines
 for line in "${lines[@]}"
 do
     # Clean line
     line=$(echo "${line}" | head -n1)
+
+    # Echo
+    echo -e "\t[$((index_line+1))] Reading Line ${line} from /etc/fstab"
 
     # Store in old_lines
     old_lines+=("${line}")
@@ -51,6 +57,9 @@ done
 
 # Counter the Number of Items
 number_lines="${#old_lines[@]}"
+
+# Echo
+echo -e "Performing Step #2"
 
 # Change Partitions PARTUUID / Filesystems UUID
 for index_line in $(seq 0 $((number_lines-1)))
@@ -63,8 +72,9 @@ do
     targetmount=$(echo "${old_line}" | awk '{print $2}')
 
     # Echo
-    # echo "Processing Line: ${old_line}"
-    # echo "(${filesystem} -> ${targetmount})"
+    echo -e "\t[$((index_line+1))]"
+    echo -e "\t\tProcessing Line: ${old_line}"
+    echo -e "\t\t(${filesystem} -> ${targetmount})"
 
     # Get current UUID
     current_uuid=$(echo "${filesystem}" | sed -E "s|UUID=([0-9a-zA-Z-]+)|\1|")
@@ -107,7 +117,7 @@ do
         current_partuuid=$(udevadm info --property=ID_PART_ENTRY_UUID --query=property "/dev/${device_name}${partition_number}" | sed -E "s|ID_PART_ENTRY_UUID=([0-9a-zA-Z-]+)|\1|")
 
         # Echo
-        echo "Processing Partition Number ${partition_number} of Device ${device_name}"
+        echo -e "\t\tProcessing Partition Number ${partition_number} of Device ${device_name}"
 
         if [[ "${filesystem_type}" == ext* ]]
         then
@@ -138,7 +148,7 @@ do
         fi
 
         # Echo
-        echo "Define Change in UUID from ${current_uuid} to ${new_uuid} for Mount Point ${targetmount}"
+        echo -e "\t\tDefine Change in UUID from ${current_uuid} to ${new_uuid} for Mount Point ${targetmount}"
 
         # New /etc/fstab Line
         new_line=$(echo "${old_line}" | sed -E "s|^UUID=([0-9a-zA-Z-]+)(\s.*)$|UUID=${new_uuid}\2|")
@@ -160,13 +170,17 @@ done
 source ${toolpath}/modules/mount_system.sh
 source ${toolpath}/modules/mount_bind.sh
 
+# Echo
+echo -e "Performing Step #3"
+
 # Perform Replacement
 for index_line in $(seq 0 $((number_lines-1)))
 do
     # Echo
-    echo "Changing ${destination}/etc/fstab Line"
-    echo -e "\t- Old: ${old_line}"
-    echo -e "\t- New: ${new_line}"
+    echo -e "\t[$((index_line+1))]"
+    echo -e "\t\tChanging ${destination}/etc/fstab Line"
+    echo -e "\t\t\t- Old: ${old_line}"
+    echo -e "\t\t\t- New: ${new_line}"
 
     # Perform Replacement
     sed -Ei "s|${old_line}|${updated_line}|" ${destination}/etc/fstab
