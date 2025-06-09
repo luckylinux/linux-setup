@@ -54,7 +54,7 @@ do
     # Find Associated PID
     PID=`ls -d $file 2> /dev/null | awk -F "/" '{print $3}'`
     FILE_FILTERED=$(echo "$file" | head -n1)
-    INFO_FILTERED=$(printf "%s;%s;%s\n" "$PID" `ps -p "$PID" 2> /dev/null | tail -n1 | awk '{print $4}'` `readlink $file 2> /dev/null` | grep -Eiv "(;/$|^\s*;\s*$|^.*?;\s*$)")
+    INFO_FILTERED=$(printf "%s;%s;%s\n" "$PID" `ps -p "$PID" 2> /dev/null | tail -n1 | awk '{print $4}'` `readlink $file 2> /dev/null` | grep -Eiv "(;/$|^\s*;\s*$|^.*?;\s*$)" || true)
     IFS=';' read -ra INFO_SPLIT <<< "$INFO_FILTERED"; unset IFS
 
     # Echo
