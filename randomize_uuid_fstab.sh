@@ -10,6 +10,9 @@ source "${toolpath}/load.sh"
 # Generate Timestamp
 timestamp=$(date +"%Y%m%d%H%M%S")
 
+# Install Requirements
+apt-get install uuidgen
+
 # Mount System Chroot
 source ${toolpath}/modules/mount_system.sh
 
@@ -25,8 +28,8 @@ cp ${destination}/etc/fstab ${destination}/etc/fstab.backup.${timestamp}
 mapfile lines < <(cat /etc/fstab | grep -E "^UUID=")
 
 # Unmount System Chroot in order to be able to run tune2fs and e2fsck
-source ${toolpath}/modules/umount_system.sh
-source ${toolpath}/modules/umount_system.sh
+source ${toolpath}/modules/umount_chroot.sh
+source ${toolpath}/modules/umount_chroot.sh
 
 # Initialize Arrays
 old_lines=()
@@ -183,5 +186,6 @@ chroot ${destination} /bin/bash -c "/tools_install/${timestamp}/inside-chroot/in
 #fi
 
 # Unmount Chroot again
-source ${toolpath}/modules/umount_chroot.sh
 source ${toolpath}/modules/umount_bind.sh
+source ${toolpath}/modules/umount_chroot.sh
+source ${toolpath}/modules/umount_chroot.sh
