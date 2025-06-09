@@ -205,7 +205,8 @@ do
             echo "INFO: Skip Partition ${partition_number} for Device ${device_real_path} since it's marked with bios_grub Flag"
         else
             # Wait in case UDEV needs to refresh list of Devices
-            inotifywait -e create --timeout 5 --include filename "${device_uuid_path}"
+            # ** This will ONLY Trigger on Device Creation, so it does NOT work if it already exists **
+            # inotifywait -e create --timeout 5 --include filename "${device_uuid_path}"
 
             # Check if Device & Partition actually exists and is a Symlink
             if [[ -L "${device_uuid_path}" ]]
