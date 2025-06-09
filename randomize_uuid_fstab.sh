@@ -55,7 +55,7 @@ do
     line=$(echo "${line}" | head -n1)
 
     # Echo
-    echo -e "\t[$((index_line+1))] Reading Line ${line} from /etc/fstab"
+    echo -e "\t[$((index_line+1))] Store Cleaned Line ${line} from /etc/fstab"
 
     # Store in old_lines
     old_lines+=("${line}")
