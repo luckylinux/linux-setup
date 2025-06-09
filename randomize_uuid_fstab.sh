@@ -99,8 +99,11 @@ echo -e "Performing Step #2 - Updating Devices UUID/PARTUUID"
 # Loop over Devices
 for device in "${devices[@]}"
 do
+    # Get only the last Part of the Path
+    device_id=$(basename "${device}")
+
     # Create Folder Structure
-    mkdir -p "${devices_basepath}/${device}"
+    mkdir -p "${devices_basepath}/${device_id}"
 
     # Get Device /dev/sdX by reading where the Link Points to
     device_real_path=$(readlink --canonicalize-missing "${device}")
@@ -109,7 +112,7 @@ do
     device_name=$(basename "${device_real_path}" | sed -E "s|^([a-zA-Z]+)([0-9]+)$|\1|")
 
     # Get List of Partitions
-    mapfile -t partitions_number < <( find /dev -iwholename "${device}[0-9]"* | sed -E "s|${device}||g" | sort --human )
+    mapfile -t partitions_number < <( find /dev -iwholename "${device_real_path}[0-9]"* | sed -E "s|${device_real_path}||g" | sort --human )
 
     # Loop over Partitions
     for partition_number in "${partitions_number[@]}"
@@ -142,22 +145,22 @@ do
         filesystem_type=$(parted -s "/dev/${device_name}${partition_number}" print --machine | tail -n1 | cut -d: -f5)
 
         # Create Folder Structure
-        mkdir -p "${devices_basepath}/${device}/${partition_number}"
+        mkdir -p "${devices_basepath}/${device_id}/${partition_number}"
 
         # Save Current UUID if not done already
-        if [[ ! -f "${devices_basepath}/${device}/old.uuid" ]]
+        if [[ ! -f "${devices_basepath}/${device_id}/old.uuid" ]]
         then
-            echo "${current_device_uuid}" >> "${devices_basepath}/${device}/old.uuid"
+            echo "${current_device_uuid}" >> "${devices_basepath}/${device_id}/old.uuid"
         fi
 
         # Save Current PARTUUID if not done already
-        if [[ ! -f "${devices_basepath}/${device}/old.partuuid" ]]
+        if [[ ! -f "${devices_basepath}/${device_id}/old.partuuid" ]]
         then
-            echo "${current_device_partuuid}" >> "${devices_basepath}/${device}/old.partuuid"
+            echo "${current_device_partuuid}" >> "${devices_basepath}/${device_id}/old.partuuid"
         fi                
 
         # Determine new UUID
-        if [[ ! -f "${devices_basepath}/${device}/new.uuid" ]]
+        if [[ ! -f "${devices_basepath}/${device_id}/new.uuid" ]]
         then
             # Generate new UUID
             new_uuid=$(uuidgen)
@@ -172,24 +175,24 @@ do
                 new_uuid=${new_uuid^^}
 
                 # Write to File
-                echo "${new_uuid}" >> "${devices_basepath}/${device}/new.uuid"
+                echo "${new_uuid}" >> "${devices_basepath}/${device_id}/new.uuid"
             fi
         else
             # Load new UUID from File
-            new_uuid=$(cat "${devices_basepath}/${device}/new.uuid")
+            new_uuid=$(cat "${devices_basepath}/${device_id}/new.uuid")
         fi
 
         # Determine new PARTUUID
-        if [[ ! -f "${devices_basepath}/${device}/new.partuuid" ]]
+        if [[ ! -f "${devices_basepath}/${device_id}/new.partuuid" ]]
         then
             # Generte new PARTUUID
             new_partuuid=$(uuidgen)
 
             # Write to File
-            echo "${new_partuuid}" >> "${devices_basepath}/${device}/new.partuuid"
+            echo "${new_partuuid}" >> "${devices_basepath}/${device_id}/new.partuuid"
         else
             # Load new UUID from File
-            new_partuuid=$(cat "${devices_basepath}/${device}/new.partuuid")
+            new_partuuid=$(cat "${devices_basepath}/${device_id}/new.partuuid")
         fi
 
 
