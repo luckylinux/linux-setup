@@ -205,7 +205,7 @@ do
         # Exclude the BIOS_GRUB Partition
         if [[ "${partition_flags}" == "bios_grub"* ]]
         then
-            echo "INFO: Skip Partition ${partition_number} for Device ${device_real_path} since it's marked with bios_grub Flag"
+            echo -e "\t\t\tINFO: Skip Partition ${partition_number} for Device ${device_real_path} since it's marked with bios_grub Flag"
         else
             # Wait in case UDEV needs to refresh list of Devices
             # ** This will ONLY Trigger on Device Creation, so it does NOT work if it already exists **
@@ -217,7 +217,7 @@ do
                 if [[ "${current_device_uuid}" == "${new_uuid}" ]]
                 then
                     # Echo
-                    echo "DEBUG: skipping updating UUID since old and new UUID Values are the same (${current_device_uuid})"
+                    echo -e "\t\t\tDEBUG: skipping updating UUID since old and new UUID Values are the same (${current_device_uuid})"
                 else
                     # Update UUID
                     if [[ "${filesystem_type}" == ext* ]]
@@ -232,7 +232,7 @@ do
                         # Use mlabel for FS UUID
                         mlabel -N "${new_uuid}" -i  "/dev/${device_name}${partition_number}" ::
                     else
-                        echo "ERROR: ${filesystem_type} is NOT supported. Aborting !"
+                        echo -e "\t\t\tERROR: ${filesystem_type} is NOT supported. Aborting !"
                         exit 9
                     fi
                 fi
@@ -244,13 +244,13 @@ do
                     sgdisk -u "${partition_number}:${new_partuuid}" "/dev/${device_name}"
                 else
                     # Echo
-                    echo "DEBUG: skipping updating PARTUUID since old and new UUID Values are the same (${current_device_partuuid})"
+                    echo -e "\t\t\tDEBUG: skipping updating PARTUUID since old and new UUID Values are the same (${current_device_partuuid})"
                 fi
 
             else
                 # Error
-                echo "ERROR: Device ${device_uuid_path} does NOT exist for real Device /dev/${device_name}${partition_number}. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
-                echo "ABORTING !"
+                echo -e "\t\t\tERROR: Device ${device_uuid_path} does NOT exist for real Device /dev/${device_name}${partition_number}. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
+                echo -e "\t\t\tABORTING !"
                 exit 6
             fi
         fi
@@ -261,7 +261,7 @@ done
 systemctl restart systemd-udev-trigger
 
 # Echo
-echo "Mount Target System to Target Mountpoint ${destination}"
+echo -e "Mount Target System to Target Mountpoint ${destination}"
 
 # Mount System Chroot
 source "${toolpath}/modules/mount_system.sh"
@@ -310,11 +310,11 @@ do
         # Find Link in Reverse to by-id Folder
         for item in /dev/disk/by-id/*
         do
-            # Echo
-            echo -e "\t\t- Compare ${item} against ${device_real_path}"
-
             # Get Real Path
             check_realpath=$(readlink --canonicalize-missing "/dev/disk/by-id/${item}")
+
+            # Echo
+            echo -e "\t\t- Compare ${item} -> ${check_realpath} against ${device_real_path}"
 
             # Compare
             if [[ "${check_realpath}" == "${device_real_path}" ]]
@@ -325,7 +325,7 @@ do
                     device_id=$(basename "${check_realpath}")
                 else
                     # Error: Duplicate Entry Found
-                    echo "ERROR: Duplicate Entry found for ${device_id}"
+                    echo -e "\t\tERROR: Duplicate Entry found for ${device_id}"
                     exit 10
                 fi
             fi
@@ -334,7 +334,7 @@ do
         if [[ -z "${device_id}" ]]
         then
             # Error
-            echo "ERROR: Device ID couldn't be found for ${device_uuid_path} / ${device_real_path}"
+            echo -e "\t\tERROR: Device ID couldn't be found for ${device_uuid_path} / ${device_real_path}"
             exit 11
         fi
 
@@ -353,7 +353,7 @@ do
             new_uuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/new.uuid")
         else
             # Error
-            echo "ERROR: new UUID not set for Device ${device_uuid_path} / ${device_real_path}"
+            echo -e "\t\tERROR: new UUID not set for Device ${device_uuid_path} / ${device_real_path}"
             exit 12
         fi
 
@@ -363,7 +363,7 @@ do
             new_partuuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/partnew.uuid")
         else
             # Error
-            echo "ERROR: new PARTUUID not set for Device ${device_uuid_path} / ${device_real_path}"
+            echo -e "\t\tERROR: new PARTUUID not set for Device ${device_uuid_path} / ${device_real_path}"
             exit 13
         fi
 
@@ -396,8 +396,8 @@ do
         fi
     else
         # Error
-        echo "ERROR: Device ${device_uuid_path} does NOT exist. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
-        echo "ABORTING !"
+        echo -e "\t\tERROR: Device ${device_uuid_path} does NOT exist. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
+        echo -e "\t\tABORTING !"
         exit 7
     fi
 done
