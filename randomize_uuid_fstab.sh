@@ -40,7 +40,7 @@ fi
 backup_timestamp=$(date +"%Y%m%d%H%M%S")
 
 # Install Requirements
-apt-get install uuid-runtime mtools
+apt-get install uuid-runtime mtools inotify-tools
 
 # Unmount System to have a "Clean Start"
 source "${toolpath}/umount_everything.sh"
@@ -204,30 +204,36 @@ do
         then
             echo "INFO: Skip Partition ${partition_number} for Device ${device_real_path} since it's marked with bios_grub Flag"
         else
+            # Wait in case UDEV needs to refresh list of Devices
+            inotifywait -e create --timeout 5 --include filename "${device_uuid_path}"
+
             # Check if Device & Partition actually exists and is a Symlink
             if [[ -L "${device_uuid_path}" ]]
             then
-                # Update UUID
-                if [[ "${filesystem_type}" == ext* ]]
+                if [[ "${current_device_uuid}" != "${new_uuid}" ]]
                 then
-                    # Must perform a fresh Check of the Filesystem in order to use tune2fs
-                    e2fsck -f "/dev/${device_name}${partition_number}"
-
-                    if [[ "${current_device_uuid}" != "${new_uuid}" ]]
+                    # Echo
+                    echo "DEBUG: skipping updating UUID since old and new UUID Values are the same (${current_device_uuid})"
+                else
+                    # Update UUID
+                    if [[ "${filesystem_type}" == ext* ]]
                     then
+                        # Must perform a fresh Check of the Filesystem in order to use tune2fs
+                        e2fsck -f "/dev/${device_name}${partition_number}"
+
                         # Use tune2fs for FS UUID
                         tune2fs -U "${new_uuid}" "/dev/${device_name}${partition_number}"
-                    fi
-                elif [[ "${filesystem_type}" == "fat32" ]]
-                then
-                    if [[ "${current_device_uuid}" != "${new_uuid}" ]]
+                    elif [[ "${filesystem_type}" == "fat32" ]]
                     then
-                        # Use mlabel for FS UUID
-                        mlabel -N "${new_uuid}" -i  "/dev/${device_name}${partition_number}" ::
+                        if [[ "${current_device_uuid}" != "${new_uuid}" ]]
+                        then
+                            # Use mlabel for FS UUID
+                            mlabel -N "${new_uuid}" -i  "/dev/${device_name}${partition_number}" ::
+                        fi
+                    else
+                        echo "ERROR: ${filesystem_type} is NOT supported. Aborting !"
+                        exit 9
                     fi
-                else
-                    echo "ERROR: ${filesystem_type} is NOT supported. Aborting !"
-                    exit 9
                 fi
 
                 # Update PARTUUID
@@ -235,11 +241,14 @@ do
                 then
                     # Use sgdisk for PARTUUID
                     sgdisk -u "${partition_number}:${new_partuuid}" "/dev/${device_name}"
+                else
+                    # Echo
+                    echo "DEBUG: skipping updating PARTUUID since old and new UUID Values are the same (${current_device_partuuid})"
                 fi
 
             else
                 # Error
-                echo "ERROR: Device ${device_uuid_path} does NOT exist. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
+                echo "ERROR: Device ${device_uuid_path} does NOT exist for real Device /dev/${device_name}${partition_number}. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
                 echo "ABORTING !"
                 exit 6
             fi
