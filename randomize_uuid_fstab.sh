@@ -136,6 +136,9 @@ do
         # Get Device link from /dev/disk/by-partuuid/<current_device_partuuid>
         device_partuuid_path="/dev/disk/by-uuid/${current_device_partuuid}"
 
+        # Get Partition Flags
+        partition_flags=$(parted -s "/dev/${device_name}" print --machine 2> /dev/null | grep -E "^${partition_number}" | cut -d: -f7)
+
         # Get Filesystem Type
         # ** does NOT work inside Chroot since lsblk relies on udev which relies on systemd which does NOT work inside Chroots **
         # filesystem_type=$(lsblk -o FSTYPE --raw --noheadings --nodeps "/dev/${device_name}${partition_number}")
@@ -150,13 +153,13 @@ do
         # Save Current UUID if not done already
         if [[ ! -f "${devices_basepath}/${device_id}/${partition_number}/old.uuid" ]]
         then
-            echo "${current_device_uuid}" >> "${devices_basepath}/${device_id}/${partition_number}/old.uuid"
+            echo "${current_device_uuid}" > "${devices_basepath}/${device_id}/${partition_number}/old.uuid"
         fi
 
         # Save Current PARTUUID if not done already
         if [[ ! -f "${devices_basepath}/${device_id}/${partition_number}/old.partuuid" ]]
         then
-            echo "${current_device_partuuid}" >> "${devices_basepath}/${device_id}/${partition_number}/old.partuuid"
+            echo "${current_device_partuuid}" > "${devices_basepath}/${device_id}/${partition_number}/old.partuuid"
         fi                
 
         # Determine new UUID
@@ -175,7 +178,7 @@ do
                 new_uuid=${new_uuid^^}
 
                 # Write to File
-                echo "${new_uuid}" >> "${devices_basepath}/${device_id}/${partition_number}/new.uuid"
+                echo "${new_uuid}" > "${devices_basepath}/${device_id}/${partition_number}/new.uuid"
             fi
         else
             # Load new UUID from File
@@ -189,57 +192,63 @@ do
             new_partuuid=$(uuidgen)
 
             # Write to File
-            echo "${new_partuuid}" >> "${devices_basepath}/${device_id}/${partition_number}/new.partuuid"
+            echo "${new_partuuid}" > "${devices_basepath}/${device_id}/${partition_number}/new.partuuid"
         else
             # Load new UUID from File
             new_partuuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/new.partuuid")
         fi
 
 
-        # Check if Device & Partition actually exists and is a Symlink
-        if [[ -L "${device_uuid_path}" ]]
+        # Exclude the BIOS_GRUB Partition
+        if [[ "${partition_flags}" == "bios_grub"* ]]
         then
-            # Update UUID
-            if [[ "${filesystem_type}" == ext* ]]
-            then
-                # Must perform a fresh Check of the Filesystem in order to use tune2fs
-                e2fsck -f "${device_real_path}"
-
-                if [[ "${current_device_uuid}" != "${new_uuid}" ]]
-                then
-                    # Use tune2fs for FS UUID
-                    tune2fs -U "${new_uuid}" "${device_real_path}"
-                fi
-            elif [[ "${filesystem_type}" == "fat32" ]]
-            then
-                # Need to use a shorter UUID in the Form of 4 Characters + "-" + 4 Characters (all uppercase)
-                part_one=$(echo "${new_uuid}" | cut -c 1-4)
-                part_two=$(echo "${new_uuid}" | cut -c 5-8)
-                new_uuid="${part_one}${part_two}"
-                new_uuid=${new_uuid^^}
-
-                if [[ "${current_device_uuid}" != "${new_uuid}" ]]
-                then
-                    # Use mlabel for FS UUID
-                    mlabel -N "${new_uuid}" -i  "${device_real_path}" ::
-                fi
-            else
-                echo "ERROR: ${filesystem_type} is NOT supported. Aborting !"
-                exit 9
-            fi
-
-            # Update PARTUUID
-            if [[ "${current_device_partuuid}" != "${new_partuuid}" ]]
-            then
-                # Use sgdisk for PARTUUID
-                sgdisk -u "${partition_number}:${new_partuuid}" "/dev/${device_name}"
-            fi
-
+            echo "INFO: Skip Partition ${partition_number} for Device ${device_real_path} since it's marked with bios_grub Flag"
         else
-            # Error
-            echo "ERROR: Device ${device_uuid_path} does NOT exist. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
-            echo "ABORTING !"
-            exit 6
+            # Check if Device & Partition actually exists and is a Symlink
+            if [[ -L "${device_uuid_path}" ]]
+            then
+                # Update UUID
+                if [[ "${filesystem_type}" == ext* ]]
+                then
+                    # Must perform a fresh Check of the Filesystem in order to use tune2fs
+                    e2fsck -f "${device_real_path}"
+
+                    if [[ "${current_device_uuid}" != "${new_uuid}" ]]
+                    then
+                        # Use tune2fs for FS UUID
+                        tune2fs -U "${new_uuid}" "${device_real_path}"
+                    fi
+                elif [[ "${filesystem_type}" == "fat32" ]]
+                then
+                    # Need to use a shorter UUID in the Form of 4 Characters + "-" + 4 Characters (all uppercase)
+                    part_one=$(echo "${new_uuid}" | cut -c 1-4)
+                    part_two=$(echo "${new_uuid}" | cut -c 5-8)
+                    new_uuid="${part_one}${part_two}"
+                    new_uuid=${new_uuid^^}
+
+                    if [[ "${current_device_uuid}" != "${new_uuid}" ]]
+                    then
+                        # Use mlabel for FS UUID
+                        mlabel -N "${new_uuid}" -i  "${device_real_path}" ::
+                    fi
+                else
+                    echo "ERROR: ${filesystem_type} is NOT supported. Aborting !"
+                    exit 9
+                fi
+
+                # Update PARTUUID
+                if [[ "${current_device_partuuid}" != "${new_partuuid}" ]]
+                then
+                    # Use sgdisk for PARTUUID
+                    sgdisk -u "${partition_number}:${new_partuuid}" "/dev/${device_name}"
+                fi
+
+            else
+                # Error
+                echo "ERROR: Device ${device_uuid_path} does NOT exist. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
+                echo "ABORTING !"
+                exit 6
+            fi
         fi
     done
 done
