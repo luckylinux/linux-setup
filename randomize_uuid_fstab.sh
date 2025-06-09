@@ -29,7 +29,7 @@ fi
 cp ${destination}/etc/fstab ${destination}/etc/fstab.backup.${timestamp}
 
 # Get Lines in /etc/fstab starting with UUID=
-mapfile lines < <(cat /etc/fstab | grep -E "^UUID=")
+mapfile lines < <(cat ${destination}/etc/fstab | grep -E "^UUID=")
 
 # Unmount System Chroot in order to be able to run tune2fs and e2fsck
 source ${toolpath}/modules/umount_chroot.sh
@@ -162,7 +162,7 @@ do
     echo -e "\t- New: ${new_line}"
 
     # Perform Replacement
-    sed -Ei "s|${old_line}|${updated_line}|" /etc/fstab
+    sed -Ei "s|${old_line}|${updated_line}|" ${destination}/etc/fstab
 done
 
 # Copy tool to chroot folder
