@@ -49,12 +49,11 @@ do
     old_lines+=("${line}")
 done
 
-# Mount System Chroot
-source ${toolpath}/modules/mount_system.sh
-source ${toolpath}/modules/mount_bind.sh
+# Counter the Number of Items
+number_lines="${#old_lines[@]}"
 
-# Perform Replacement
-for index_line in $(seq 0 ${#new_lines[@]})
+# Change Partitions PARTUUID / Filesystems UUID
+for index_line in $(seq 0 $((number_lines-1)))
 do
     # Extract Values
     old_line=${old_lines[${index_line}]}
@@ -155,7 +154,15 @@ do
 
     # Not really needed anymore
     # new_line=${new_lines[${index_line}]}
+done
 
+# Mount System Chroot
+source ${toolpath}/modules/mount_system.sh
+source ${toolpath}/modules/mount_bind.sh
+
+# Perform Replacement
+for index_line in $(seq 0 $((number_lines-1)))
+do
     # Echo
     echo "Changing ${destination}/etc/fstab Line"
     echo -e "\t- Old: ${old_line}"
