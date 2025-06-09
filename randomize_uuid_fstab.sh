@@ -322,7 +322,7 @@ do
                 if [[ "${device_id}" == "" ]]
                 then
                     # Set Device id
-                    device_id=$(basename "${item}")
+                    device_id=$(basename "${item}" | sed -E "s|(.*)-part[0-9]+|\1|")
                 else
                     # Error: Duplicate Entry Found
                     echo -e "\t\tERROR: Duplicate Entry found for ${device_id}"
