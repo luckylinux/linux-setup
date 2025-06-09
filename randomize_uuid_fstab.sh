@@ -185,6 +185,10 @@ echo -e "Performing Step #3"
 # Perform Replacement
 for index_line in $(seq 0 $((number_lines-1)))
 do
+    # Extract Values
+    old_line=${old_lines[${index_line}]}
+    new_line=${new_lines[${index_line}]}
+
     # Echo
     echo -e "\t[$((index_line+1))]"
     echo -e "\t\tChanging ${destination}/etc/fstab Line"
