@@ -13,6 +13,7 @@ action="$1"
 if [[ -z "${action}" ]]
 then
     echo "ERROR: you must specify an Action. Choose between: [update-fstab,update-devices]"
+    exit 1
 fi
 
 # Generate Timestamp
