@@ -176,10 +176,10 @@ do
 
                 # Transform into all Uppercase
                 new_uuid=${new_uuid^^}
-
-                # Write to File
-                echo "${new_uuid}" > "${devices_basepath}/${device_id}/${partition_number}/new.uuid"
             fi
+
+            # Write to File
+            echo "${new_uuid}" > "${devices_basepath}/${device_id}/${partition_number}/new.uuid"
         else
             # Load new UUID from File
             new_uuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/new.uuid")
