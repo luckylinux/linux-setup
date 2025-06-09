@@ -112,10 +112,10 @@ do
     device_name=$(basename "${device_real_path}" | sed -E "s|^([a-zA-Z]+)([0-9]+)$|\1|")
 
     # Get List of Partitions
-    mapfile -t partitions_number < <( find /dev -iwholename "${device_real_path}[0-9]"* | sed -E "s|${device_real_path}||g" | sort --human )
+    mapfile -t partition_numbers < <( find /dev -iwholename "${device_real_path}[0-9]"* | sed -E "s|${device_real_path}||g" | sort --human )
 
     # Loop over Partitions
-    for partition_number in "${partitions_number[@]}"
+    for partition_number in "${partition_numbers[@]}"
     do
         # Echo
         echo -e "\t\tProcessing Partition Number ${partition_number} of Device ${device_name}"
@@ -148,19 +148,19 @@ do
         mkdir -p "${devices_basepath}/${device_id}/${partition_number}"
 
         # Save Current UUID if not done already
-        if [[ ! -f "${devices_basepath}/${device_id}/old.uuid" ]]
+        if [[ ! -f "${devices_basepath}/${device_id}/${partition_number}/old.uuid" ]]
         then
-            echo "${current_device_uuid}" >> "${devices_basepath}/${device_id}/old.uuid"
+            echo "${current_device_uuid}" >> "${devices_basepath}/${device_id}/${partition_number}/old.uuid"
         fi
 
         # Save Current PARTUUID if not done already
-        if [[ ! -f "${devices_basepath}/${device_id}/old.partuuid" ]]
+        if [[ ! -f "${devices_basepath}/${device_id}/${partition_number}/old.partuuid" ]]
         then
-            echo "${current_device_partuuid}" >> "${devices_basepath}/${device_id}/old.partuuid"
+            echo "${current_device_partuuid}" >> "${devices_basepath}/${device_id}/${partition_number}/old.partuuid"
         fi                
 
         # Determine new UUID
-        if [[ ! -f "${devices_basepath}/${device_id}/new.uuid" ]]
+        if [[ ! -f "${devices_basepath}/${device_id}/${partition_number}/new.uuid" ]]
         then
             # Generate new UUID
             new_uuid=$(uuidgen)
@@ -175,24 +175,24 @@ do
                 new_uuid=${new_uuid^^}
 
                 # Write to File
-                echo "${new_uuid}" >> "${devices_basepath}/${device_id}/new.uuid"
+                echo "${new_uuid}" >> "${devices_basepath}/${device_id}/${partition_number}/new.uuid"
             fi
         else
             # Load new UUID from File
-            new_uuid=$(cat "${devices_basepath}/${device_id}/new.uuid")
+            new_uuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/new.uuid")
         fi
 
         # Determine new PARTUUID
-        if [[ ! -f "${devices_basepath}/${device_id}/new.partuuid" ]]
+        if [[ ! -f "${devices_basepath}/${device_id}/${partition_number}/new.partuuid" ]]
         then
             # Generte new PARTUUID
             new_partuuid=$(uuidgen)
 
             # Write to File
-            echo "${new_partuuid}" >> "${devices_basepath}/${device_id}/new.partuuid"
+            echo "${new_partuuid}" >> "${devices_basepath}/${device_id}/${partition_number}/new.partuuid"
         else
             # Load new UUID from File
-            new_partuuid=$(cat "${devices_basepath}/${device_id}/new.partuuid")
+            new_partuuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/new.partuuid")
         fi
 
 
@@ -268,6 +268,12 @@ do
     # Get current Fstab UUID
     current_fstab_uuid=$(echo "${filesystem}" | sed -E "s|UUID=([0-9a-zA-Z-]+)|\1|")
 
+    # Save FSTAB UUID
+    if [[ -f "${devices_basepath}/${device_id}/${partition_number}/fstab.uuid" ]]
+    then
+        echo "${current_fstab_uuid}" > "${devices_basepath}/${device_id}/${partition_number}/fstab.uuid"
+    fi
+
     # Echo
     echo -e "\tProcessing current Fstab Line: ${old_fstab_line}"
 
@@ -305,6 +311,7 @@ do
                 else
                     # Error: Duplicate Entry Found
                     echo "ERROR: Duplicate Entry found for ${device_id}"
+                    exit 10
                 fi
             fi
         done
@@ -313,30 +320,36 @@ do
         then
             # Error
             echo "ERROR: Device ID couldn't be found for ${device_uuid_path} / ${device_real_path}"
-            exit 8
-        fi
-
-        # Echo
-        echo -e "\t\tFound Matching Device ID in /dev/disk/by-id/${device_id}"
-
-        # Load new UUID
-        if [[ -f "${devices_basepath}/${device_id}/new.uuid" ]]
-        then
-            new_uuid=$(cat "${devices_basepath}/${device_id}/new.uuid")
-        else
-            # Error
-            echo "ERROR: new UUID not set for Device ${device_uuid_path} / ${device_real_path}"
             exit 11
         fi
 
-        # Load new PARTUUID
-        if [[ -f "${devices_basepath}/${device_id}/new.partuuid" ]]
+        # Echo
+        echo -e "\t\tFound Matching Device ID in /dev/disk/by-id/${device_id} for ${device_uuid_path} (${device_real_path})"
+
+        # Extract Device Name
+        device_name=$(basename "${device_real_path}" | sed -E "s|^([a-zA-Z]+)([0-9]+)$|\1|")
+
+        # Extract Partition Number
+        partition_number=$(basename "${device_real_path}" | sed -E "s|^([a-zA-Z]+)([0-9]+)$|\2|")
+
+        # Load new UUID
+        if [[ -f "${devices_basepath}/${device_id}/${partition_number}/new.uuid" ]]
         then
-            new_partuuid=$(cat "${devices_basepath}/${device_id}/partnew.uuid")
+            new_uuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/new.uuid")
+        else
+            # Error
+            echo "ERROR: new UUID not set for Device ${device_uuid_path} / ${device_real_path}"
+            exit 12
+        fi
+
+        # Load new PARTUUID
+        if [[ -f "${devices_basepath}/${device_id}/${partition_number}/new.partuuid" ]]
+        then
+            new_partuuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/partnew.uuid")
         else
             # Error
             echo "ERROR: new PARTUUID not set for Device ${device_uuid_path} / ${device_real_path}"
-            exit 12
+            exit 13
         fi
 
         # Echo
