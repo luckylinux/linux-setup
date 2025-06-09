@@ -93,6 +93,9 @@ done
 # Counter the Number of Items in /etc/fstab
 fstab_number_lines="${#old_fstab_lines[@]}"
 
+# Temporarily disable udev-trigger from rescanning the Devices all the Time
+systemctl stop systemd-udev-trigger
+
 # Echo
 echo -e "Performing Step #2 - Updating Devices UUID/PARTUUID"
 
@@ -211,7 +214,7 @@ do
             # Check if Device & Partition actually exists and is a Symlink
             if [[ -L "${device_uuid_path}" ]]
             then
-                if [[ "${current_device_uuid}" != "${new_uuid}" ]]
+                if [[ "${current_device_uuid}" == "${new_uuid}" ]]
                 then
                     # Echo
                     echo "DEBUG: skipping updating UUID since old and new UUID Values are the same (${current_device_uuid})"
@@ -226,11 +229,8 @@ do
                         tune2fs -U "${new_uuid}" "/dev/${device_name}${partition_number}"
                     elif [[ "${filesystem_type}" == "fat32" ]]
                     then
-                        if [[ "${current_device_uuid}" != "${new_uuid}" ]]
-                        then
-                            # Use mlabel for FS UUID
-                            mlabel -N "${new_uuid}" -i  "/dev/${device_name}${partition_number}" ::
-                        fi
+                        # Use mlabel for FS UUID
+                        mlabel -N "${new_uuid}" -i  "/dev/${device_name}${partition_number}" ::
                     else
                         echo "ERROR: ${filesystem_type} is NOT supported. Aborting !"
                         exit 9
@@ -257,6 +257,8 @@ do
     done
 done
 
+# Temporarily disable udev-trigger from rescanning the Devices all the Time
+systemctl restart systemd-udev-trigger
 
 # Echo
 echo "Mount Target System to Target Mountpoint ${destination}"
