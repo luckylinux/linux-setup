@@ -8,7 +8,7 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 source "${toolpath}/load.sh"
 
 # Generate Timestamp
-timestamp=$(date +"%Y%m%d%H%M%S")
+backup_timestamp=$(date +"%Y%m%d%H%M%S")
 
 # Install Requirements
 apt-get install uuid-runtime mtools
@@ -26,7 +26,7 @@ then
 fi
 
 # Backup current /etc/fstab
-cp ${destination}/etc/fstab ${destination}/etc/fstab.backup.${timestamp}
+cp ${destination}/etc/fstab ${destination}/etc/fstab.backup.${backup_timestamp}
 
 # Get Lines in /etc/fstab starting with UUID=
 mapfile lines < <(cat ${destination}/etc/fstab | grep -E "^UUID=")
