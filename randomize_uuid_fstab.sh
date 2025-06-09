@@ -11,7 +11,11 @@ source "${toolpath}/load.sh"
 timestamp=$(date +"%Y%m%d%H%M%S")
 
 # Install Requirements
-apt-get install uuidgen
+apt-get install uuid-runtime
+
+# Unmount System to have a "Clean Start"
+source ${toolpath}/umount_everything.sh
+source ${toolpath}/umount_everything.sh
 
 # Mount System Chroot
 source ${toolpath}/modules/mount_system.sh
