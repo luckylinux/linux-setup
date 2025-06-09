@@ -10,13 +10,29 @@ source "${toolpath}/load.sh"
 # Generate Timestamp
 timestamp=$(date +"%Y%m%d%H%M%S")
 
-# Backup current /etc/fstab
-cp /etc/fstab /etc/fstab.backup.${timestamp}
+# Mount System Chroot
+source ${toolpath}/modules/mount_system.sh
 
-# Process Lines in /etc/fstab starting with UUID=
+if ! mountpoint -q ${destination}
+then
+    echo "ERROR: ${destination} cannot be mounted. Aborting !"
+fi
+
+# Backup current /etc/fstab
+cp ${destination}/etc/fstab ${destination}/etc/fstab.backup.${timestamp}
+
+# Get Lines in /etc/fstab starting with UUID=
 mapfile lines < <(cat /etc/fstab | grep -E "^UUID=")
 
-# Loop
+# Unmount System Chroot in order to be able to run tune2fs and e2fsck
+source ${toolpath}/modules/umount_system.sh
+source ${toolpath}/modules/umount_system.sh
+
+# Initialize Arrays
+old_lines=()
+new_lines=()
+
+# Loop over FSTAB Lines
 for line in "${lines[@]}"
 do
     # Clean line
@@ -45,6 +61,9 @@ do
     # Check if Device actually exists
     if [[ -e "${device_uuid_path}" ]]
     then
+        # Store in old_lines
+        old_lines+=(line)
+
         # Get Device /dev/sdX by reading where the Link Points to
         device_real_path=$(readlink --canonicalize-missing "${device_uuid_path}")
 
@@ -101,36 +120,68 @@ do
         fi
 
         # Echo
-        echo "Changing UUID from ${current_uuid} to ${new_uuid} for Mount Point ${targetmount}"
+        echo "Define Change in UUID from ${current_uuid} to ${new_uuid} for Mount Point ${targetmount}"
 
-        # Update /etc/fstab
+        # New /etc/fstab Line
         updated_line=$(echo "${line}" | sed -E "s|^UUID=([0-9a-zA-Z-]+)(\s.*)$|UUID=${new_uuid}\2|")
+
+        # Store in new_lines
+        new_lines+=(updated_line)
 
         # Echo
         # echo "Replace Line ${line} with Line ${updated_line} in /etc/fstab"
-
-        # Perform Replacement
-        sed -Ei "s|${line}|${updated_line}|"  /etc/fstab
     else
         # Error
         echo "ERROR: Device ${device_uuid_path} does NOT exist. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
+        echo "ABORTING !"
+        exit 6
     fi
 done
 
+# Mount System Chroot
+source ${toolpath}/modules/mount_system.sh
+source ${toolpath}/modules/mount_bind.sh
+
+# Perform Replacement
+for index_line in $(seq 0 ${#new_lines[@]})
+do
+    # Extract Values
+    old_line=${old_lines[${index_line}]}
+    new_line=${new_lines[${index_line}]}
+
+    # Echo
+    echo "Changing ${destination}/etc/fstab Line"
+    echo -e "\t- Old: ${old_line}"
+    echo -e "\t- New: ${new_line}"
+
+    # Perform Replacement
+    sed -Ei "s|${line}|${updated_line}|"  /etc/fstab
+done
+
+# Copy tool to chroot folder
+source ${toolpath}/modules/copy_tool_to_chroot.sh
+
+# Run inside-chroot/install_bootloader.sh inside chroot
+chroot ${destination} /bin/bash -c "/tools_install/${timestamp}/inside-chroot/install_bootloader.sh"
+
 # Update Grub Configuration
-if [[ $(command -v update-grub) ]]
-then
-    update-grub
-elif [[ $(command -v grub2-mkconfig) ]]
-then
-    grub2-mkconfig -o /boot/grub2/grub.cfg
-fi
+#if [[ $(command -v update-grub) ]]
+#then
+#    update-grub
+#elif [[ $(command -v grub2-mkconfig) ]]
+#then
+#    grub2-mkconfig -o /boot/grub2/grub.cfg
+#fi
 
 # Update Initramfs
-if [[ $(command -v update-initramfs) ]]
-then
-    update-initramfs -k all -u
-elif [[ $(command -v dracut) ]]
-then
-    dracut --regenerate-all --force
-fi
+#if [[ $(command -v update-initramfs) ]]
+#then
+#    update-initramfs -k all -u
+#elif [[ $(command -v dracut) ]]
+#then
+#    dracut --regenerate-all --force
+#fi
+
+# Unmount Chroot again
+source ${toolpath}/modules/umount_chroot.sh
+source ${toolpath}/modules/umount_bind.sh

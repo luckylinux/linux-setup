@@ -22,18 +22,18 @@ do
 
     if mountpoint -q "${destination}${efi_mount_path}"
     then
-	    umount -R "${destination}${efi_mount_path}"
+        umount -R "${destination}${efi_mount_path}"
     fi
 done
 
 if mountpoint -q "${destination}/boot"
 then
-	umount -R "${destination}/boot"
+    umount -R "${destination}/boot"
 fi
 
 if mountpoint -q "${destination}"
 then
-	umount -R "${destination}"
+    umount -R "${destination}"
 fi
 
 # Try to unmount all ZFS filesystems first
@@ -53,8 +53,8 @@ mapfile processes < <(grep -i ${rootpool} /proc/*/mounts)
 #/proc/450/mounts:rpool/ROOT/debian /mnt/rescue zfs rw,nodev,noatime,xattr,noacl,casesensitive 0 0
 for line in "${processes[@]}"
 do
-	pid=$(echo $line | sed -En "s/\/proc\/([0-9]*)\/.*/\1/p")
-	kill -9 $pid
+    pid=$(echo $line | sed -En "s/\/proc\/([0-9]*)\/.*/\1/p")
+    kill -9 $pid
 done
 
 # Export pool
