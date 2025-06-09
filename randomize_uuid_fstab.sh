@@ -360,7 +360,7 @@ do
         # Load new PARTUUID
         if [[ -f "${devices_basepath}/${device_id}/${partition_number}/new.partuuid" ]]
         then
-            new_partuuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/partnew.uuid")
+            new_partuuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/new.partuuid")
         else
             # Error
             echo -e "\t\tERROR: new PARTUUID not set for Device ${device_uuid_path} / ${device_real_path}"
