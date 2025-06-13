@@ -111,29 +111,34 @@ then
 	    do
 	        grub-install "/dev/disk/by-id/${disk}"
         done
-        
 		# UEFI
 		for disk in "${disks[@]}"
 		do
 			# Get EFI Mount Path
 			efi_mount_path=$(get_efi_mount_path "${disk}")
-		
+
 			# grub-install --target=x86_64-efi "/dev/disk/by-id/${disk}"
 			# grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=ubuntu --recheck --no-floppy
 			grub-install --target=x86_64-efi --efi-directory="${efi_mount_path}" --boot-directory="/boot/" --no-nvram "/dev/disk/by-id/${disk}"
 		done
 
+        # Make sure to set the correct UUID for Kernel Command Line
+        sed -Ei "s|(.*?)root=UUID=([a-f0-9-]+)\s(.*?)|\1root=UUID=\2 \3|" /etc/kernel/cmdline
+
+        # Fedora: Remove all Files in /boot/loader/entries/*.conf, then reinstall kernel-core to Trigger GRUB update to use new Partition Layout
+        force_grub_configuration_update_after_partition_changes
+
 	# Disable some GRUB modules
 	chmod -x /etc/grub.d/30_os-prober
 
 	# Update GRUB configuration
-	update-grub
+        update_grub_configuration
 
 	# Update GRUB once again
-	update-grub
+	update_grub_configuration
 
 	# Check which filesystem is on /boot
-	grub-probe /boot
+	grub_probe /boot
 
 elif [ "${bootloader}" == "zbm" ]
 then
@@ -152,4 +157,4 @@ fi
 update-initramfs -k all -u
 
 # Update GRUB once again
-update-grub
+update_grub_configuration
