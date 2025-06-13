@@ -163,7 +163,7 @@ do
         if [[ ! -f "${devices_basepath}/${device_id}/${partition_number}/old.partuuid" ]]
         then
             echo "${current_device_partuuid}" > "${devices_basepath}/${device_id}/${partition_number}/old.partuuid"
-        fi                
+        fi
 
         # Determine new UUID
         if [[ ! -f "${devices_basepath}/${device_id}/${partition_number}/new.uuid" ]]
@@ -270,136 +270,185 @@ source "${toolpath}/modules/mount_bind.sh"
 # Echo
 echo -e "Performing Step #3 - Update /etc/fstab"
 
-# Loop over FSTAB Entries
-for index_fstab_line in $(seq 0 $((fstab_number_lines-1)))
+
+# Loop over Devices
+for device in "${devices[@]}"
 do
-    # Extract Values
-    old_fstab_line=${old_fstab_lines[${index_fstab_line}]}
+    # Get only the last Part of the Path
+    device_id=$(basename "${device}")
 
-    # Extract Filesystem Part
-    filesystem=$(echo "${old_fstab_line}" | awk '{print $1}')
-    targetmount=$(echo "${old_fstab_line}" | awk '{print $2}')
+    # Get Device /dev/sdX by reading where the Link Points to
+    device_real_path=$(readlink --canonicalize-missing "${device}")
 
-    # Get current Fstab UUID
-    current_fstab_uuid=$(echo "${filesystem}" | sed -E "s|UUID=([0-9a-zA-Z-]+)|\1|")
+    # Get Device Name
+    device_name=$(basename "${device_real_path}" | sed -E "s|^([a-zA-Z]+)([0-9]+)$|\1|")
 
-    # Save FSTAB UUID
-    if [[ -f "${devices_basepath}/${device_id}/${partition_number}/fstab.uuid" ]]
-    then
-        echo "${current_fstab_uuid}" > "${devices_basepath}/${device_id}/${partition_number}/fstab.uuid"
-    fi
+    # Get List of Partitions
+    mapfile -t partition_numbers < <( find /dev -iwholename "${device_real_path}[0-9]"* | sed -E "s|${device_real_path}||g" | sort --human )
 
-    # Echo
-    echo -e "\tProcessing current Fstab Line: ${old_fstab_line}"
-
-    # Define UUID Path
-    device_uuid_path="/dev/disk/by-uuid/${current_fstab_uuid}"
-
-    # Check if Device exists
-    if [[ -L "${device_uuid_path}" ]]
-    then
-        # Get Device /dev/sdX by reading where the Link Points to
-        device_real_path=$(readlink --canonicalize-missing "${device_uuid_path}")
-
+    # Loop over Partitions
+    for partition_number in "${partition_numbers[@]}"
+    do
         # Echo
-        echo -e 
+        echo -e "\t\tProcessing Partition Number ${partition_number} of Device ${device_name}"
 
-        # Initialize Value
-        device_id=""
+        # Get current UUID
+        current_device_uuid=$(udevadm info --property=ID_FS_UUID --query=property "/dev/${device_name}${partition_number}" | sed -E "s|ID_FS_UUID=([0-9a-zA-Z-]+)|\1|")
 
-        # Find Link in Reverse to by-id Folder
-        for item in /dev/disk/by-id/*
+        # Get old UUID
+        old_device_uuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/old.uuid")
+
+        # Loop over FSTAB Entries
+        for index_fstab_line in $(seq 0 $((fstab_number_lines-1)))
         do
-            # Get Real Path
-            check_realpath=$(readlink --canonicalize-missing "${item}")
+            # Extract Values
+            old_fstab_line=${old_fstab_lines[${index_fstab_line}]}
 
-            # Echo
-            echo -e "\t\t- Compare ${item} -> ${check_realpath} against ${device_real_path}"
+            # Extract Filesystem Part
+            filesystem=$(echo "${old_fstab_line}" | awk '{print $1}')
+            targetmount=$(echo "${old_fstab_line}" | awk '{print $2}')
 
-            # Compare
-            if [[ "${check_realpath}" == "${device_real_path}" ]]
+            # Get current Fstab UUID
+            current_fstab_uuid=$(echo "${filesystem}" | sed -E "s|UUID=([0-9a-zA-Z-]+)|\1|")
+
+            # Check if Fstab UUID matches old UUID
+            if [[ "${current_fstab_uuid}" == "${old_device_uuid}" ]]
             then
-                if [[ "${device_id}" == "" ]]
+                # Save FSTAB UUID
+                if [[ -f "${devices_basepath}/${device_id}/${partition_number}/fstab.uuid" ]]
                 then
-                    # Set Device id
-                    device_id=$(basename "${item}" | sed -E "s|(.*)-part[0-9]+|\1|")
+                    echo "${current_fstab_uuid}" > "${devices_basepath}/${device_id}/${partition_number}/fstab.uuid"
+                fi
+
+                # Echo
+                echo -e "\tProcessing current Fstab Line: ${old_fstab_line}"
+
+                # List UUID
+                echo -e "\t\tCurrent UUID in /etc/fstab: ${current_fstab_uuid}"
+                echo -e "\t\tMatches old UUID before running Script: ${old_device_uuid}"
+
+                # Load new UUID
+                if [[ -f "${devices_basepath}/${device_id}/${partition_number}/new.uuid" ]]
+                then
+                    new_uuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/new.uuid")
                 else
-                    # Error: Duplicate Entry Found
-                    echo -e "\t\tERROR: Duplicate Entry found for ${device_id}"
-                    exit 10
+                    # Error
+                    echo -e "\t\tERROR: new UUID not set for Device ${device_uuid_path} / ${device_real_path}"
+                    exit 12
+                fi
+
+                # Load new PARTUUID
+                if [[ -f "${devices_basepath}/${device_id}/${partition_number}/new.partuuid" ]]
+                then
+                    new_partuuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/new.partuuid")
+                else
+                    # Error
+                    echo -e "\t\tERROR: new PARTUUID not set for Device ${device_uuid_path} / ${device_real_path}"
+                    exit 13
+                fi
+
+                # Define UUID Path
+                device_uuid_path="/dev/disk/by-uuid/${new_uuid}"
+
+                # **Most of this Code is not really needed anymore since we are looping already on all Devices, Partitions and FSTAB Lines anyways**
+                # Check if Device exists
+                if [[ -L "${device_uuid_path}" ]]
+                then
+                    # Get Device /dev/sdX by reading where the Link Points to
+                    # device_real_path=$(readlink --canonicalize-missing "${device_uuid_path}")
+
+                    # Echo
+                    echo -e "\t\tProcessing Device ${device_uuid_path}"
+
+                    # Initialize Value
+                    # device_id=""
+
+                    # Find Link in Reverse to by-id Folder
+                    # for item in /dev/disk/by-id/*
+                    # do
+                    #     # Get Real Path
+                    #     check_realpath=$(readlink --canonicalize-missing "${item}")
+                    #
+                    #     # Echo
+                    #     echo -e "\t\t- Compare ${item} -> ${check_realpath} against ${device_real_path}"
+                    # 
+                    #     # Compare
+                    #     if [[ "${check_realpath}" == "${device_real_path}" ]]
+                    #     then
+                    #         if [[ "${device_id}" == "" ]]
+                    #         then
+                    #             # Set Device id
+                    #             device_id=$(basename "${item}" | sed -E "s|(.*)-part[0-9]+|\1|")
+                    #         else
+                    #             # Error: Duplicate Entry Found
+                    #             echo -e "\t\tERROR: Duplicate Entry found for ${device_id}"
+                    #             exit 10
+                    #         fi
+                    #     fi
+                    # done
+                    # 
+                    # if [[ -z "${device_id}" ]]
+                    # then
+                    #     # Error
+                    #     echo -e "\t\tERROR: Device ID couldn't be found for ${device_uuid_path} / ${device_real_path}"
+                    #     exit 11
+                    # fi
+
+                    # Echo
+                    # echo -e "\t\tFound Matching Device ID in /dev/disk/by-id/${device_id} for ${device_uuid_path} (${device_real_path})"
+
+                    # Extract Device Name
+                    # device_name=$(basename "${device_real_path}" | sed -E "s|^([a-zA-Z]+)([0-9]+)$|\1|")
+
+                    # Extract Partition Number
+                    # partition_number=$(basename "${device_real_path}" | sed -E "s|^([a-zA-Z]+)([0-9]+)$|\2|")
+
+                    # Load new UUID
+                    # if [[ -f "${devices_basepath}/${device_id}/${partition_number}/new.uuid" ]]
+                    # then
+                    #     new_uuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/new.uuid")
+                    # else
+                    #     # Error
+                    #     echo -e "\t\tERROR: new UUID not set for Device ${device_uuid_path} / ${device_real_path}"
+                    #     exit 12
+                    # fi
+
+                    # Echo
+                    echo -e "\t[$((index_fstab_line+1))]"
+                    echo -e "\t\tProcessing Line: ${old_fstab_line}"
+                    echo -e "\t\t(Filesystem: ${filesystem} -> Target Mount Point: ${targetmount})"
+
+                    # Echo
+                    echo -e "\t\tDefine Change in UUID from ${current_fstab_uuid} to ${new_uuid} for Mount Point ${targetmount}"
+
+                    # New /etc/fstab Line
+                    new_fstab_line=$(echo "${old_fstab_line}" | sed -E "s|^UUID=([0-9a-zA-Z-]+)(\s.*)$|UUID=${new_uuid}\2|")
+
+                    # Store in new_fstab_lines
+                    # Not really needed anymore
+                    new_fstab_lines+=("${new_fstab_line}")
+
+                    # Echo
+                    echo -e "\t[$((index_fstab_line+1))]"
+                    echo -e "\t\tChanging ${destination}/etc/fstab Line"
+                    echo -e "\t\t\t- Old: ${old_fstab_line}"
+                    echo -e "\t\t\t- New: ${new_fstab_line}"
+
+                    # Check if old and new Fstab Lines are any different
+                    if [[ "${old_fstab_line}" != "${new_fstab_line}" ]]
+                    then
+                        # Perform Replacement
+                        sed -Ei "s|${old_fstab_line}|${new_fstab_line}|" "${destination}/etc/fstab"
+                    fi
+                else
+                    # Error
+                    echo -e "\t\tERROR: Device ${device_uuid_path} does NOT exist. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
+                    echo -e "\t\tABORTING !"
+                    exit 7
                 fi
             fi
         done
-
-        if [[ -z "${device_id}" ]]
-        then
-            # Error
-            echo -e "\t\tERROR: Device ID couldn't be found for ${device_uuid_path} / ${device_real_path}"
-            exit 11
-        fi
-
-        # Echo
-        echo -e "\t\tFound Matching Device ID in /dev/disk/by-id/${device_id} for ${device_uuid_path} (${device_real_path})"
-
-        # Extract Device Name
-        device_name=$(basename "${device_real_path}" | sed -E "s|^([a-zA-Z]+)([0-9]+)$|\1|")
-
-        # Extract Partition Number
-        partition_number=$(basename "${device_real_path}" | sed -E "s|^([a-zA-Z]+)([0-9]+)$|\2|")
-
-        # Load new UUID
-        if [[ -f "${devices_basepath}/${device_id}/${partition_number}/new.uuid" ]]
-        then
-            new_uuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/new.uuid")
-        else
-            # Error
-            echo -e "\t\tERROR: new UUID not set for Device ${device_uuid_path} / ${device_real_path}"
-            exit 12
-        fi
-
-        # Load new PARTUUID
-        if [[ -f "${devices_basepath}/${device_id}/${partition_number}/new.partuuid" ]]
-        then
-            new_partuuid=$(cat "${devices_basepath}/${device_id}/${partition_number}/new.partuuid")
-        else
-            # Error
-            echo -e "\t\tERROR: new PARTUUID not set for Device ${device_uuid_path} / ${device_real_path}"
-            exit 13
-        fi
-
-        # Echo
-        echo -e "\t[$((index_fstab_line+1))]"
-        echo -e "\t\tProcessing Line: ${old_fstab_line}"
-        echo -e "\t\t(Filesystem: ${filesystem} -> Target Mount Point: ${targetmount})"
-
-        # Echo
-        echo -e "\t\tDefine Change in UUID from ${current_fstab_uuid} to ${new_uuid} for Mount Point ${targetmount}"
-
-        # New /etc/fstab Line
-        new_fstab_line=$(echo "${old_fstab_line}" | sed -E "s|^UUID=([0-9a-zA-Z-]+)(\s.*)$|UUID=${new_uuid}\2|")
-
-        # Store in new_fstab_lines
-        # Not really needed anymore
-        new_fstab_lines+=("${new_fstab_line}")
-
-        # Echo
-        echo -e "\t[$((index_fstab_line+1))]"
-        echo -e "\t\tChanging ${destination}/etc/fstab Line"
-        echo -e "\t\t\t- Old: ${old_fstab_line}"
-        echo -e "\t\t\t- New: ${new_fstab_line}"
-
-        # Check if old and new Fstab Lines are any different
-        if [[ "${old_fstab_line}" != "${new_fstab_line}" ]]
-        then
-            # Perform Replacement
-            sed -Ei "s|${old_fstab_line}|${new_fstab_line}|" "${destination}/etc/fstab"
-        fi
-    else
-        # Error
-        echo -e "\t\tERROR: Device ${device_uuid_path} does NOT exist. Did you already run this Script and must reboot in order for the Kernel to be notified of the Changes ?"
-        echo -e "\t\tABORTING !"
-        exit 7
-    fi
+    done
 done
 
 # Copy tool to chroot folder
