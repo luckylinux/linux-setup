@@ -17,7 +17,10 @@ then
     echo "Restore ${destination}/etc/resolv.conf"
 
     # Remove quixk Fix for Chroot Environment
-    rm "${destination}/etc/resolv.conf"
+    if [[ -f "${destination}/etc/resolv.conf" ]]
+    then
+        rm "${destination}/etc/resolv.conf"
+    fi
 
     if [[ -L "${destination}/etc/resolv.conf.systemd" ]]
     then
