@@ -115,19 +115,30 @@ done
 #        fi
 #fi
 
-# Install minimal system
-debootstrap --exclude="${excludepackages}" --include="${includepackages}" "${release}" "${destination}" "${source}"
+if [[ "${DISTRIBUTION_FAMILY}" == "debian" ]]
+then
+    # Install minimal system
+    debootstrap --exclude="${excludepackages}" --include="${includepackages}" "${release}" "${destination}" "${source}"
+elif [[ "${DISTRIBUTION_FAMILY}" == "fedora" ]]
+then
+    # Not implemented yet
+    # Most likely will need to download and extract a RootFS base Image
+    x=1
+fi
 
 # Bind required filesystems
 source ${toolpath}/modules/mount_bind.sh
 
-# Copy APT sources
-cp "${toolpath}/repositories/${distribution}/${release}/sources.list" "${destination}/etc/apt/sources.list"
+if [[ "${DISTRIBUTION_FAMILY}" == "debian" ]]
+then
+    # Copy APT sources
+    cp "${toolpath}/repositories/${distribution}/${release}/sources.list" "${destination}/etc/apt/sources.list"
 
-# Copy GRUB configuration files
-mkdir -p "${destination}/etc/default/grub.d"
-cp "${toolpath}/files/etc/default/grub" "${destination}/etc/default/grub"
-cp -ar ${toolpath}/files/etc/default/grub.d/* "${destination}/etc/default/grub.d/"
+    # Copy GRUB configuration files
+    mkdir -p "${destination}/etc/default/grub.d"
+    cp "${toolpath}/files/etc/default/grub" "${destination}/etc/default/grub"
+    cp -ar ${toolpath}/files/etc/default/grub.d/* "${destination}/etc/default/grub.d/"
+fi
 
 if [[ -f "${destination}/etc/default/grub.d/zfs.cfg" ]]
 then
@@ -156,30 +167,34 @@ ifconfig
 echo "Possible network interface names are: " && ls /sys/class/net/
 read -p "Enter network interface name: " interfacename
 
-mkdir -p "${destination}/etc/network/interfaces.d"
-
 # Create Persistent Interface Name using UDEV
 macaddress=$(find /sys/class/net -mindepth 1 -maxdepth 1 ! -name lo -printf "%P: " -execdir cat {}/address \; | grep ${interfacename} | sed -E "s|${interfacename}:\s*?([0-9a-fA-F:]+)$|\1|")
 
 echo "SUBSYSTEM==\"net\", ACTION==\"add\", DRIVERS==\"?*\", ATTR{address}==\"${macaddress}\", ATTR{type}==\"1\", KERNEL==\"*\", NAME=\"${interfacename}\"" >> "${destination}/etc/udev/rules.d/30-net_persistent_names.rules"
 
-if [[ "${ipconfiguration}" == "static" ]]
+
+if [[ "${DISTRIBUTION_FAMILY}" == "debian" ]]
 then
-   echo "auto ${interfacename}" > "${destination}/etc/network/interfaces.d/${interfacename}"
-   #echo "allow-hotplug ${interfacename}" >> "${destination}/etc/network/interfaces.d/${interfacename}" # Should prevent hanging during boot process
-   echo "iface ${interfacename} inet static" >> "${destination}/etc/network/interfaces.d/${interfacename}"
-   echo "	address ${ipaddress}" >> "${destination}/etc/network/interfaces.d/${interfacename}"
-   echo "	netmask ${subnetmask}" >> "${destination}/etc/network/interfaces.d/${interfacename}"
-   echo "	gateway ${defgateway}" >> "${destination}/etc/network/interfaces.d/${interfacename}"
-elif [[ "${ipconfiguration}" == "dhcp" ]]
-then
-   echo "auto ${interfacename}" > "${destination}/etc/network/interfaces.d/${interfacename}"
-   #echo "allow-hotplug ${interfacename}" >> "${destination}/etc/network/interfaces.d/${interfacename}" # Should prevent hanging during boot process
-   echo "iface ${interfacename} inet dhcp" >> "${destination}/etc/network/interfaces.d/${interfacename}"
-else
-   echo "ERROR: Network Configuration Type <${ipconfiguration}> is NOT supported. Must be one of: <static> or <dhcp>"
-   echo "ABORTING ..."
-   exit 9
+    mkdir -p "${destination}/etc/network/interfaces.d"
+
+    if [[ "${ipconfiguration}" == "static" ]]
+    then
+        echo "auto ${interfacename}" > "${destination}/etc/network/interfaces.d/${interfacename}"
+        #echo "allow-hotplug ${interfacename}" >> "${destination}/etc/network/interfaces.d/${interfacename}" # Should prevent hanging during boot process
+        echo "iface ${interfacename} inet static" >> "${destination}/etc/network/interfaces.d/${interfacename}"
+        echo "	address ${ipaddress}" >> "${destination}/etc/network/interfaces.d/${interfacename}"
+        echo "	netmask ${subnetmask}" >> "${destination}/etc/network/interfaces.d/${interfacename}"
+        echo "	gateway ${defgateway}" >> "${destination}/etc/network/interfaces.d/${interfacename}"
+    elif [[ "${ipconfiguration}" == "dhcp" ]]
+    then
+        echo "auto ${interfacename}" > "${destination}/etc/network/interfaces.d/${interfacename}"
+        #echo "allow-hotplug ${interfacename}" >> "${destination}/etc/network/interfaces.d/${interfacename}" # Should prevent hanging during boot process
+        echo "iface ${interfacename} inet dhcp" >> "${destination}/etc/network/interfaces.d/${interfacename}"
+    else
+        echo "ERROR: Network Configuration Type <${ipconfiguration}> is NOT supported. Must be one of: <static> or <dhcp>"
+        echo "ABORTING ..."
+        exit 9
+    fi
 fi
 
 echo "Network configured for <${interfacename}> in <${ipconfiguration}> mode"
@@ -188,7 +203,7 @@ echo "Network configured for <${interfacename}> in <${ipconfiguration}> mode"
 if [[ "$setupnfstools" == "yes" ]]
 then
    echo "# Tools over NFS" >> "${destination}/etc/fstab"
-   echo "192.168.1.223:/export/tools          /tools_nfs           nfs             rw,user=tools,auto,nfsvers=3          0       0"  >> "${destination}/etc/fstab"
+   echo "192.168.1.223:/export/tools            /tools_nfs      nfs     rw,user=tools,auto,nofail,x-systemd.automount,mountvers=4.0,proto=tcp        0   0"  >> "${destination}/etc/fstab"
    mkdir -p  "${destination}/tools_nfs"
    chattr +i "${destination}/tools_nfs"
 fi
