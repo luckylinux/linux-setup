@@ -4,6 +4,9 @@
 relativepath="../" # Define relative path to go from this script to the root level of the tool
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
+# Input Arguments
+interactive_shell=${1-"yes"}
+
 # Load configuration
 source "${toolpath}/load.sh"
 
@@ -38,9 +41,12 @@ then
 fi
 
 # Chroot into the environment
-chroot "${destination}" /bin/bash --login
-#chroot "${destination}" /bin/bash --login -c "/bin/bash /tools_install/$timestamp/inside-chroot/start.sh"
-#-x  <<'EOF'
-#source /etc/profile
-#cd /tools_install/$timestamp
-#EOF
+if [[ "${interactive_shell}" == "yes" ]]
+then
+    chroot "${destination}" /bin/bash --login
+    #chroot "${destination}" /bin/bash --login -c "/bin/bash /tools_install/$timestamp/inside-chroot/start.sh"
+    #-x  <<'EOF'
+    #source /etc/profile
+    #cd /tools_install/$timestamp
+    #EOF
+fi

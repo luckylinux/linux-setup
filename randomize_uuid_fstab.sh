@@ -468,7 +468,7 @@ do
 done
 
 # Copy tool to chroot folder
-source "${toolpath}/modules/copy_tool_to_chroot.sh"
+source "${toolpath}/modules/setup_chroot.sh" "no"
 
 # Run inside-chroot/install_bootloader.sh inside chroot
 chroot "${destination}" /bin/bash -c "/tools_install/${timestamp}/inside-chroot/install_bootloader.sh"
