@@ -18,16 +18,21 @@ source "${toolpath}/load.sh"
 # Store current Path
 currentpath=$(pwd)
 
-# Update APT
-apt-get update
+# Update Lists
+update_lists
+
+# Install Locales Support
+install_packages_unattended locales
 
 # Configure locales and timezone
-apt-get install --yes locales
-dpkg-reconfigure locales
-dpkg-reconfigure tzdata
+if [[ "${DISTRIBUTION_FAMILY}" == "debian" ]]
+then
+    dpkg-reconfigure locales
+    dpkg-reconfigure tzdata
+fi
 
 # Install BASH-completion Package
-apt-get install --yes bash-completion
+install_packages_unattended bash-completion
 
 # Fix /etc/resolv.conf
 if [[ "${nsconfig}" == "resolv.conf" ]]
@@ -53,7 +58,7 @@ then
     echo "Configuring Nameservers using systemd-resolved: /etc/systemd/resolved.conf"
 
     # Install systemd-resolved
-    apt-get install --yes systemd-resolved
+    install_packages_unattended systemd-resolved
     systemctl enable systemd-resolved
     systemctl restart systemd-resolved
 
@@ -146,38 +151,89 @@ do
     mount "${efi_mount_path}"
 done
 
+# Install Distribution-specific Tools
+if [[ "${DISTRIBUTION_FAMILY}" == "debian" ]]
+then
+    # Install Debian-specific Tools
+    install_packages_unattended aptitude
+
+    # Install initramfs-tools
+    install_packages_unattended initramfs-tools
+elif [[ "${DISTRIBUTION_FAMILY}" == "fedora" ]]
+then
+    # Nothing specific to install for Fedora
+    x=1
+fi
 
 # Install additionnal tools
-apt-get install --yes aptitude
-apt-get install --yes net-tools
+install_packages_unattended net-tools
 
-# Install DHClient so we are sure that Networking gets set up properly and do NOT get locked out of the Server
-apt-get install --yes isc-dhcp-client
+# Install other Tools that have Distribution-specific Names
+if [[ "${DISTRIBUTION_FAMILY}" == "debian" ]]
+then
+    # Install DHClient so we are sure that Networking gets set up properly and do NOT get locked out of the Server
+    install_packages_unattended isc-dhcp-client   
 
-# Install initramfs-tools
-apt-get install --yes initramfs-tools
+    # Install Linux Kernel Image
+    install_packages_unattended linux-image-amd64
 
-# Install partitioning tool and linux kernel
-apt-get install --yes linux-headers-$(uname -r)
-apt-get install --yes gdisk linux-image-amd64
+    # Install Linux Kernel Headers
+    install_packages_unattended linux-headers-$(uname -r)
+
+    # Install SSH Client & Server
+    install_packages_unattended ssh
+elif [[ "${DISTRIBUTION_FAMILY}" == "fedora" ]]
+then
+    # Install DHClient so we are sure that Networking gets set up properly and do NOT get locked out of the Server
+    install_packages_unattended dhcp-client
+
+    # Install Linux Kernel Image
+    install_packages_unattended kernel kernel-core kernel-modules
+
+    # Install Linux Kernel Headers
+    install_packages_unattended kernel-headers
+ 
+    # Install SSH Client & Server
+    install_packages_unattended openssh-clients openssh-server
+fi
+
+# Install Partitioning Tool
+install_packages_unattended gdisk 
 
 if [ "${rootfs}" == "zfs" ] || [ "${bootfs}" == "zfs" ]
 then
     # Install ZFS
-    apt-get install --yes zfs-dkms zfs-initramfs
+    install_packages_unattended zfs-dkms zfs-initramfs
 fi
 
-# Install nfs-client, wget, ssh, sudo and curl
-apt-get install --yes nfs-client wget ssh sudo curl
-systemctl enable ssh
+# Install  wget, sudo and curl
+install_packages_unattended wget sudo curl
 
 # Allow SSH Root Login via Password Authentication until a safer Way is setup after reboot
 sed -Ei "s|#?PermitRootLogin(.*?)$|PermitRootLogin yes|g" /etc/ssh/sshd_config
+
+# Enable SSH (after reboot, it's not possible to activate SSH Daemon in Chroot)
+if [[ "${DISTRIBUTION_FAMILY}" == "debian" ]]
+then
+    systemctl enable ssh
+elif [[ "${DISTRIBUTION_FAMILY}" == "fedora" ]]
+then
+    systemctl enable sshd
+fi
 
 # Ensure that NFS tools are mounted if applicable
 #if [ -d "/tools_nfs" ]
 if [[ "$setupnfstools" == "yes" ]]
 then
+    if [[ "${DISTRIBUTION_FAMILY}" == "debian" ]]
+    then
+        install_packages_unattended nfs-client nfs-common
+    elif [[ "${DISTRIBUTION_FAMILY}" == "fedora" ]]
+    then
+        install_packages_unattended nfs-utils rpcbind
+    fi
+
+    # Mount the NFS Share
 	mount /tools_nfs
 fi
 
@@ -187,7 +243,7 @@ then
 	#currentpath=$(pwd)
 	#cd /tools_nfs/Debian
 	#bash setup_grub_testing.sh
-	#apt-get update
+	#update_lists
 	#cd $currentpath
 
 	# Enable importing ${bootpool}
@@ -215,14 +271,20 @@ EOF
 fi
 
 # Install kernel
-apt-get install --yes linux-image-amd64
+if [[ "${DISTRIBUTION_FAMILY}" == "debian" ]]
+then
+    install_packages_unattended linux-image-amd64
+elif [[ "${DISTRIBUTION_FAMILY}" == "fedora" ]]
+then
+    install_packages_unattended kernel kernel-core kernel-modules
+fi
 
 # Set root password
 echo "Setting root password"
 passwd
 
 # Remove os-prober package
-apt-get remove --yes os-prober
+remove_packages_unattended os-prober
 
 # Tell Initramfs to use custom keyboard
 echo "# Tell Initramfs to use custom keyboard" >> "/etc/initramfs-tools/initramfs.conf"
@@ -247,10 +309,10 @@ echo "!!! CHECK THAT THE ZFS MODULE IS INSTALLED !!!"
 ls /boot/grub/*/zfs.mod
 
 # Verify that the ZFS root filesystem is recognised
-grub-probe /
+grub_probe /
 
 # Update initramfs
-update-initramfs -u -k all
+regenerate_initrd
 
 # Setup Secure Boot
 if [ "${secureboot}" == "yes" ]

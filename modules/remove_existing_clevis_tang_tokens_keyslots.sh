@@ -8,10 +8,10 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 source "${toolpath}/load.sh"
 
 # Update APT Lists
-apt-get update
+update_lists
 
 # Install clevis on the system and add clevis to the initramfs
-apt-get install --yes clevis clevis-luks clevis-initramfs cryptsetup-initramfs
+install_packages_unattended clevis clevis-luks clevis-initramfs cryptsetup-initramfs
 
 # Ask for password
 read -s -p "Enter encryption password: " password
@@ -41,7 +41,7 @@ done
 unset $password
 
 # Update initramfs
-update-initramfs -c -k all
+regenerate_initrd
 
 # Get information
 for disk in "${disks[@]}"

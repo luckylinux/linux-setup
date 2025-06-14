@@ -40,7 +40,7 @@ fi
 backup_timestamp=$(date +"%Y%m%d%H%M%S")
 
 # Install Requirements
-apt-get install uuid-runtime mtools inotify-tools
+install_packages_unattended uuid-runtime mtools inotify-tools
 
 # Unmount System to have a "Clean Start"
 source "${toolpath}/umount_everything.sh"

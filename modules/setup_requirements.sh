@@ -18,34 +18,45 @@ then
     fi
 fi
 
-# Install system tools
-apt-get install --yes aptitude nload htop lm-sensors net-tools debootstrap dosfstools e2fsprogs psmisc
+# Install Distribution-specific Packages
+if [[ $(get_os_family) == "debian" ]]
+then
+    # Install Debian Tools
+    install_packages_unattended aptitude debootstrap
+elif [[ $(get_os_family) == "fedora" ]]
+then
+    # Nothing Special required for Fedora
+    x=1
+fi
+
+# Install Common System Tools
+install_packages_unattended nload htop lm-sensors net-tools dosfstools e2fsprogs psmisc tmux screen
 
 # Install partition management tools
-apt-get install --yes gdisk parted
+install_packages_unattended gdisk parted
 
 # Install mdadm
 if [ "${bootfs}" != "zfs" ] && [ ${numdisks_total} -gt 1 ]
 then
-    apt-get install --yes mdadm
+    install_packages_unattended mdadm
 fi
 
 # Install cryptsetup / LUKS
 if [ "${encryptrootfs}" == "luks" ] || [ "${encryptdatafs}" == "yes" ]
 then
-    apt-get install --yes cryptsetup
+    install_packages_unattended cryptsetup
 fi
 
 # Install clevis
 if [[ "${clevisautounlock}" == "yes" ]]
 then
-    apt-get install --yes clevis clevis-luks clevis-initramfs cryptsetup-initramfs
+    install_packages_unattended clevis clevis-luks clevis-initramfs cryptsetup-initramfs
 fi
 
 # Install ZFS
 if [ "${rootfs}" == "zfs" ] || [ "${bootfs}" == "zfs" ]
 then
-    apt-get install --yes zfsutils-linux zfs-zed zfs-dkms
+    install_packages_unattended zfsutils-linux zfs-zed zfs-dkms
 fi
 
 # Fix MDADM automount

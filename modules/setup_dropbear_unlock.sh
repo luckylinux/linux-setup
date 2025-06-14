@@ -60,10 +60,10 @@ EOF
 add_rfc3442_hook
 
 # Update APT Lists
-apt-get update
+update_lists
 
 # Install clevis on the system and add clevis to the initramfs
-apt-get install --yes cryptsetup-initramfs dropbear-initramfs
+install_packages_unattended cryptsetup-initramfs dropbear-initramfs
 
 # Create Folder
 mkdir -p ${installroot}/root
@@ -94,6 +94,7 @@ echo "==========================================================================
 unset RENAMEDPUBKEY
 unset RAWPUBKEY
 EOF
+
 echo "======================================================================================================================================="
 echo "======================================================================================================================================="
 echo -e "\n\n"
@@ -119,4 +120,4 @@ sed -ie "s/#DROPBEAR_OPTIONS=/DROPBEAR_OPTIONS=\"-I ${dropbearwait} -j -k -p ${d
 dpkg-reconfigure dropbear-initramfs
 
 # Update initramfs
-update-initramfs -c -k all
+regenerate_initrd

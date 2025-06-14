@@ -39,37 +39,56 @@ do
 done
 
 # Update initramfs
-update-initramfs -k all -u
+regenerate_initrd
 
 if [ "${bootloader}" == "grub" ]
 then
-	# Install GRUB to MBR
-	if [ "${bootloadermode}" == "BIOS" ]
+	# Install both Packages in the Case of Fedora, since they don't conflict with one another
+	if [[ "${DISTRIBUTION_FAMILY}" == "fedora" ]]
 	then
-	    # Install GRUB for BIOS (Primary)
-	    apt-get install --yes grub-pc
+		# Install GRUB Tools
+		install_packages_unattended grub2-pc-modules
 
-            # Install GRUB for UEFI (Secondary)
-            apt-get install --yes grub-efi-amd64-bin shim-signed
+		# Install GRUB for BIOS
+		install_packages_unattended grub2-pc grub2-pc-modules
+
+		# Install GRUB for UEFI
+		install_packages_unattended grub2-efi-x64 grub2-efi-x64-modules shim-x64
+	fi
+
+	# Install GRUB to MBR
+	if [[ "${bootloadermode}" == "BIOS" ]]
+	then
+		if [[ "${DISTRIBUTION_FAMILY}" == "debian" ]]
+		then
+			# Install GRUB for BIOS (Primary)
+			install_packages_unattended grub-pc
+
+			# Install GRUB for UEFI (Secondary)
+			install_packages_unattended grub-efi-amd64-bin shim-signed
+		fi
 
 	    # BIOS
 	    for disk in "${disks[@]}"
 	    do
-	        grub-install "/dev/disk/by-id/${disk}"
-            done
-	elif [ "${bootloadermode}" == "UEFI" ]
+	        grub_install "/dev/disk/by-id/${disk}"
+        done
+	elif [[ "${bootloadermode}" == "UEFI" ]]
             then
             # Might be intesting to also rename UEFI Labels/Entries
             # See for instance https://askubuntu.com/questions/1125920/how-can-i-change-the-names-of-items-in-the-efi-uefi-boot-menu
 
             # Install GRUB and Shim for UEFI (Primary)
-            apt-get install --yes grub-efi-amd64 shim-signed
+            install_packages_unattended grub-efi-amd64 shim-signed
 
-            # Attempt to install SHIM Helpers (Debian only)
-            apt-get install --yes shim-helpers-amd64-signed
+            # Attempt to install SHIM Helpers (Debian only, NOT Ubuntu)
+			if [[ "${DISTRIBUTION_RELEASE}" == "debian" ]]
+			then
+            	install_packages_unattended shim-helpers-amd64-signed
+			fi
 
             # Install GRUB for BIOS (Secondary)
-            apt-get install --yes grub-pc-bin
+            install_packages_unattended grub-pc-bin
 	else
 	    # Not Supported
 	    echo "Error - bootloadermode <${bootloadermode}> is NOT supported. Aborting"
@@ -109,7 +128,7 @@ then
         # BIOS
         for disk in "${disks[@]}"
 	    do
-	        grub-install "/dev/disk/by-id/${disk}"
+	        grub_install "/dev/disk/by-id/${disk}"
         done
 		# UEFI
 		for disk in "${disks[@]}"
@@ -117,9 +136,9 @@ then
 			# Get EFI Mount Path
 			efi_mount_path=$(get_efi_mount_path "${disk}")
 
-			# grub-install --target=x86_64-efi "/dev/disk/by-id/${disk}"
-			# grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=ubuntu --recheck --no-floppy
-			grub-install --target=x86_64-efi --efi-directory="${efi_mount_path}" --boot-directory="/boot/" --no-nvram "/dev/disk/by-id/${disk}"
+			# grub_install --target=x86_64-efi "/dev/disk/by-id/${disk}"
+			# grub_install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=ubuntu --recheck --no-floppy
+			grub_install --target=x86_64-efi --efi-directory="${efi_mount_path}" --boot-directory="/boot/" --no-nvram "/dev/disk/by-id/${disk}"
 		done
 
         # Make sure to set the correct UUID for Kernel Command Line
@@ -132,7 +151,7 @@ then
 	chmod -x /etc/grub.d/30_os-prober
 
 	# Update GRUB configuration
-        update_grub_configuration
+    update_grub_configuration
 
 	# Update GRUB once again
 	update_grub_configuration
@@ -154,7 +173,7 @@ else
 fi
 
 # Update initramfs once again
-update-initramfs -k all -u
+regenerate_initrd
 
 # Update GRUB once again
 update_grub_configuration

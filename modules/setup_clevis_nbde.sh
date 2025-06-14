@@ -60,10 +60,10 @@ EOF
 add_rfc3442_hook
 
 # Update APT Lists
-apt-get update
+update_lists
 
 # Install clevis on the system and add clevis to the initramfs
-apt-get install --yes clevis clevis-luks clevis-initramfs cryptsetup-initramfs jq
+install_packages_unattended clevis clevis-luks clevis-initramfs cryptsetup-initramfs jq
 
 # Ask for password
 read -s -p "Enter encryption password: " password
@@ -109,7 +109,7 @@ done
 unset $password
 
 # Update initramfs
-update-initramfs -c -k all
+regenerate_initrd
 
 # Get information
 for disk in "${disks[@]}"

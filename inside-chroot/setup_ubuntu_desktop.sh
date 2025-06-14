@@ -73,62 +73,62 @@ sed -Ei "s|$destination/?|/|" /etc/zfs/zfs-list.cache/*
 sed -Ei "s|//boot?|/boot|" /etc/zfs/zfs-list.cache/*
 
 # Setup MATE desktop
-apt-get install --yes ubuntu-mate-desktop
+install_packages_unattended ubuntu-mate-desktop
 
 # Setup XFCE desktop
-apt-get install --yes xubuntu-desktop
+install_packages_unattended xubuntu-desktop
 
 # Install LXQT desktop
-apt-get install --yes lubuntu-desktop
+install_packages_unattended lubuntu-desktop
 
 # Install X2GO server&client
-apt-get install --yes x2goserver x2goclient
+install_packages_unattended x2goserver x2goclient
 
 # Install Xorg
-apt-get install --yes xorg
+install_packages_unattended xorg
 
 # Install NVIDIA drivers
-#apt-get install --yes nvidia-drivers-440
+# install_packages_unattended nvidia-drivers-440
 
 # Install nano
-apt-get install --yes nano
+install_packages_unattended nano
 
 # Install cryptsetup
-apt-get install --yes cryptsetup
+install_packages_unattended cryptsetup
 
 # Install fat32 tools
-apt-get install --yes dosfstools
+install_packages_unattended dosfstools
 
 # Install ZFS on Linux
-apt-get install --yes linux-image-generic zfs-initramfs zfs-dkms zfs-auto-snapshot zfs-zed # zsys
+install_packages_unattended linux-image-generic zfs-initramfs zfs-dkms zfs-auto-snapshot zfs-zed # zsys
 
 # Remove snapd
-apt-get purge --yes snapd
+purge_packages_unattended snapd
 apt-get hold snapd
-apt-get autoremove
+autoremove_packages
 
 # Remove net plan
-apt-get purge --yes netplan.io
+purge_packages_unattended netplan.io
 apt-get hold netplan.io
-apt-get autoremove
+autoremove_packages
 
 # Install kernel
-apt-get install --yes linux-image-generic
+install_packages_unattended linux-image-generic
 
 # Regerenate initramfs
-update-initramfs -k all -u
+regenerate_initrd
 
 # Install ifupdown
-apt-get install --yes ifupdown-extra
+install_packages_unattended ifupdown-extra
 
 # Install development tools
-apt-get install --yes bison flex build-essential libelf-dev libncurses-dev flex bison openssl libssl-dev dkms libelf-dev libudev-dev libpci-dev libiberty-dev autoconf uuid-dev #build-dep 
+install_packages_unattended bison flex build-essential libelf-dev libncurses-dev flex bison openssl libssl-dev dkms libelf-dev libudev-dev libpci-dev libiberty-dev autoconf uuid-dev # build-dep 
 
 # Disable grub fallback service
 # Typically only needed for  mirror or raidz topology:
 systemctl mask grub-initrd-fallback.service
 
 # Patch dependency loop due to ZFS on top of LUKS
-apt-get install --yes curl patch
+install_packages_unattended curl patch
 curl https://launchpadlibrarian.net/478315221/2150-fix-systemd-dependency-loops.patch | \
     sed "s|/etc|/lib|;s|\.in$||" | (cd / ; patch -p1)

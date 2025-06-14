@@ -160,8 +160,16 @@ dropbearport="2222" # Listen on Port ${dropbearport}
 # Install Parted if not installed yet
 if [[ -z $(command -v parted) ]]
 then
-    apt-get update
-    apt-get install parted
+    if [[ -z $(command -v dnf) ]]
+    then
+        # Debian-like Distribution
+        apt-get update
+        apt-get install parted
+    else
+        # Fedora-like Distribution
+        dnf update --refresh
+        dnf install parted
+    fi
 fi
 
 # Automatically Calculate Disk Size

@@ -107,4 +107,4 @@ then
 fi
 
 # Update initramfs
-update-initramfs -c -k all
+regenerate_initrd

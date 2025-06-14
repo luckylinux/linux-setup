@@ -23,7 +23,7 @@ then
                 # Install mdadm if not already installed
                 if [[ -z $(command -v mdadm) ]]
                 then
-                    apt-get install -y mdadm
+                    install_packages_unattended mdadm
                 fi
 
                 # Configure MDADM Array in /etc/fstab

@@ -4,7 +4,7 @@
 # - https://github.com/jakeday/linux-surface/blob/3267e4ea1f318bb9716d6742d79162de8277dea2/SIGNING.md
 
 # Install Requirements
-apt-get install mokutil
+install_packages mokutil
 
 # Define Base Folder
 basefolder="/etc/mokutil"
@@ -49,8 +49,8 @@ fi
 # Install nano if not installed yet
 if [[ -z $(command -v nano) ]]
 then
-    apt-get update
-    apt-get install nano
+    update_lists
+    install_packages_unattended nano
 fi
 
 # Open the File for editing in Interactive Mode
@@ -97,7 +97,7 @@ chmod +x /usr/local/sbin/dkms_with_mok
 /usr/local/sbin/dkms_with_mok generate_mok
 
 # Update InitramFS and Grub
-update-initramfs -k all -u
-update-grub
-update-initramfs -k all -u
-update-grub
+regenerate_initrd
+update_grub_configuration
+regenerate_initrd
+update_grub_configuration

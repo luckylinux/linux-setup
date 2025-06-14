@@ -84,7 +84,7 @@ then
                 # If running in CHROOT then make sure to setup required packages
                 if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]
                 then
-			apt-get install --yes mdadm
+                        install_packages_unattended mdadm
 	        fi
 
                 # Dual Disk

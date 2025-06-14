@@ -31,10 +31,10 @@ fi
 cp ${toolpath}/repositories/${distribution}/${release}/preferences.d/zfs-backports ${installroot}/etc/apt/preferences.d/zfs-backports
 
 # Update Sources
-apt-get update
+update_lists
 
 # Perform Installation
-apt-get install zfsutils-linux zfs-dkms
+install_packages zfsutils-linux zfs-dkms
 
 # Upgrade Kernel Packages if applicable
-apt-get dist-upgrade
+upgrade_packages

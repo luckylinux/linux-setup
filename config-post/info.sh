@@ -9,5 +9,6 @@ source "${toolpath}/functions.sh"
 
 # Define Distribution Properties Variables
 export DISTRIBUTION_RELEASE=$(get_os_release)
+export DISTRIBUTION_FAMILY=$(get_os_family)
 export DISTRIBUTION_CODENAME=$(get_os_codename)
 export DISTRIBUTION_VERSION=$(get_os_version)

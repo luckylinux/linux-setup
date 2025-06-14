@@ -19,7 +19,7 @@ device=${1-""}
 destinationpath=${2-""}
 
 # Install requirements
-apt-get -y install fdisk parted gddrescue coreutils
+install_packages_unattended fdisk parted gddrescue coreutils
 
 # Ask for Device to backup interactively
 while [ ! -b "${device}" ] || [ -z "${device}" ]

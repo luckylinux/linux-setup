@@ -38,6 +38,22 @@ get_os_version() {
     echo $codename
 }
 
+# Get OS Family
+get_os_family() {
+    # The Distribution can be Detected by looking at the Line starting with ID=...
+    # Possible values: ID=fedora, ID=debian, ID=ubuntu, ...
+    distribution=$(cat /etc/os-release | grep -Ei "^ID_LIKE=" | sed -E "s|ID_LIKE=([a-zA-Z]+?)|\1|")
+
+    # If nothing was found, use simply the "ID" Property directly using get_os_release
+    if [[ -z "${distribution}" ]]
+    then
+        distribution=$(get_os_release)
+    fi
+
+    # Return Value
+    echo $distribution
+}
+
 # Get EFI Mount Path
 get_efi_mount_path() {
     # Input Arguments
@@ -59,7 +75,7 @@ update_grub_configuration() {
     if [[ $(get_os_release) == "fedora" ]]
     then
         grub2-mkconfig -o /boot/grub2/grub.cfg
-    elif [[ $(get_os_release) == "debian"" ]]
+    elif [[ $(get_os_release) == "debian" ]]
     then
         update-grub
     elif [[ $(get_os_release) == "ubuntu" ]]
@@ -92,17 +108,26 @@ grub_probe() {
     # Input Arguments
     local ltarget="$1"
 
-    if [[ $(get_os_release) == "fedora" ]]
+    if [[ $(get_os_family) == "fedora" ]]
     then
         grub2-probe "${ltarget}"
-    elif [[ $(get_os_release) == "debian"" ]]
-    then
-        grub-probe "${ltarget}"
-    elif [[ $(get_os_release) == "ubuntu" ]]
+    elif [[ $(get_os_family) == "debian" ]]
     then
         grub-probe "${ltarget}"
     fi
+}
 
+grub_install() {
+    # Input Arguments
+    local loptions="$@"
+
+    if [[ $(get_os_family) == "fedora" ]]
+    then
+        grub2-install ${loptions}
+    elif [[ $(get_os_family) == "debian" ]]
+    then
+        grub-install ${loptions}
+    fi
 }
 
 # Update Initrd
@@ -110,15 +135,159 @@ regenerate_initrd() {
     # Input Arguments
     local lforce=${1-"no"}
 
-    if [[ $(get_os_release) == "fedora" ]]
+    if [[ $(get_os_family) == "fedora" ]]
     then
         dracut --regenerate-all --force
-    elif [[ $(get_os_release) == "debian"" ]]
-    then
-        update-initramfs -k all -u
-    elif [[ $(get_os_release) == "ubuntu" ]]
+    elif [[ $(get_os_release) == "debian" ]]
     then
         update-initramfs -k all -u
     fi
+}
 
+# Update Lists
+update_lists() {
+    # Input Arguments
+    local lpackages=$@
+
+    # Get OS Family
+    distribution_family=$(get_os_family)
+
+    if [[ "${distribution_family}" == "debian" ]]
+    then
+        apt-get update
+    elif [[ "${distribution_family}" == "fedora" ]]
+    then
+        dnf update --refresh
+    fi
+}
+
+# Install Packages
+install_packages() {
+    # Input Arguments
+    local lpackages=$@
+
+    # Get OS Family
+    distribution_family=$(get_os_family)
+
+    if [[ "${distribution_family}" == "debian" ]]
+    then
+        apt-get install ${lpackages[*]}
+    elif [[ "${distribution_family}" == "fedora" ]]
+    then
+        dnf install ${lpackages[*]}
+    fi
+}
+
+# Install Packages (unattended)
+install_packages_unattended() {
+    # Input Arguments
+    local lpackages=$@
+
+    # Get OS Family
+    distribution_family=$(get_os_family)
+
+    if [[ "${distribution_family}" == "debian" ]]
+    then
+        apt-get install --yes ${lpackages[*]}
+    elif [[ "${distribution_family}" == "fedora" ]]
+    then
+        dnf install -y ${lpackages[*]}
+    fi
+}
+
+# Remove Packages
+remove_packages() {
+    # Input Arguments
+    local lpackages=$@
+
+    # Get OS Family
+    distribution_family=$(get_os_family)
+
+    if [[ "${distribution_family}" == "debian" ]]
+    then
+        apt-get remove ${lpackages[*]}
+    elif [[ "${distribution_family}" == "fedora" ]]
+    then
+        dnf remove ${lpackages[*]}
+    fi
+}
+
+# Remove Packages (unattended)
+remove_packages_unattended() {
+    # Input Arguments
+    local lpackages=$@
+
+    # Get OS Family
+    distribution_family=$(get_os_family)
+
+    if [[ "${distribution_family}" == "debian" ]]
+    then
+        apt-get remove --yes ${lpackages[*]}
+    elif [[ "${distribution_family}" == "fedora" ]]
+    then
+        dnf remove -y ${lpackages[*]}
+    fi
+}
+
+# Purge Packages
+purge_packages() {
+    # Input Arguments
+    local lpackages=$@
+
+    # Get OS Family
+    distribution_family=$(get_os_family)
+
+    if [[ "${distribution_family}" == "debian" ]]
+    then
+        apt-get purge ${lpackages[*]}
+    elif [[ "${distribution_family}" == "fedora" ]]
+    then
+        dnf remove ${lpackages[*]}
+    fi
+}
+
+# Purge Packages (unattended)
+purge_packages_unattended() {
+    # Input Arguments
+    local lpackages=$@
+
+    # Get OS Family
+    distribution_family=$(get_os_family)
+
+    if [[ "${distribution_family}" == "debian" ]]
+    then
+        apt-get purge --yes ${lpackages[*]}
+    elif [[ "${distribution_family}" == "fedora" ]]
+    then
+        dnf remove -y ${lpackages[*]}
+    fi
+}
+
+# Autoremove Packages
+autoremove_packages() {
+    # Get OS Family
+    distribution_family=$(get_os_family)
+
+    if [[ "${distribution_family}" == "debian" ]]
+    then
+        apt-get autoremove
+    elif [[ "${distribution_family}" == "fedora" ]]
+    then
+        dnf autoremove
+    fi
+}
+
+
+# Upgrade Packages
+upgrade_packages() {
+    # Get OS Family
+    distribution_family=$(get_os_family)
+
+    if [[ "${distribution_family}" == "debian" ]]
+    then
+        apt-get dist-upgrade
+    elif [[ "${distribution_family}" == "fedora" ]]
+    then
+        dnf upgrade
+    fi
 }
