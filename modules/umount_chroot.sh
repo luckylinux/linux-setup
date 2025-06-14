@@ -10,11 +10,26 @@ source "${toolpath}/load.sh"
 # Disable swap
 swapoff -a
 
+# Restore /etc/resolv.conf
+if [[ ! -L "${destination}/etc/resolv.conf" ]]
+then
+    # Echo
+    echo "Restore ${destination}/etc/resolv.conf"
+
+    # Remove quixk Fix for Chroot Environment
+    rm "${destination}/etc/resolv.conf"
+
+    if [[ -L "${destination}/etc/resolv.conf.systemd" ]]
+    then
+        # Restore Symlink to /etc/resolv.conf.systemd
+        mv "${destination}/etc/resolv.conf.systemd" "${destination}/etc/resolv.conf"
+    fi
+fi
+
 # Umount proc, sys, dev
 source ${toolpath}/modules/umount_bind.sh
 
 # Umount root/boot
-
 for disk in "${disks[@]}"
 do
     # Get EFI Mount Path
