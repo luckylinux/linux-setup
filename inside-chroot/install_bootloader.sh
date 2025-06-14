@@ -146,7 +146,7 @@ then
 		done
 
 		# Get Current UUID for /
-		current_uuid=$(findmnt / --raw --noheadings --output UUID)
+		current_root_uuid=$(findmnt / --raw --noheadings --output UUID)
 
 		if [[ -f /etc/kernel/cmdline ]]
 		then
