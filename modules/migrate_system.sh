@@ -56,6 +56,10 @@ then
     # Copy Data using rsync
     # rsync -aPAUHEtv -X --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found"} ${restore_from_mountpoint}/ ${destination}
     rsync -aPAXUHEtv --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found"} ${restore_from_mountpoint}/ ${destination}
+
+    # Do a 2nd and 3rd Pass to have Errors stand out more easily
+    rsync -aPAXUHEtv --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found"} ${restore_from_mountpoint}/ ${destination}
+    rsync -aPAXUHEtv --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found"} ${restore_from_mountpoint}/ ${destination}
 else
     # Abort
     echo "ERROR: Path ${restore_from_mountpoint} does NOT contain a mounted Filesystem. Aborting !"
