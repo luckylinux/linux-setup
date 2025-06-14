@@ -309,6 +309,7 @@ do
             # Extract Filesystem Part
             filesystem=$(echo "${old_fstab_line}" | awk '{print $1}')
             targetmount=$(echo "${old_fstab_line}" | awk '{print $2}')
+            filesystem_type=$(echo "${old_fstab_line}" | awk '{print $3}')
 
             # Get current Fstab UUID
             current_fstab_uuid=$(echo "${filesystem}" | sed -E "s|UUID=([0-9a-zA-Z-]+)|\1|")
@@ -347,6 +348,19 @@ do
                     # Error
                     echo -e "\t\tERROR: new PARTUUID not set for Device ${device_uuid_path} / ${device_real_path}"
                     exit 13
+                fi
+
+                # Shorten it in case of FAT32 to 8 Characters with a Dash ("-") between the 4th and 5th Character
+                if [ "${filesystem_type}" == "vfat" ] || [ "${filesystem_type}" == "fat32" ]
+                then
+                    # Need to use a shorter UUID in the Form of 8 Characters
+                    new_uuid=$(echo "${new_uuid}" | tr -d "-")
+                    part_one=$(echo "${new_uuid}" | cut -c 1-4)
+                    part_two=$(echo "${new_uuid}" | cut -c 5-8)
+                    new_uuid="${part_one}-${part_two}"
+
+                    # Transform into all Uppercase
+                    new_uuid=${new_uuid^^}
                 fi
 
                 # Define UUID Path
