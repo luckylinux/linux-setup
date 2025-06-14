@@ -125,11 +125,24 @@ do
         # Echo
         echo -e "\t\tProcessing Partition Number ${partition_number} of Device ${device_name}"
 
+        # Get Filesystem Type
+        # ** does NOT work inside Chroot since lsblk relies on udev which relies on systemd which does NOT work inside Chroots **
+        # filesystem_type=$(lsblk -o FSTYPE --raw --noheadings --nodeps "/dev/${device_name}${partition_number}")
+
+        # Get Filesystem Type
+        # filesystem_type=$(parted -s "/dev/${device_name}${partition_number}" print --json | grep -Ei '"filesystem": ".*"' | sed -E 's|^\s?*"filesystem": "([a-zA-Z0-9]+)"$|\1|')
+        filesystem_type=$(parted -s "/dev/${device_name}${partition_number}" print --machine | tail -n1 | cut -d: -f5)
+
+        filesystem_detection_status_code=$?
+
+        # Get Partition Flags
+        partition_flags=$(parted -s "/dev/${device_name}" print --machine 2> /dev/null | grep -E "^${partition_number}" | cut -d: -f7)
+
         # Get current UUID
         current_device_uuid=$(udevadm info --property=ID_FS_UUID --query=property "/dev/${device_name}${partition_number}" | sed -E "s|ID_FS_UUID=([0-9a-zA-Z-]+)|\1|")
 
-        # Sanity Check
-        if [[ -z "${current_device_uuid}" ]]
+        # Sanity Check (exclude Partitions that raised an Error in Parted, which is Typically the bios_grub Partition)
+        if [ -z "${current_device_uuid}" ] && [ ${filesystem_detection_status_code} -eq 0 ] && [ "${partition_flags}" == "bios_grub"* ]
         then
             echo -e "\t\t\tERROR: Current Partition UUID is Empty. Aborting !"
             exit 21
@@ -155,17 +168,8 @@ do
         # Get Device link from /dev/disk/by-partuuid/<current_device_partuuid>
         device_partuuid_path="/dev/disk/by-uuid/${current_device_partuuid}"
 
-        # Get Partition Flags
-        partition_flags=$(parted -s "/dev/${device_name}" print --machine 2> /dev/null | grep -E "^${partition_number}" | cut -d: -f7)
-
-        # Get Filesystem Type
-        # ** does NOT work inside Chroot since lsblk relies on udev which relies on systemd which does NOT work inside Chroots **
-        # filesystem_type=$(lsblk -o FSTYPE --raw --noheadings --nodeps "/dev/${device_name}${partition_number}")
-
-        # Get Filesystem Type
-        # filesystem_type=$(parted -s "/dev/${device_name}${partition_number}" print --json | grep -Ei '"filesystem": ".*"' | sed -E 's|^\s?*"filesystem": "([a-zA-Z0-9]+)"$|\1|')
-        filesystem_type=$(parted -s "/dev/${device_name}${partition_number}" print --machine | tail -n1 | cut -d: -f5)
-
+        
+        
         # Create Folder Structure
         mkdir -p "${devices_basepath}/${device_id}/${partition_number}"
 
