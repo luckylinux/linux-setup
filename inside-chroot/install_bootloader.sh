@@ -145,26 +145,48 @@ then
 			grub_install --target=x86_64-efi --efi-directory="${efi_mount_path}" --boot-directory="/boot/" --no-nvram "/dev/disk/by-id/${disk}"
 		done
 
+		# Get Current UUID for /
+		current_uuid=$(findmnt / --raw --noheadings --output UUID)
+
 		if [[ -f /etc/kernel/cmdline ]]
 		then
 			# Make sure to set the correct UUID for Kernel Command Line
         	sed -Ei "s|(.*?)root=UUID=([a-f0-9-]+)\s(.*?)|\1root=UUID=\2 \3|" /etc/kernel/cmdline
 
-			# Make sure to remove the Swap Resume Entry
-			sed -Ei "s|(.*?)resume=UUID=([a-f0-9-]+)\s(.*?)|\1\3|" /etc/kernel/cmdline
+			# Remove Resume Support for Swap Partition, if no Swap is enabled
+			if [[ ${swap_size} -eq 0 ]]
+			then
+				# Make sure to remove the Swap Resume Entry
+				sed -Ei "s|(.*?)resume=UUID=([a-f0-9-]+)\s(.*?)|\1\3|" /etc/kernel/cmdline
+			else
+				# Update Resume UUID
+				# Nothing implemented for now
+				x=1
+			fi
 		fi
 
-		# Remove support for Swap Partition
-		sed -Ei "s|resume=UUID=([a-f0-9-]+)\s?||g" /etc/default/grub
-
-		# Remove support for Swap Partition
+		if [[ ${swap_size} -eq 0 ]]
+		then
+			# Remove Resume Support for Swap Partition, if no Swap is enabled
+			sed -Ei "s|resume=UUID=([a-f0-9-]+)\s?||g" /etc/default/grub
+		else
+			# Update Resume UUID
+			# Nothing implemented for now
+			x=1
+		fi
+		
 		if [[ -d /etc/initramfs-tools ]]
 		then
 			if [[ -d /etc/initramfs-tools/conf.d ]]
 			then
-				if [[ -f /etc/initramfs-tools/conf.d/resume ]]
+				if [[ ${swap_size} -eq 0 ]]
 				then
-					rm /etc/initramfs-tools/conf.d/resume
+					# Remove support for Swap Partition, if no Swap is enabled
+					rm -f /etc/initramfs-tools/conf.d/resume
+				else
+					# Update Resume UUID
+					# Nothing implemented for now
+					x=1
 				fi
 			fi
 		fi
