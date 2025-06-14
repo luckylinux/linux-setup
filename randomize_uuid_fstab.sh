@@ -128,12 +128,26 @@ do
         # Get current UUID
         current_device_uuid=$(udevadm info --property=ID_FS_UUID --query=property "/dev/${device_name}${partition_number}" | sed -E "s|ID_FS_UUID=([0-9a-zA-Z-]+)|\1|")
 
+        # Sanity Check
+        if [[ -z "${current_device_uuid}" ]]
+        then
+            echo -e "\t\t\tERROR: Current Partition UUID is Empty. Aborting !"
+            exit 21
+        fi
+
         # Get Current PARTUUID
         # This returns an empty String - lsblk / udev / systemd NOT working inside Chroot
         # current_device_partuuid=$(lsblk -o PARTUUID --raw --noheadings --nodeps "/dev/${device_name}${partition_number}")        
 
         # Get Current PARTUUID
         current_device_partuuid=$(udevadm info --property=ID_PART_ENTRY_UUID --query=property "/dev/${device_name}${partition_number}" | sed -E "s|ID_PART_ENTRY_UUID=([0-9a-zA-Z-]+)|\1|")
+
+        # Sanity Check
+        if [[ -z "${current_device_partuuid}" ]]
+        then
+            echo -e "\t\t\tERROR: Current Partition PARTUUID is Empty. Aborting !"
+            exit 22
+        fi
 
         # Get Device link from /dev/disk/by-uuid/<current_device_uuid>
         device_uuid_path="/dev/disk/by-uuid/${current_device_uuid}"
