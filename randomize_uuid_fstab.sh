@@ -471,7 +471,7 @@ done
 source "${toolpath}/modules/setup_chroot.sh" "no"
 
 # Run inside-chroot/install_bootloader.sh inside chroot
-chroot "${destination}" /bin/bash -c "/tools_install/${timestamp}/inside-chroot/install_bootloader.sh"
+chroot "${destination}" /bin/bash -c "source /etc/profile; cd /tools_install/${timestamp}/inside-chroot/; ./install_bootloader.sh"
 
 # Echo
 echo "Unmounting Everything from Target Mountpoint"
