@@ -4,10 +4,6 @@
 relativepath="./" # Define relative path to go from this script to the root level of the tool
 if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
 
-# Load config
-# Do **NOT** use load.sh here, since it will create an Infitite Loop
-source "${toolpath}/config.sh"
-
 # Get OS Release
 get_os_release() {
     # The Distribution can be Detected by looking at the Line starting with ID=...
@@ -52,22 +48,6 @@ get_os_family() {
 
     # Return Value
     echo $distribution
-}
-
-# Get EFI Mount Path
-get_efi_mount_path() {
-    # Input Arguments
-    local ldisk="$1"
-
-    if [[ "${numdisks_total}" -eq 1 ]]
-    then
-        efi_mount_path="/boot/efi"
-    else
-        efi_mount_path="/boot/efi/${ldisk}"
-    fi
-
-    # Return Value
-    echo "${efi_mount_path}"
 }
 
 # Update GRUB Configuration

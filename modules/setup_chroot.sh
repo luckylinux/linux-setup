@@ -13,6 +13,8 @@ source ${toolpath}/modules/mount_bind.sh
 # Copy tool to chroot folder
 source ${toolpath}/modules/copy_tool_to_chroot.sh
 
+# Configure /etc/resolv.conf
+
 # Chroot into the environment
 chroot "${destination}" /bin/bash --login
 #chroot "${destination}" /bin/bash --login -c "/bin/bash /tools_install/$timestamp/inside-chroot/start.sh"

@@ -43,18 +43,16 @@ numdevices_total=${#devices[@]}
 n="/dev/null"
 
 # Define target Distribution
-distribution="debian" # "debian" or "ubuntu"
+distribution="debian" # "debian" / "ubuntu" / "fedora"
 
-# Define the current running system Distribution
-# Used if need to setup Backports prior to running Install
-hostdistribution=$(lsb_release -i | sed -E "s|.*?Distributor ID:\s*?([a-zA-Z]+)|\L\1|")
-hostrelease=$(lsb_release -c | sed -E "s|.*?Codename:\s*?([a-zA-Z]+)|\L\1|")
+# Define Debian / Ubuntu Archive
+source="http://deb.debian.org/debian/"
+
+# Define mountpoint
+destination="/mnt/$distribution"
 
 # Define Distribution Release
-release="bookworm" # "bullseye", "bookworm", "testing"
-
-# Define Debian Archive
-source="http://ftp.dk.debian.org/debian/"
+release="bookworm" # "bullseye", "bookworm", "trixie", "testing", ...
 
 # Packages to Exclude when running debootstrap
 excludepackages="netplan.io,snapd"
@@ -71,9 +69,6 @@ usekernelbackports="no" # "yes" or "no"
 # Hetzner ZFS Fix
 # This will remove their /usr/local/sbin/zfs dummy Package since we install directly from Debian Backports
 hetznerzfsfix="no" # "yes" or "no"
-
-# Define mountpoint
-destination="/mnt/$distribution"
 
 # Define hostname
 targethostname="pveX"

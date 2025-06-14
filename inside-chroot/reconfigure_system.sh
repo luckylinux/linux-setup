@@ -30,6 +30,9 @@ then
    rm /etc/fstab
 fi
 
+# Install lsb_release Package
+install_packages_unattended lsb_release
+
 # Configure /boot Partition & /etc/fstab
 source ${toolpath}/modules/configure_boot_partition.sh
 
