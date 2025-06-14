@@ -22,15 +22,18 @@ fi
 if [[ $(get_os_family) == "debian" ]]
 then
     # Install Debian Tools
-    install_packages_unattended aptitude debootstrap
+    install_packages_unattended aptitude debootstrap lm-sensors
 elif [[ $(get_os_family) == "fedora" ]]
 then
     # Nothing Special required for Fedora
-    x=1
+    # x=1
+
+    # Install lm-sensors for Fedora
+    install_packages_unattended lm_sensors
 fi
 
 # Install Common System Tools
-install_packages_unattended nload htop lm-sensors net-tools dosfstools e2fsprogs psmisc tmux screen
+install_packages_unattended nload htop net-tools dosfstools e2fsprogs psmisc tmux screen
 
 # Install partition management tools
 install_packages_unattended gdisk parted
