@@ -151,7 +151,7 @@ then
 		if [[ -f /etc/kernel/cmdline ]]
 		then
 			# Make sure to set the correct UUID for Kernel Command Line
-        	sed -Ei "s|(.*?)root=UUID=([a-f0-9-]+)\s(.*?)|\1root=UUID=\2 \3|" /etc/kernel/cmdline
+        	sed -Ei "s|(.*?)root=UUID=([a-f0-9-]+)\s(.*?)|\1root=UUID=${current_root_uuid} \3|" /etc/kernel/cmdline
 
 			# Remove Resume Support for Swap Partition, if no Swap is enabled
 			if [[ ${swap_size} -eq 0 ]]
@@ -164,6 +164,9 @@ then
 				x=1
 			fi
 		fi
+
+		# Make sure to set the correct UUID for Kernel Command Line in /etc/default/grub
+		sed -Ei "s|(.*?)root=UUID=([a-f0-9-]+)\s(.*?)|\1root=UUID=${current_root_uuid} \3|" /etc/default/grub
 
 		if [[ ${swap_size} -eq 0 ]]
 		then
