@@ -40,7 +40,9 @@ fi
 backup_timestamp=$(date +"%Y%m%d%H%M%S")
 
 # Install Requirements
-install_packages_unattended uuid-runtime mtools inotify-tools
+install_packages_unattended uuid-runtime
+install_packages_unattended mtools
+install_packages_unattended inotify-tools
 
 # Unmount System to have a "Clean Start"
 source "${toolpath}/umount_everything.sh"
