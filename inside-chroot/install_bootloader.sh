@@ -154,7 +154,20 @@ then
 			sed -Ei "s|(.*?)resume=UUID=([a-f0-9-]+)\s(.*?)|\1\3|" /etc/kernel/cmdline
 		fi
 
+		# Remove support for Swap Partition
 		sed -Ei "s|resume=UUID=([a-f0-9-]+)\s?||g" /etc/default/grub
+
+		# Remove support for Swap Partition
+		if [[ -d /etc/initramfs-tools ]]
+		then
+			if [[ -d /etc/initramfs-tools/conf.d ]]
+			then
+				if [[ -f /etc/initramfs-tools/conf.d/resume ]]
+				then
+					rm /etc/initramfs-tools/conf.d/resume
+				fi
+			fi
+		fi
 
         # Fedora: Remove all Files in /boot/loader/entries/*.conf, then reinstall kernel-core to Trigger GRUB update to use new Partition Layout
         force_grub_configuration_update_after_partition_changes
