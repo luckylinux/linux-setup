@@ -133,6 +133,7 @@ then
 	    do
 	        grub_install "/dev/disk/by-id/${disk}"
         done
+
 		# UEFI
 		for disk in "${disks[@]}"
 		do
@@ -144,8 +145,16 @@ then
 			grub_install --target=x86_64-efi --efi-directory="${efi_mount_path}" --boot-directory="/boot/" --no-nvram "/dev/disk/by-id/${disk}"
 		done
 
-        # Make sure to set the correct UUID for Kernel Command Line
-        sed -Ei "s|(.*?)root=UUID=([a-f0-9-]+)\s(.*?)|\1root=UUID=\2 \3|" /etc/kernel/cmdline
+		if [[ -f /etc/kernel/cmdline ]]
+		then
+			# Make sure to set the correct UUID for Kernel Command Line
+        	sed -Ei "s|(.*?)root=UUID=([a-f0-9-]+)\s(.*?)|\1root=UUID=\2 \3|" /etc/kernel/cmdline
+
+			# Make sure to remove the Swap Resume Entry
+			sed -Ei "s|(.*?)resume=UUID=([a-f0-9-]+)\s(.*?)|\1\3|" /etc/kernel/cmdline
+		fi
+
+		sed -Ei "s|resume=UUID=([a-f0-9-]+)\s?||g" /etc/default/grub
 
         # Fedora: Remove all Files in /boot/loader/entries/*.conf, then reinstall kernel-core to Trigger GRUB update to use new Partition Layout
         force_grub_configuration_update_after_partition_changes
