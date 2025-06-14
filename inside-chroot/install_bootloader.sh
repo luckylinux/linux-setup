@@ -78,17 +78,20 @@ then
             # Might be intesting to also rename UEFI Labels/Entries
             # See for instance https://askubuntu.com/questions/1125920/how-can-i-change-the-names-of-items-in-the-efi-uefi-boot-menu
 
-            # Install GRUB and Shim for UEFI (Primary)
-            install_packages_unattended grub-efi-amd64 shim-signed
+			if [[ "${DISTRIBUTION_FAMILY}" == "debian" ]]
+			then
+            	# Install GRUB and Shim for UEFI (Primary)
+            	install_packages_unattended grub-efi-amd64 shim-signed
+
+				# Install GRUB for BIOS (Secondary)
+            	install_packages_unattended grub-pc-bin
+			fi
 
             # Attempt to install SHIM Helpers (Debian only, NOT Ubuntu)
 			if [[ "${DISTRIBUTION_RELEASE}" == "debian" ]]
 			then
             	install_packages_unattended shim-helpers-amd64-signed
 			fi
-
-            # Install GRUB for BIOS (Secondary)
-            install_packages_unattended grub-pc-bin
 	else
 	    # Not Supported
 	    echo "Error - bootloadermode <${bootloadermode}> is NOT supported. Aborting"
