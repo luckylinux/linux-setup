@@ -271,3 +271,46 @@ upgrade_packages() {
         dnf upgrade
     fi
 }
+
+# Wait until Device becomes available
+wait_until_device_becomes_available() {
+    # Input Arguments
+    local ldevice="$1"
+    local lsleep=${2-"1"}
+    local ltimeout=${3-"10"}
+
+    # Define Counter for Timeout
+    local lwaitcounter
+    lwaitcounter=0
+
+    # Define Counter Step
+    local lwaitstep=0.2
+
+    # Standard Sleep
+    sleep "${lsleep}"
+
+    # Wait until Device becomes available or Timeout is reached
+    while [[ ${lwaitcounter} -le ${ltimeout} ]]
+    do
+        # Wait a bit
+        sleep "${lwaitstep}"
+
+        # Increase Waiting Counter
+        lwaitcounter=$(echo "scale=3; ${lwaitcounter} + ${lwaitstep}" | bc)
+
+        # Check if Device exists
+        if [[ -e "${ldevice}" ]]
+        then
+            break
+        fi
+    done
+
+    # Final Check if Device exists
+    if [[ -e "${ldevice}" ]]
+    then
+        return 0
+    else
+        echo "ERROR: Device ${ldevice} does not Exist ! Aborting Execution !"
+        exit 1
+    fi
+}

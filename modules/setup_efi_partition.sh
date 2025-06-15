@@ -10,12 +10,21 @@ source "${toolpath}/load.sh"
 # Standalone EFI/ESP Setup
 for disk in "${disks[@]}"
 do
+    # Define Device
+    device="/dev/disk/by-id/${disk}-part${efi_num}"
+
+    # Wait until Device becomes available
+    wait_until_device_becomes_available "${device}"
+
+    # Check Status Code
+    exit_status=$?   
+
     # Get EFI Mount Path
     efi_mount_path=$(get_efi_mount_path "${disk}")
 
     # Create Filesystem
-    echo "Creating FAT32 filesystem on /dev/disk/by-id/${disk}-part${efi_num}"
-    mkfs.vfat -F 32 "/dev/disk/by-id/${disk}-part${efi_num}"
+    echo "Creating FAT32 filesystem on ${device}"
+    mkfs.vfat -F 32 "${device}"
     sleep 1
 done
 
