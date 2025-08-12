@@ -48,8 +48,11 @@ distribution="debian" # "debian" / "ubuntu" / "fedora"
 # Define Debian / Ubuntu Archive
 source="http://deb.debian.org/debian/"
 
-# Define mountpoint
-destination="/mnt/$distribution"
+# Define Mountpoint (if NOT set externally)
+if [[ -z "${destination}" ]]
+then
+    destination="/mnt/$distribution"
+fi
 
 # Define Distribution Release
 release="bookworm" # "bullseye", "bookworm", "trixie", "testing", ...
