@@ -20,11 +20,11 @@ export destination="/"
 mount /boot
 
 # Generate Timestamp for backup archive
-timestamp=$(date +"%Y%m%d-%H%M%S")
+timestamp_long=$(date +"%Y%m%d-%H%M%S")
 
 # Backup Current /boot partition content
 cd /boot
-tar cvzf /boot_$timestamp.tar.gz ./
+tar cvzf /boot_${timestamp_long}.tar.gz ./
 cd ..
 
 # Check if ZFS boot pool exists
@@ -39,9 +39,9 @@ fi
 # Execute Boot Device(s) Setup
 source ${toolpath}/modules/setup_boot_partition.sh
 
-# Move /boot to /boot_local_$timestamp
+# Move /boot to /boot_local_${timestamp_long}
 chattr -i /boot
-mv /boot /boot_local_$timestamp
+mv /boot /boot_local_${timestamp_long}
 
 # Create /boot folder and prevent direct writing (i.e. a partition must first be mounted inside to enable writing)
 mkdir -p /boot
@@ -54,7 +54,7 @@ source ${toolpath}/modules/configure_boot_partition.sh
 mount /boot
 
 # Restore Backup
-tar xvzf /boot_$timestamp.tar.gz -C /boot
+tar xvzf /boot_${timestamp_long}.tar.gz -C /boot
 
 # Remove existing Pool Configuration if existing
 if [[ -f "/etc/zfs/zfs-list.cache/bpool" ]]
