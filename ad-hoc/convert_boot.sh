@@ -10,6 +10,12 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Load configuration
 source "${toolpath}/load.sh"
 
+# Install Requirements
+apt-get install bc mdadm lsb-release
+
+# Override Destination since this is NOT an Installation but rather an in-place Update on a running (live) System
+export destination="/"
+
 # Mount Current /boot partition
 mount /boot
 
@@ -49,3 +55,12 @@ mount /boot
 
 # Restore Backup
 tar xvzf /boot_$timestamp.tar.gz -C /boot
+
+# Update Grub
+update-grub
+
+# Update Initramfs
+update-initramfs -k all -u
+
+# Update Grub
+update-grub
