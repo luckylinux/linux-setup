@@ -2,7 +2,7 @@
 
 # Make sure we are in chroot
 # Abort if we are trying to run the script from the host machine
-if [ "$(stat -c %d:%i /)" == "$(stat -c %d:%i /proc/1/root/.)" ] 
+if [ "$(stat -c %d:%i /)" == "$(stat -c %d:%i /proc/1/root/.)" ] || [ "${force_bootloader_installation_from_running_system}" == "yes" ]
 then
         echo "This script must ONLY be run within the chroot environment. Aborting !"
         exit 2
