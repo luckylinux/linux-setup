@@ -56,6 +56,12 @@ mount /boot
 # Restore Backup
 tar xvzf /boot_$timestamp.tar.gz -C /boot
 
+# Remove existing Pool Configuration if existing
+if [[ -f "/etc/zfs/zfs-list.cache/bpool" ]]
+then
+    rm /etc/zfs/zfs-list.cache/bpool
+fi
+
 # Update Grub
 update-grub
 
