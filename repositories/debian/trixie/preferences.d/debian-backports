@@ -1,0 +1,9 @@
+# Never prefer packages from the backports release
+Package: *
+Pin: release n=trixie-backports
+Pin-Priority: 1
+
+# Never prefer packages from the backports release
+Package: *
+Pin: release a=stable-backports
+Pin-Priority: 1

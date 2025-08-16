@@ -28,13 +28,13 @@ apt-get -y dist-upgrade
 apt-get -y remove linux-firmware-free
 
 # Add Proxmox VE repository
-echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" > /etc/apt/sources.list.d/pve-no-subscription.list
+echo "deb http://download.proxmox.com/debian/pve ${release} pve-no-subscription" > /etc/apt/sources.list.d/pve-no-subscription.list
 
 # Remove Proxmox VE enterprise repository
 rm -f /etc/apt/sources.list.d/pve-enterprise.list*
 
 # Add Proxmox VE repository key
-wget https://enterprise.proxmox.com/debian/proxmox-release-bookworm.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg
+wget https://enterprise.proxmox.com/debian/proxmox-release-${release}.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-${release}.gpg
 
 # Update to include new sources
 apt-get update

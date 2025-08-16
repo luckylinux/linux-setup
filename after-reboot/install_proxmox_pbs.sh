@@ -9,7 +9,7 @@ source "${toolpath}/load.sh"
 
 # Make sure we are NOT in chroot
 # Abort if we are trying to run the script from the chroot environment
-if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ] 
+if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]
 then
         echo "This script must NOT be run from a chroot environment."
         echo "Please execute this Script after Reboot !"
@@ -28,13 +28,13 @@ apt-get -y dist-upgrade
 apt-get -y remove linux-firmware-free
 
 # Add Proxmox PBS repository
-echo "deb http://download.proxmox.com/debian/pbs bookworm pbs-no-subscription" > /etc/apt/sources.list.d/pbs-no-subscription.list
+echo "deb http://download.proxmox.com/debian/pbs ${release} pbs-no-subscription" > /etc/apt/sources.list.d/pbs-no-subscription.list
 
 # Remove Proxmox PBS enterprise repository
 rm -f /etc/apt/sources.list.d/pbs-enterprise.list*
 
 # Add Proxmox PBS repository key
-wget https://enterprise.proxmox.com/debian/proxmox-release-bookworm.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg
+wget https://enterprise.proxmox.com/debian/proxmox-release-${release}.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-${release}.gpg
 
 # Update to include new sources
 apt-get update

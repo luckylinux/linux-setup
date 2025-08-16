@@ -55,7 +55,8 @@ then
 fi
 
 # Define Distribution Release
-release="bookworm" # "bullseye", "bookworm", "trixie", "testing", ...
+release="trixie" # Debian: "bullseye", "bookworm", "trixie", "testing"
+                 # Ubuntu: "noble", "plucky"
 
 # Packages to Exclude when running debootstrap
 excludepackages="netplan.io,snapd"

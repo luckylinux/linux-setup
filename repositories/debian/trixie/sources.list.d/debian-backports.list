@@ -1,0 +1,3 @@
+# BACKPORT SOURCES
+deb http://deb.debian.org/debian/ trixie-backports main contrib non-free non-free-firmware
+deb-src http://deb.debian.org/debian/ trixie-backports main contrib non-free non-free-firmware

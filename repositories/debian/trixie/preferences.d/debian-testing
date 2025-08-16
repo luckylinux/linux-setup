@@ -1,0 +1,4 @@
+# Never prefer packages from the testing release
+Package: *
+Pin: release a=testing
+Pin-Priority: 1
