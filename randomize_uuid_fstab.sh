@@ -116,6 +116,9 @@ do
     # Get Device Name
     device_name=$(basename "${device_real_path}" | sed -E "s|^([a-zA-Z]+)([0-9]+)$|\1|")
 
+    # Echo
+    echo "Device ${device} -> ${device_real_path} (${device_name})"
+
     # Get List of Partitions
     mapfile -t partition_numbers < <( find /dev -iwholename "${device_real_path}[0-9]"* | sed -E "s|${device_real_path}||g" | sort --human )
 
@@ -141,6 +144,9 @@ do
         # Get current UUID
         current_device_uuid=$(udevadm info --property=ID_FS_UUID --query=property "/dev/${device_name}${partition_number}" | sed -E "s|ID_FS_UUID=([0-9a-zA-Z-]+)|\1|")
 
+        # Echo
+        echo "Found Current Device UUID: ${current_device_uuid}"
+
         # Sanity Check (exclude Partitions that raised an Error in Parted, which is Typically the bios_grub Partition)
         if [ -z "${current_device_uuid}" ] && [ ${filesystem_detection_status_code} -eq 0 ] && [ "${partition_flags}" == "bios_grub"* ]
         then
@@ -155,6 +161,9 @@ do
         # Get Current PARTUUID
         current_device_partuuid=$(udevadm info --property=ID_PART_ENTRY_UUID --query=property "/dev/${device_name}${partition_number}" | sed -E "s|ID_PART_ENTRY_UUID=([0-9a-zA-Z-]+)|\1|")
 
+        # Echo
+        echo "Found Current Device PARTUUID: ${current_device_partuuid}"
+
         # Sanity Check
         if [[ -z "${current_device_partuuid}" ]]
         then
@@ -167,8 +176,6 @@ do
 
         # Get Device link from /dev/disk/by-partuuid/<current_device_partuuid>
         device_partuuid_path="/dev/disk/by-uuid/${current_device_partuuid}"
-
-        
         
         # Create Folder Structure
         mkdir -p "${devices_basepath}/${device_id}/${partition_number}"

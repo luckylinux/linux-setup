@@ -60,7 +60,7 @@ update_grub_configuration() {
         update-grub
     elif [[ $(get_os_release) == "ubuntu" ]]
     then
-        upgrade-grub
+        update-grub
     fi
 }
 
