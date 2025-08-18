@@ -71,7 +71,7 @@ then
 	    # BIOS
 	    for disk in "${disks[@]}"
 	    do
-	        grub_install "/dev/disk/by-id/${disk}"
+	        grub_install --target=i386-pc "/dev/disk/by-id/${disk}"
         done
 	elif [[ "${bootloadermode}" == "UEFI" ]]
             then
@@ -131,7 +131,7 @@ then
         # BIOS
         for disk in "${disks[@]}"
 	    do
-	        grub_install "/dev/disk/by-id/${disk}"
+	        grub_install --target=i386-pc "/dev/disk/by-id/${disk}"
         done
 
 		# UEFI
