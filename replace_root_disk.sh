@@ -118,6 +118,12 @@ mdadm --manage /dev/${mdadm_boot_device} --add /dev/disk/by-id/${new_disk}-part$
 # Update Root Device Configuration in /etc/crypttab
 sed -Ei "s|${old_disk}|${new_disk}|" /etc/crypttab
 
+# Update UUID
+old_uuid=$(blkid -s UUID -o value /dev/disk/by-id/${old_disk}-part${boot_num})
+new_uuid=$(blkid -s UUID -o value /dev/disk/by-id/${new_disk}-part${boot_num})
+
+sed -Ei "s|${old_uuid}|${new_uuid}|" /etc/crypttab
+
 # Perform Pool Device Replacement
 zpool replace ${rootpool} /dev/mapper/${old_disk}_root_crypt /dev/mapper/${new_disk}_root_crypt
 
