@@ -22,7 +22,7 @@ device3="/dev/disk/by-id/${disk3}"
 device4="/dev/disk/by-id/${disk4}"
 
 # Put disks into array
-if [[ -v disks ]]
+if [[ ! -v disks ]]
 then
     disks=()
     disks+=("$disk1")
@@ -32,7 +32,7 @@ then
 fi
 
 # Put devices into array
-if [[ -v devices ]]
+if [[ ! -v devices ]]
 then
     devices=()
     devices+=("$device1")
