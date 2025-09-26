@@ -75,6 +75,15 @@ then
     exit 2
 fi
 
+# Unmount if mounted (might be necessary if multiple Attempts for replacing)
+mdadm --manage /dev/${mdadm_boot_device} --fail /dev/disk/by-id/${new_disk}-part${boot_num}
+mdadm --manage /dev/${mdadm_boot_device} --remove /dev/disk/by-id/${new_disk}-part${boot_num}
+
+if [[ -b "/dev/mapper/${new_disk}_root_crypt" ]]
+then
+    cryptsetup luksClose /dev/mapper/${new_disk}_root_crypt
+fi
+
 # Setup new Disk
 source ${toolpath}/modules/setup_partitions.sh
 
@@ -110,8 +119,26 @@ mdadm --manage /dev/${mdadm_boot_device} --add /dev/disk/by-id/${new_disk}-part$
 sed -Ei "s|${old_disk}|${new_disk}|" /etc/crypttab
 
 # Perform Pool Device Replacement
-zpool replace ${rootpool} /dev/mapper/${old_disk}_crypt_root /dev/mapper/${new_disk}_crypt_root
+zpool replace ${rootpool} /dev/mapper/${old_disk}_root_crypt /dev/mapper/${new_disk}_root_crypt
 
 # Update Cachefile
 rm -f /etc/zfs/zpool.cache
 zpool set cachefile=/etc/zfs/zpool.cache
+
+# Install Bootloader (BIOS) onto new Disk
+grub_install --target=i386-pc "/dev/disk/by-id/${new_disk}"
+
+# Install Bootloader (UEFI) onto new Disk
+grub_install --target=x86_64-efi --efi-directory="/boot/efi/${new_disk}" --boot-directory="/boot/" --no-nvram "/dev/disk/by-id/${new_disk}"
+
+# Update Grub Configuration
+update-grub
+
+# Update Initramfs
+update-initramfs -k all -u
+
+# Update Grub Configuration
+update-grub
+
+# Update Initramfs
+update-initramfs -k all -u
