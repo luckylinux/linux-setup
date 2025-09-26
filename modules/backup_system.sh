@@ -31,10 +31,10 @@ zfs snapshot -r ${rootpool}@$snapshotname
 
 # Send to remote server
 # Normal Mode
-#zfs send -Rv ${rootpool}@snapshotname | ssh root@backupserver zfs receive -F -s $backupdataset
+#zfs send -Rv ${rootpool}@snapshotname | ssh root@backupserver zfs receive -o mountpoint=/$backupdataset -s -Fduv $backupdataset
 
 # Readonly Mode
-zfs send -Rv ${rootpool}@$snapshotname | ssh root@$backupserver zfs receive -o readonly=on -s -Fduv $backupdataset
+zfs send -Rv ${rootpool}@$snapshotname | ssh root@$backupserver zfs receive -o readonly=on -o mountpoint=/$backupdataset -s -Fduv $backupdataset
 
 
 
