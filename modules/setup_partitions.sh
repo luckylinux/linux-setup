@@ -117,7 +117,7 @@ do
 	start_boot=$((end_efi))				# MiB
 	end_boot=$((start_boot + boot_size))		# MiB
 
-	echo "Creating /boot partition on ${device}-part${bios_num}"
+	echo "Creating /boot partition on ${device}-part${boot_num}"
 	parted --align=opt $device mkpart primary "${start_boot}MiB" "${end_boot}MiB" >> $n
 	parted $device name 3 "${label}_BOOT" >> $n
 

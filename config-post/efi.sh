@@ -7,7 +7,12 @@ get_efi_mount_path() {
 
     if [[ "${numdisks_total}" -eq 1 ]]
     then
-        efi_mount_path="/boot/efi"
+        if [[ "${efi_force_full_path}" != "yes" ]]
+        then
+            efi_mount_path="/boot/efi"
+        else
+            efi_mount_path="/boot/efi/${ldisk}"
+        fi
     else
         efi_mount_path="/boot/efi/${ldisk}"
     fi

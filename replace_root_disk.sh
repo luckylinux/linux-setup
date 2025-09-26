@@ -24,8 +24,12 @@ done
 
 # Export Configuration
 export devices=("/dev/disk/by-id/${new_disk}")
-real_disk=$(readlink --canonicalize-missing "/dev/disk/by-id/${new_disk}")
-export disks=("${real_disk}")
+# real_disk=$(readlink --canonicalize-missing "/dev/disk/by-id/${new_disk}")
+export disks=("${new_disk}")
+
+# ForcE EFI Full Paths for /boot/efi
+export efi_force_full_path="yes"
+# efi_force_full_path="yes"
 
 # Display what is going to be performed
 echo "This Script will migrate Data from /dev/disk/by-id/${old_disk} to /dev/disk/by-id/${new_disk}"
@@ -74,7 +78,11 @@ fi
 # Setup new Disk
 source ${toolpath}/modules/setup_partitions.sh
 
+# Setup Clevis
+source ${toolpath}/modules/setup_clevis_nbde.sh
 
+# Unlock Device
+source ${toolpath}/modules/unlock_encrypted_root.sh
 
 # Copy Partition Table
 # sgdisk /dev/disk/by-id/${old_disk} -R /dev/disk/by-id/${new_disk}
@@ -102,7 +110,8 @@ mdadm --manage /dev/${mdadm_boot_device} --add /dev/disk/by-id/${new_disk}-part$
 sed -Ei "s|${old_disk}|${new_disk}|" /etc/crypttab
 
 # Perform Pool Device Replacement
-zpool replace ${rootpool} ${old_device} ${new_device}
+zpool replace ${rootpool} /dev/mapper/${old_disk}_crypt_root /dev/mapper/${new_disk}_crypt_root
 
 # Update Cachefile
-# ...
+rm -f /etc/zfs/zpool.cache
+zpool set cachefile=/etc/zfs/zpool.cache
