@@ -24,8 +24,8 @@ done
 
 # Export Configuration
 export devices=("/dev/disks/by-id/${new_disk}")
-real_disk=$(readlink --canonicalize-missing "/dev/disks/by-id/${new_disk}"
-export disks=$(real_disk))
+real_disk=$(readlink --canonicalize-missing "/dev/disks/by-id/${new_disk}")
+export disks=($real_disk)
 
 # Display what is going to be performed
 echo "This Script will migrate Data from /dev/disk/by-id/${old_disk} to /dev/disk/by-id/${new_disk}"
