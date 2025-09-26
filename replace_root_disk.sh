@@ -71,9 +71,6 @@ then
     exit 2
 fi
 
-# Init Partitioning for new Disk
-source ${toolpath}/modules/init_partitioning.sh
-
 # Setup new Disk
 source ${toolpath}/modules/setup_partitions.sh
 
