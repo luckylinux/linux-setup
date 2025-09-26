@@ -22,18 +22,24 @@ device3="/dev/disk/by-id/${disk3}"
 device4="/dev/disk/by-id/${disk4}"
 
 # Put disks into array
-disks=()
-disks+=("$disk1")
-disks+=("$disk2")
-disks+=("$disk3")
-disks+=("$disk4")
+if [[ -v disks ]]
+then
+    disks=()
+    disks+=("$disk1")
+    disks+=("$disk2")
+    disks+=("$disk3")
+    disks+=("$disk4")
+fi
 
 # Put devices into array
-devices=()
-devices+=("$device1")
-devices+=("$device2")
-devices+=("$device3")
-devices+=("$device4")
+if [[ -v devices ]]
+then
+    devices=()
+    devices+=("$device1")
+    devices+=("$device2")
+    devices+=("$device3")
+    devices+=("$device4")
+fi
 
 # Get number of disks
 numdisks_total=${#disks[@]}
