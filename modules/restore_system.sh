@@ -16,7 +16,7 @@ sleep 5
 
 # Restore ZFS Snapshot
 #ssh root@$backupserver zfs send -Rv $backupdataset@$snapshotname | zfs receive -Fduv ${rootpool}
-ssh root@${backupserver} zfs send -Rv ${backupdataset}@${snapshotname} | zfs receive -F ${rootpool}
+ssh root@${backupserver} zfs send -Rv ${backupdataset}@${snapshotname} | zfs receive -o mountpoint=/ -F ${rootpool}
 
 # Restore ZFS mountpoints
 source "${toolpath}/ad-hoc/restore_zfs_mountpoints.sh"
