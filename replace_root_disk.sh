@@ -122,10 +122,13 @@ sed -Ei "s|${old_disk}|${new_disk}|" /etc/crypttab
 old_uuid=$(blkid -s UUID -o value /dev/disk/by-id/${old_disk}-part${boot_num})
 new_uuid=$(blkid -s UUID -o value /dev/disk/by-id/${new_disk}-part${boot_num})
 
+# Get old Mapper Device
+old_mapper=$(cat /etc/crypttab | grep "${old_disk}" | awk '{print $1}')
+
 sed -Ei "s|${old_uuid}|${new_uuid}|" /etc/crypttab
 
 # Perform Pool Device Replacement
-zpool replace ${rootpool} /dev/mapper/${old_disk}_root_crypt /dev/mapper/${new_disk}_root_crypt
+zpool replace ${rootpool} /dev/mapper/${old_mapper} /dev/mapper/${new_disk}_root_crypt
 
 # Update Cachefile
 rm -f /etc/zfs/zpool.cache
