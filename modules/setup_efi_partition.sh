@@ -17,7 +17,7 @@ do
     wait_until_device_becomes_available "${device}"
 
     # Check Status Code
-    exit_status=$?   
+    exit_status=$?
 
     # Get EFI Mount Path
     efi_mount_path=$(get_efi_mount_path "${disk}")

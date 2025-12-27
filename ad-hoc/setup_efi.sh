@@ -16,6 +16,16 @@ mount /boot
 # Generate Timestamp for backup archive
 timestamp=$(date +"%Y%m%d")
 
+# Standalone EFI/ESP Setup
+for disk in "${disks[@]}"
+do
+    # Define Device
+    device="/dev/disk/by-id/${disk}-part${efi_num}"
+
+    # Clear MDADM Superblock
+    mdadm --zero-superblock --force ${device}
+done
+
 # Execute EFI Device(s) Setup
 source ${toolpath}/modules/setup_efi_partition.sh
 
