@@ -14,7 +14,12 @@ source "${toolpath}/load.sh"
 mount /boot
 
 # Generate Timestamp for backup archive
-timestamp=$(date +"%Y%m%d")
+timestamp_long=$(date +"%Y%m%d-%H%M%S")
+
+# Backup Current /boot partition content
+cd /boot/efi
+tar cvzf /boot_efi_${timestamp_long}.tar.gz ./
+cd ..
 
 # Standalone EFI/ESP Setup
 for disk in "${disks[@]}"
