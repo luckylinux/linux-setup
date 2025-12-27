@@ -61,3 +61,16 @@ do
 
     mount "/boot/efi/${disk}"
 done
+
+# Force Bootloader Installation from Live System
+export force_bootloader_installation_from_running_system="yes"
+source ${toolpath}/inside-chroot/install_bootloader.sh
+
+# Update Grub
+update-grub
+
+# Update Initramfs
+update-initramfs -k all -u
+
+# Update Grub
+update-grub
