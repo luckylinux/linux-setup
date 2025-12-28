@@ -87,3 +87,6 @@ rm -f /etc/apt/sources.list.d/pve-enterprise.list*
 rm -f /etc/apt/preferences.d/zfs-backports
 apt-get remove -y zfs-dkms
 apt-get -y dist-upgrade
+
+# Reinstall zfs-zed & zfs-initramfs
+apt-get -y install zfs-zed zfs-initramfs
