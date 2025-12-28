@@ -10,6 +10,9 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Load Configuration
 source "${toolpath}/load.sh"
 
+# Create Random File
+openssl rand -writerand /root/.rnd
+
 # Install Requirements
 install_packages mokutil
 
