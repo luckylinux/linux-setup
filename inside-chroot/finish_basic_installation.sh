@@ -198,12 +198,15 @@ then
 fi
 
 # Install Partitioning Tool
-install_packages_unattended gdisk 
+install_packages_unattended gdisk
 
 if [ "${rootfs}" == "zfs" ] || [ "${bootfs}" == "zfs" ]
 then
     # Install ZFS
     install_packages_unattended zfs-dkms zfs-initramfs
+
+    # Build & Install ZFS Module
+    dkms autoinstall
 fi
 
 # Install  wget, sudo and curl
