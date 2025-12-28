@@ -3,6 +3,13 @@
 # References:
 # - https://github.com/jakeday/linux-surface/blob/3267e4ea1f318bb9716d6742d79162de8277dea2/SIGNING.md
 
+# Determine toolpath if not set already
+relativepath="../" # Define relative path to go from this script to the root level of the tool
+if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ); toolpath=$(realpath --canonicalize-missing $scriptpath/$relativepath); fi
+
+# Load Configuration
+source "${toolpath}/load.sh"
+
 # Install Requirements
 install_packages mokutil
 
@@ -35,7 +42,7 @@ stateOrProvinceName     = <STATE>
 localityName            = <CITY_OR_LOCALITY>
 0.organizationName      = <ORG_NAME>
 commonName              = Secure Boot Signing
-emailAddress            = secure@<MYDOMAIN>.<TLD>
+emailAddress            = secureboot@<MYDOMAIN>.<TLD>
 
 [ v3 ]
 subjectKeyIdentifier    = hash
