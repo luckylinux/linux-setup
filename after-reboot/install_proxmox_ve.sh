@@ -48,12 +48,11 @@ rm -f /etc/apt/sources.list.d/pve-enterprise.list*
 # Remove OS-prober
 apt-get remove os-prober
 
-# Remove linux-image-amd64
-apt-get remove linux-image-amd64
+# Get List of Debian Kernel Images and Headers (linux-image-* & linux-headers-*)
+mapfile -t debian_kernel_images_headers < <( dpkg --get-selections | grep -Ei "^linux-image|^linux-headers" | grep -v deinstall | cut -f1 )
 
-# Remove other linux-image & linux-headers
-mapfile packages < <(dpkg --get-selections | grep -v deinstall | cut -f1 | grep -E "linux-image|linux-headers")
-apt-get remove ${packages[@]}
+# Remove other Debian Kernel Image & Headers (linux-image-* & linux-headers-*)
+apt-get remove ${debian_kernel_images_headers[@]}
 
 # Also make sure to remove ZFS-DKMS since that referes to Debian Packages and is NOT part of Proxmox VE
 echo "Remove ZFS-DKMS since that referes to Debian Packages and is NOT part of Proxmox VE"
