@@ -10,8 +10,15 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Load configuration
 source "${toolpath}/load.sh"
 
-# Mount Current /boot partition
-mount /boot
+# Mount /boot if not already mounted
+if mountpoint -q "/boot"
+then
+    # Silent
+    x=1
+else
+    # Mount Current /boot partition
+    mount /boot
+fi
 
 # Generate Timestamp for backup archive
 timestamp_long=$(date +"%Y%m%d-%H%M%S")
