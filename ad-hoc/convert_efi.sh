@@ -21,6 +21,12 @@ cd /boot/efi
 tar cvzf /boot_efi_${timestamp_long}.tar.gz ./
 cd ..
 
+# Unmount /boot/efi
+umount /boot/efi
+
+# Stop /dev/md{efi_num}
+mdadm --stop /dev/${mdadm_efi_device}
+
 # Standalone EFI/ESP Setup
 for disk in "${disks[@]}"
 do
