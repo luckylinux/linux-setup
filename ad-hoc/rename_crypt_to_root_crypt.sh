@@ -31,8 +31,14 @@ do
     # Close LUKS Device
     cryptsetup luksClose "${crypt_device_old}"
 
-    # Open LUKS Device with the new Name
-    clevis luks unlock -d "${device}" -n "${crypt_device_new}"
+    if [[ "${clevisautounlock}" == "yes" ]]
+    then
+        # Clevis Unlock
+        clevis luks unlock -d "/dev/disk/by-id/${disk}-part${root_num}" -n "${crypt_device_new}"
+    else
+        # Password Unlock
+        cryptsetup open "/dev/disk/by-id/${disk}-part${root_num}" "${crypt_device_new}"
+    fi
 
     # Update Pool Configuration
     zpool set path="/dev/mapper/${crypt_device_new}" "${rootpool}" "${crypt_device_old}"
