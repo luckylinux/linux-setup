@@ -26,7 +26,7 @@ do
     sed -Ei "s|${crypt_device_old}|${crypt_device_new}|g" /etc/crypttab
 
     # Offline LUKS Device from Pool
-    zpool offline "${root_pool}" "${crypt_device_old}"
+    zpool offline "${rootpool}" "${crypt_device_old}"
 
     # Close LUKS Device
     cryptsetup luksClose "${crypt_device_old}"
@@ -35,21 +35,21 @@ do
     clevis luks unlock -d "${device}" -n "${crypt_device_new}"
 
     # Update Pool Configuration
-    zpool set path="/dev/mapper/${crypt_device_new}" "${root_pool}" "${crypt_device_old}"
+    zpool set path="/dev/mapper/${crypt_device_new}" "${rootpool}" "${crypt_device_old}"
 
     # Online Device
-    zpool online "${root_pool}" "${crypt_device_new}"
+    zpool online "${rootpool}" "${crypt_device_new}"
 
     # Clear Pool Errors
-    zpool clear "${root_pool}"
+    zpool clear "${rootpool}"
 
     # Reopen ZFS Pool
-    zpool reopen "${root_pool}"
+    zpool reopen "${rootpool}"
 done
 
 # (Re)generate /etc/zfs/zpool.cache
 rm -f cachefile=/etc/zfs/zpool.cache
-zpool set cachefile=/etc/zfs/zpool.cache "${root_pool}"
+zpool set cachefile=/etc/zfs/zpool.cache "${rootpool}"
 
 # Regenerate InitramFS
 update-initramfs -k all -u
