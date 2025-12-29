@@ -84,6 +84,7 @@ apt-get install zfs-initramfs
 
 # Remove Proxmox PBS enterprise repository
 rm -f /etc/apt/sources.list.d/pbs-enterprise.list*
+rm -f /etc/apt/sources.list.d/pbs-enterprise.sources*
 
 # Remove zfs-dkms from Debian Backports
 rm -f /etc/apt/preferences.d/zfs-backports
