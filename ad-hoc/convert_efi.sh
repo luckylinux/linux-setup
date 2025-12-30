@@ -32,7 +32,7 @@ cd ..
 # This should prevent SystemD from remounting it immediately
 mdadm_efi_uuid=$(blkid -s UUID -o value /dev/${mdadm_efi_device})
 
-sed -Ei "s|^UUID=${mdadm_efi_uuid}(.+)|# UUID=${mdadm_efi_device}\1|g" /etc/fstab
+sed -Ei "s|^UUID=${mdadm_efi_uuid}(.+)$|# UUID=${mdadm_efi_uuid}\1|g" /etc/fstab
 
 systemctl daemon-reload
 
