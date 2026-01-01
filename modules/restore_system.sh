@@ -7,6 +7,9 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 # Load configuration
 source "${toolpath}/load.sh"
 
+# Generate Timestamp for backup archive
+timestamp=$(date +"%Y%m%d-%H%M%S")
+
 # Load modules
 modprobe spl
 modprobe zfs
@@ -20,6 +23,22 @@ ssh root@${backupserver} zfs send -Rv ${backupdataset}@${snapshotname} | zfs rec
 
 # Restore ZFS mountpoints
 source "${toolpath}/ad-hoc/restore_zfs_mountpoints.sh"
+
+# Import ZFS pool if not already mounted
+if [ "${rootfs}" == "zfs" ]
+then
+    # Mount Filesystem
+    zfs mount ${rootpool}/ROOT/${distribution}
+fi
+
+# Make sure that /boot is empty and properly set the Immutable bit before any Filesystem is mounted there
+mkdir "${destination}/_boot_local_${timestamp}"
+umount ${destination}/boot
+mv ${destination}/boot/* ${destination}/_boot_local_${timestamp}/
+chattr +i ${destination}/boot
+mount /dev/${mdadm_efi_device} ${destination}/boot
+mv ${destination}/_boot_local_${timestamp}/* ${destination}/boot/
+rmdir ${destination}/_boot_local_${timestamp}
 
 # Restore /boot Archive
 boot_archive=""
