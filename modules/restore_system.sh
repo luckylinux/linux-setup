@@ -36,7 +36,28 @@ mkdir "${destination}/_boot_local_${timestamp}"
 umount ${destination}/boot
 mv ${destination}/boot/* ${destination}/_boot_local_${timestamp}/
 chattr +i ${destination}/boot
-mount /dev/${mdadm_efi_device} ${destination}/boot
+mount /dev/${mdadm_boot_device} ${destination}/boot
+
+# Create /boot/efi EFI Folder and make sure it can be modified
+mkdir -p ${destination}/boot/efi
+
+# Allow direct writing to the Folder
+chattr -i ${destination}/boot/efi
+
+# Create a Subfolder for each Disk ESP/EFI Partition
+for disk in "${disks[@]}"
+do
+    # Get EFI Mount Path
+    efi_mount_path=$(get_efi_mount_path "${disk}")
+
+    mkdir -p "${efi_mount_path}"
+    chattr +i "${efi_mount_path}"
+
+    # Mount EFI Mountpoints
+    mount "/dev/disk/by-id/${disk}-part${efi_num}" "${efi_mount_path}"
+done
+
+# Move Files that were in /_boot_local_${timestamp} to the newly created /boot Partition
 mv ${destination}/_boot_local_${timestamp}/* ${destination}/boot/
 rmdir ${destination}/_boot_local_${timestamp}
 
