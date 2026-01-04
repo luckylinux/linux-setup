@@ -16,7 +16,7 @@ if [[ ! -v toolpath ]]; then scriptpath=$(cd "$( dirname "${BASH_SOURCE[0]}" )" 
 source "${toolpath}/load.sh"
 
 # Ask User if want to Start with a clean /etc/fstab
-read -p "Do you want to start with a clean /etc/fsta [yes/no]: " clean_fstab
+read -p "Do you want to start with a clean /etc/fstab [yes/no]: " clean_fstab
 
 # Generate Timestamp
 timestamp=$(date +"%Y%m%d-%H%M%S")
@@ -30,8 +30,8 @@ then
    rm /etc/fstab
 fi
 
-# Install lsb_release Package
-install_packages_unattended lsb_release
+# Install lsb_release Tool (lsb-release Package)
+install_packages_unattended lsb-release
 
 # Configure /boot Partition & /etc/fstab
 source ${toolpath}/modules/configure_boot_partition.sh
