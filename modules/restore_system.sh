@@ -50,11 +50,15 @@ do
     # Get EFI Mount Path
     efi_mount_path=$(get_efi_mount_path "${disk}")
 
-    mkdir -p "${efi_mount_path}"
-    chattr +i "${efi_mount_path}"
+    # Echo
+    echo "Setting up Mountpoint ${efi_mount_path} at ${destination}/${efi_mount_path}"
+
+    # Create Mountpoint Folder and make it immutable
+    mkdir -p "${destination}/${efi_mount_path}"
+    chattr +i "${destination}/${efi_mount_path}"
 
     # Mount EFI Mountpoints
-    mount "/dev/disk/by-id/${disk}-part${efi_num}" "${efi_mount_path}"
+    mount "/dev/disk/by-id/${disk}-part${efi_num}" "${destination}/${efi_mount_path}"
 done
 
 # Move Files that were in /_boot_local_${timestamp} to the newly created /boot Partition
