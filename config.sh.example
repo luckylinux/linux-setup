@@ -62,7 +62,7 @@ fi
 
 # Define Distribution Release
 release="trixie" # Debian: "bullseye", "bookworm", "trixie", "testing"
-                 # Ubuntu: "noble", "plucky"
+                 # Ubuntu: "noble", "plucky", "questing", "resolute"
 
 # Packages to Exclude when running debootstrap
 excludepackages="netplan.io,snapd"
