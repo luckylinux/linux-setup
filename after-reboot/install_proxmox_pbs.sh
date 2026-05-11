@@ -45,6 +45,9 @@ apt-get update
 # Install Proxmox PBS with all reccomended Packages
 apt-get install proxmox-backup postfix open-iscsi ifupdown2
 
+# Create Postfix /etc/postfix/main.cf File if not existing yet
+touch /etc/postfix/main.cf
+
 # Remove Proxmox PBS enterprise repository
 rm -f /etc/apt/sources.list.d/pbs-enterprise.list*
 

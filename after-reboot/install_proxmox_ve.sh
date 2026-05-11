@@ -49,6 +49,9 @@ wget http://download.proxmox.com/debian/pve/dists/trixie/pve-no-subscription/bin
 # Install Proxmox VE
 apt-get install proxmox-ve postfix open-iscsi ifupdown2
 
+# Create Postfix /etc/postfix/main.cf File if not existing yet
+touch /etc/postfix/main.cf
+
 # Remove Proxmox VE enterprise repository
 rm -f /etc/apt/sources.list.d/pve-enterprise.list*
 
