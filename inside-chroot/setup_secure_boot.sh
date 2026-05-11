@@ -94,6 +94,9 @@ fi
 echo "You will need to enter a Passphrase to enroll the Secure Boot Keys at next Boot !"
 sudo mokutil --import "${basefolder}/MOK.der"
 
+# Create Folder Structure if it doesn't exist yet
+mkdir -p /var/lib/shim-signed/mok
+
 # Copy MOK.der and MOK.priv to /var/lib/shim-signed/mok/
 cp "${basefolder}/MOK.der" /var/lib/shim-signed/mok/MOK.der
 cp "${basefolder}/MOK.priv" /var/lib/shim-signed/mok/MOK.priv

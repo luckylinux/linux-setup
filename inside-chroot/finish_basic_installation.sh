@@ -172,13 +172,13 @@ install_packages_unattended net-tools
 if [[ "${DISTRIBUTION_FAMILY}" == "debian" ]]
 then
     # Install DHClient so we are sure that Networking gets set up properly and do NOT get locked out of the Server
-    install_packages_unattended isc-dhcp-client   
+    install_packages_unattended isc-dhcp-client
 
     # Install Linux Kernel Image
     install_packages_unattended linux-image-amd64
 
     # Install Linux Kernel Headers
-    install_packages_unattended linux-headers-$(uname -r)
+    install_packages_unattended linux-headers-amd64
 
     # Install SSH Client & Server
     install_packages_unattended ssh

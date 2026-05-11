@@ -203,7 +203,7 @@ echo "Network configured for <${interfacename}> in <${ipconfiguration}> mode"
 if [[ "$setupnfstools" == "yes" ]]
 then
    echo "# Tools over NFS" >> "${destination}/etc/fstab"
-   echo "192.168.1.223:/export/tools            /tools_nfs      nfs     rw,user=tools,auto,nofail,x-systemd.automount,mountvers=4.0,proto=tcp        0   0"  >> "${destination}/etc/fstab"
+   echo "192.168.1.223:/export/tools				/tools_nfs		nfs		rw,user=tools,auto,nofail,x-systemd.automount,mountvers=4.0,proto=tcp				0	0"  >> "${destination}/etc/fstab"
    mkdir -p  "${destination}/tools_nfs"
    chattr +i "${destination}/tools_nfs"
 fi
