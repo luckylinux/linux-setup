@@ -27,6 +27,9 @@ apt-get -y dist-upgrade
 # Remove linux-firmware-free
 apt-get -y remove linux-firmware-free
 
+# Remove firmware-linux-free
+apt-get -y remove firmware-linux-free
+
 # Add Proxmox VE repository
 echo "deb http://download.proxmox.com/debian/pve ${release} pve-no-subscription" > /etc/apt/sources.list.d/pve-no-subscription.list
 

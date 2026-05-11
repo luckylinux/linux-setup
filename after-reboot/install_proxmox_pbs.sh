@@ -27,6 +27,9 @@ apt-get -y dist-upgrade
 # Remove linux-firmware-free
 apt-get -y remove linux-firmware-free
 
+# Remove firmware-linux-free
+apt-get -y remove firmware-linux-free
+
 # Add Proxmox PBS repository
 echo "deb http://download.proxmox.com/debian/pbs ${release} pbs-no-subscription" > /etc/apt/sources.list.d/pbs-no-subscription.list
 
