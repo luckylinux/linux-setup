@@ -21,6 +21,9 @@ currentpath=$(pwd)
 # Update Lists
 update_lists
 
+# Install auto-apt-proxy
+install_packages_unattended auto-apt-proxy
+
 # Install Locales Support
 install_packages_unattended locales
 
