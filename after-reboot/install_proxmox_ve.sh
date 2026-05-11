@@ -42,6 +42,10 @@ wget https://enterprise.proxmox.com/debian/proxmox-release-${release}.gpg -O /et
 # Update to include new sources
 apt-get update
 
+# Need some Workaround due to apt-cacher-ng blocking 2 Packages for some unknown Reason
+wget http://download.proxmox.com/debian/pve/dists/trixie/pve-no-subscription/binary-amd64/proxmox-offline-mirror-docs_0.7.3_all.deb -O /var/cache/apt/archives/proxmox-offline-mirror-docs_0.7.3_all.deb
+wget http://download.proxmox.com/debian/pve/dists/trixie/pve-no-subscription/binary-amd64/proxmox-offline-mirror-helper_0.7.3_amd64.deb -O /var/cache/apt/archives/proxmox-offline-mirror-helper_0.7.3_amd64.deb
+
 # Install Proxmox VE
 apt-get install proxmox-ve postfix open-iscsi ifupdown2
 
