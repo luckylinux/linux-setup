@@ -59,7 +59,7 @@ EOF
                 # Add each Disk to the MDADM Configuration
                 for disk in "${disks[@]}"
                 do
-                    echo "member_devices+=( \"/dev/disk/by-id/${disk}-part${root_num}\" )" >> /etc/mdadm/root.mdadm
+                    add_if_not_exists "/etc/mdadm/root.mdadm" "member_devices+=( \"/dev/disk/by-id/${disk}-part${root_num}\" )"
                 done
 
                 # Install tool

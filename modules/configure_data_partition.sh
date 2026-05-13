@@ -29,14 +29,14 @@ then
         then
                 # Configure Partition in /etc/fstab
                 UUID=$(blkid -s UUID -o value ${devices[0]}-part${data_num})
-                echo "# / on ext4" >> /etc/fstab
-                echo "UUID=$UUID	/			ext4		auto,noatime									0	1" >> /etc/fstab
+                add_if_not_exists "/etc/fstab" "# / on ext4"
+                add_if_not_exists "/etc/fstab" "UUID=$UUID	/			ext4		auto,noatime									0	1"
 
         else
                 # Configure MDADM Array in /etc/fstab
                 UUID=$(blkid -s UUID -o value /dev/${mdadm_data_device})
-                echo "# / on ext4 with MDADM Software Raid-1" >> /etc/fstab
-                echo "UUID=$UUID	/			ext4		auto,noatime									0	1" >> /etc/fstab
+                add_if_not_exists "/etc/fstab" "# / on ext4 with MDADM Software Raid-1"
+                add_if_not_exists "/etc/fstab" "UUID=$UUID	/			ext4		auto,noatime									0	1"
                 # Also add MDADM Array to /etc/mdadm/mdadm.conf
                 # When this is enabled, mdadm does NOT create the devices as expected
                 # The boot process might also be interrupted, dropping you to an emergency shell
@@ -60,14 +60,14 @@ EOF
                 # Add each Disk to the MDADM Configuration
                 for disk in "${disks[@]}"
                 do
-                    echo "member_devices+=( \"/dev/disk/by-id/${disk}-part${data_num}\" )" >> /etc/mdadm/root.mdadm
+                    add_if_not_exists "/etc/mdadm/root.mdadm" "member_devices+=( \"/dev/disk/by-id/${disk}-part${data_num}\" )"
                 done
 
                 # Install tool
                 source ${toolpath}/modules/setup_systemd_mdadm_assemble.sh
 
         fi
-        
+
         # else
         #         echo "Only 1-Disk and 2-Disks Setups are currently supported. Aborting !"
         #         exit 1

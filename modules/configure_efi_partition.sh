@@ -32,7 +32,7 @@ fi
 chattr -i /boot/efi
 
 
-echo "# EFI/ESP Devices" >> /etc/fstab
+add_if_not_exists "/etc/fstab" "# EFI/ESP Devices"
 for disk in "${disks[@]}"
 do
     # Get EFI Mount Path
@@ -53,7 +53,7 @@ do
     # Configure FSTAB
     UUID=$(blkid -s UUID -o value /dev/disk/by-id/${disk}-part${efi_num})
 
-    echo "UUID=$UUID					${efi_mount_path}		vfat		nofail,x-systemd.automount,umask=0022,fmask=0022,dmask=0022		0	1" >> /etc/fstab
+    add_if_not_exists "/etc/fstab" "UUID=$UUID					${efi_mount_path}		vfat		nofail,x-systemd.automount,umask=0022,fmask=0022,dmask=0022		0	1"
 done
 
 

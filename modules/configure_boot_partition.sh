@@ -17,8 +17,8 @@ then
         then
                 # Configure Partition in /etc/fstab
                 UUID=$(blkid -s UUID -o value ${devices[0]}-part${boot_num})
-		echo "# /boot on ext4" >> /etc/fstab
-                echo "UUID=$UUID	/boot			ext4		auto,noatime,nofail,x-systemd.automount					0	1" >> /etc/fstab
+		add_if_not_exists "/etc/fstab" "# /boot on ext4"
+                add_if_not_exists "/etc/fstab" "UUID=$UUID	/boot			ext4		auto,noatime,nofail,x-systemd.automount					0	1"
         else
                 # Install mdadm if not already installed
                 if [[ -z $(command -v mdadm) ]]
@@ -28,8 +28,8 @@ then
 
                 # Configure MDADM Array in /etc/fstab
                 UUID=$(blkid -s UUID -o value /dev/${mdadm_boot_device})
-                echo "# /boot on ext4 with MDADM Software Raid-1" >> /etc/fstab
-                echo "UUID=$UUID	/boot			ext4		auto,noatime,nofail,x-systemd.automount					0	1" >> /etc/fstab
+                add_if_not_exists "/etc/fstab" "# /boot on ext4 with MDADM Software Raid-1"
+                add_if_not_exists "/etc/fstab" "UUID=$UUID	/boot			ext4		auto,noatime,nofail,x-systemd.automount					0	1"
 
 		# Also add MDADM Array to /etc/mdadm/mdadm.conf
                 # When this is enabled, mdadm does NOT create the devices as expected
@@ -54,7 +54,7 @@ EOF
                 # Add each Disk to the MDADM Configuration
                 for disk in "${disks[@]}"
                 do
-                    echo "member_devices+=( \"/dev/disk/by-id/${disk}-part${boot_num}\" )" >> /etc/mdadm/boot.mdadm
+                    add_if_not_exists "/etc/mdadm/boot.mdadm" "member_devices+=( \"/dev/disk/by-id/${disk}-part${boot_num}\" )"
                 done
 
 	        # Install Tool / Wrapper for Managing MDADM Devices
