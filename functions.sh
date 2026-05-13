@@ -314,3 +314,26 @@ wait_until_device_becomes_available() {
         exit 1
     fi
 }
+
+# Add String to File if it doesn't exist yet
+add_if_not_exists() {
+    # Input Arguments
+    local lfilepath="$1"
+    local lstring="$2"
+
+    # Pre-declare Variable
+    local lexitcode
+
+    # Create File if not exist
+    touch "${lfilepath}"
+
+    # Check if File contains String
+    grep -q "${lstring}" "${lfilepath}"
+    lexitcode=$?
+
+    # If File doesn't contain String, add String to File
+    if [ $lexitcode -ne 0 ]
+    then
+        echo "${lstring}" >> "${lfilepath}"
+    fi
+}
