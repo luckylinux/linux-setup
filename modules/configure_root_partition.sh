@@ -16,7 +16,8 @@ then
         # Enable Disk in Crypttab for initramfs
         for disk in "${disks[@]}"
         do
-            add_if_not_exists "${destination}/etc/crypttab" "${disk}_root_crypt" UUID=$(blkid -s UUID -o value /dev/disk/by-id/${disk}-part${root_num}) none luks,discard,initramfs"
+            UUID=$(blkid -s UUID -o value "/dev/disk/by-id/${disk}-part${root_num}")
+            add_if_not_exists "${destination}/etc/crypttab" "${disk}_root_crypt UUID=${UUID} none luks,discard,initramfs"
         done
 fi
 

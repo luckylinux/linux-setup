@@ -16,7 +16,7 @@ then
         if [ "${numdisks_total}" -eq 1 ]
         then
                 # Configure Partition in /etc/fstab
-                UUID=$(blkid -s UUID -o value ${devices[0]}-part${boot_num})
+                UUID=$(blkid -s UUID -o value "${devices[0]}-part${boot_num}")
 		add_if_not_exists "/etc/fstab" "# /boot on ext4"
                 add_if_not_exists "/etc/fstab" "UUID=$UUID	/boot			ext4		auto,noatime,nofail,x-systemd.automount					0	1"
         else
@@ -27,7 +27,7 @@ then
                 fi
 
                 # Configure MDADM Array in /etc/fstab
-                UUID=$(blkid -s UUID -o value /dev/${mdadm_boot_device})
+                UUID=$(blkid -s UUID -o value "/dev/${mdadm_boot_device}")
                 add_if_not_exists "/etc/fstab" "# /boot on ext4 with MDADM Software Raid-1"
                 add_if_not_exists "/etc/fstab" "UUID=$UUID	/boot			ext4		auto,noatime,nofail,x-systemd.automount					0	1"
 
