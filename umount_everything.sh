@@ -28,6 +28,9 @@ do
     # Umount previosuly assembled MDADM Arrays
     source ${toolpath}/modules/umount_mdadm.sh
 
+    # Umount LUKS Devices
+    source ${toolpath}/modules/umount_luks.sh
+
     # Umount everything that remains by force
     source ${toolpath}/modules/umount_force_all.sh
 
