@@ -17,6 +17,9 @@ source ${toolpath}/modules/setup_mountpoint.sh
 installroot="" # Needed to ensure that we install on the Host
 source ${toolpath}/modules/setup_requirements.sh
 
+# Unlock existing pool (if already encrypted)
+source ${toolpath}/modules/unlock_encrypted_root.sh
+
 # Backup existing pool
 source ${toolpath}/modules/backup_system.sh
 
